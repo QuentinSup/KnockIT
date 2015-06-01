@@ -1,0 +1,98 @@
+module fr.fwk.knockit.fields {
+
+    export class TextUIField extends InputUIField {
+
+        public maxLength: number = 1000
+        public minLength: number = 0
+
+        /**
+         * The formatted Value
+         */
+        public formattedValue: KnockoutComputed<string>
+        public hasTextChanged: KnockoutComputed<boolean>
+        
+        //public inputType: KnockoutObservable<string> = ko.observable<string>('text') => Disabled because of bug on IE8 when settings 'type' attribute
+        public valueUpdateOn: KnockoutObservable<string> = ko.observable<string>('change') 
+
+        constructor(id: string, value: any, required?: boolean, readOnly?: boolean) {
+            super(id, value, required, readOnly)
+            this.inputTemplate = "ui-field-text-template"
+            this.hasTextChanged = ko.computed(this.computeHasTextChanged, this)
+            this.formattedValue = ko.computed({
+                read: (): string => {
+                    if(this.isFocused()) {
+                        return this.value()
+                    }
+                    return this.formatValue(this.dataValue());
+                },
+                write: (v: string): void => {
+                    this.value(v)
+                }
+            }, this)
+                
+            this.value.subscribe((): void => {
+                if(this.isFocused()) {
+                    defer((): void => {
+                        this.hasBeenVisited(true);
+                    });
+                }
+            });
+           
+            this.isFocused.subscribe((v: boolean): void => {
+                if(!v) {
+                    this.validateValue();
+                }
+            });
+
+        }
+        
+        public formatValue(value: string): string {
+            return value
+        }
+                
+        public cleanFormatValue(value: string): string {
+            return value
+        }
+        
+        public getDataValue(): string {
+            var v: string = super.getDataValue()
+            if(v) {
+                return this.cleanFormatValue(v)
+            }
+            return v
+        }   
+
+        public isValidateValue(value): boolean {
+            var b: boolean = super.isValidateValue(value)
+            if (b && typeof (value) == "string") {
+                if ((this.minLength && value.length < this.minLength) || (this.maxLength && value.length > this.maxLength)) {
+                    b = false
+                }
+            }
+            return b
+        }
+        
+        private computeHasTextChanged(): boolean {
+            var oldValue = '' + (this.oldValue() == null || this.oldValue() == undefined ? '' : this.oldValue())
+            var value = '' + (this.value() == null || this.value() == undefined ? '' : this.value())
+            return (oldValue != value)
+        }
+        
+        public onBlurEventHandler(): void {
+            this.isFocused(false);
+            defer((): void => {
+                this.hasBeenVisited(true);
+            });
+        }
+        
+        public onFocusEventHandler(): void {
+            this.isFocused(true);
+        }
+
+        public dispose() {
+            super.dispose();
+            dispose(this.formattedValue);
+        }
+    }
+    
+}
