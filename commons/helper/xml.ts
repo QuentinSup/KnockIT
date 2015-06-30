@@ -1,7 +1,7 @@
 /**
  * @fileOverview This file defines a simple xml to json converter.
  */
-module fr.fwk.knockit.helpers {
+module kit.helpers {
 
 	export class XmlConverter {
 		public static ATTRIBUTES_KEY: string = "_attributes_";

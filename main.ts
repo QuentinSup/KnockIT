@@ -1,10 +1,10 @@
-module fr.fwk.knockit.main {
+module kit.main {
 
     import Logger = helpers.Logger;
     
     var LANGUAGE_HASH_KEY: string = "lang"
 
-    var oLogger: Logger = Logger.getLogger('fr.fwk.knockit.main');
+    var oLogger: Logger = Logger.getLogger('kit.main');
     
     /*
     window.onerror = function(msg, url, line) {
@@ -16,7 +16,7 @@ module fr.fwk.knockit.main {
     var application: IApplication;
     var location = window.location;
     var path = location.protocol + "//" + location.host + "/";
-
+ 
     application = {
         title: ko.observable<string>(),
         isReady: ko.observable<boolean>(false),
@@ -88,7 +88,7 @@ module fr.fwk.knockit.main {
     
      window.app = application;
      
-     app.i18n = <fr.fwk.knockit.manager.I18n>app.manager.register('i18n', new manager.I18n(browserLocaleInfos["Locales"]));
+     app.i18n = <kit.manager.I18n>app.manager.register('i18n', new manager.I18n(Locales));
      
      app.manager.ready(['i18n'], function() {       
         application.isReady(true);

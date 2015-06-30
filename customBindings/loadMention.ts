@@ -2,7 +2,7 @@
  * @fileOverview This file defines the loadMention custom binding
  *      It requires jQuery and KnockOut libraries.
  */
-module fr.fwk.knockit.bindings {
+module kit.bindings {
 
 	ko.bindingHandlers['loadMention'] = {
 		init : function(element, valueAccessor, allBindings, viewModel, bindingContext) {},

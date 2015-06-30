@@ -1,7 +1,7 @@
 /**
  * @fileOverview This file defines the storage module
  */
-module fr.fwk.knockit.helpers {
+module kit.helpers {
 
     export interface IStorageOptions {
         crypt?: boolean

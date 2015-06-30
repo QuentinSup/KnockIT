@@ -1,6 +1,6 @@
 /// <reference path="classes/Locale.class.ts"/>
 
-module fr.fwk.knockit.manager {
+module kit.manager {
 
 	import Logger = helpers.Logger
 	import Query = helpers.Query
@@ -29,7 +29,7 @@ module fr.fwk.knockit.manager {
 		public localizedStrings: { [key: string]: string } = {}
 		public localizedObservableStrings: { [key: string]: KnockoutObservable<string>} = {}
         
-        private static oLogger = Logger.getLogger('fr.fwk.knockit.manager.I18n');
+        private static oLogger = Logger.getLogger('kit.manager.I18n');
         
 	    /**
 		 * The current resources language.

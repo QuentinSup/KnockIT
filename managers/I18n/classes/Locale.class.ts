@@ -1,4 +1,4 @@
-module fr.fwk.knockit.manager {
+module kit.manager {
 
 
 	export class Locale {

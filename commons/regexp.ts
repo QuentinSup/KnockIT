@@ -1,10 +1,11 @@
-module fr.fwk.knockit.regexp {
+module kit.regexp {
 
     export var CdPost: RegExp = /^(([0-8][1-9]|9[0-5]|[1-9]0)[0-9]{3})|(97[1-6][0-9]{2})$/
     export var Email: RegExp = /^[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$/
     export var AlphaNumerique: RegExp = /^[a-z0-9 ÀÂÉÈÊËÏÎÔÖÛÙÜÇ\-']*$/i
     export var Alpha: RegExp = /^[a-z ÀÂÉÈÊËÏÎÔÖÛÙÜÇ\-']*$/i
-    export var Adresse: RegExp = /^[a-z0-9 ÀÂÉÈÊËÏÎÔÖÛÙÜÇ\-',/]*$/i        
+    export var Adresse: RegExp = /^[a-z0-9 ÀÂÉÈÊËÏÎÔÖÛÙÜÇ\-',/]*$/i
+    export var Mots: RegExp = /([A-ZÀÂÉÈÊËÏÎÔÖÛÙÜÇ])+/ig
         
     export var Integer: RegExp = /^(\-)?\d+$/
     export var PositiveInteger: RegExp = /^[0-9]+[0-9]*$/

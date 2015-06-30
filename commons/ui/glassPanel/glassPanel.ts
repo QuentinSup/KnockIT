@@ -1,4 +1,4 @@
-module fr.fwk.knockit.ui {
+module kit.ui {
     
     import Logger = helpers.Logger
 
@@ -17,7 +17,7 @@ module fr.fwk.knockit.ui {
 
 	export class GlassPanel extends MVVM {
        
-        private static oLogger: Logger = Logger.getLogger('fr.fwk.knockit.ui.GlassPanel');
+        private static oLogger: Logger = Logger.getLogger('kit.ui.GlassPanel');
         
         public id: string = null
         public lockKeyBoard: boolean = false

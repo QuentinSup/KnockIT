@@ -1,5 +1,5 @@
 
-module fr.fwk.knockit {
+module kit {
 
     export interface IEvent {
         id: string

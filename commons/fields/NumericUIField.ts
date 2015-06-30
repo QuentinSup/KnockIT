@@ -1,4 +1,4 @@
-module fr.fwk.knockit.fields {
+module kit.fields {
     
     import Locale = manager.Locale
     

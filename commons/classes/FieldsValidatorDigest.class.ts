@@ -1,4 +1,4 @@
-module fr.fwk.knockit {
+module kit {
 
     import IUIField = fields.IUIField
     import InputUIField = fields.InputUIField

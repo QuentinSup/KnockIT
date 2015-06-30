@@ -2,7 +2,7 @@
  * @fileOverview This file defines the datetimepicker custom binding.
  *     It requires jQuery and KnockOut libraries.
  */
-module fr.fwk.knockit.bindings {
+module kit.bindings {
 
 	// Code I found on the web to make JQuery DatePicker working with Knock Out
 	// source : http://stackoverflow.com/questions/6612705/knockout-with-jquery-ui-datepicker

@@ -3,7 +3,7 @@
  * @fileOverview This file defines the errors module. 
  * @example var _errorsHelper = oneesp.module('commons.helper.errors');
  */
-module fr.fwk.knockit.helpers {
+module kit.helpers {
 
     /**
      * MODES

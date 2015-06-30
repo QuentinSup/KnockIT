@@ -2,7 +2,7 @@
  * @fileOverview This file defines the readonly custom binding.
  * 		It requires jQuery and KnockOut libraries.
  */
-module fr.fwk.knockit.bindings {
+module kit.bindings {
 
 	var doReadOnly = function(element, valueAccessor) {
 		var readonly = ko.utils.unwrapObservable(valueAccessor());

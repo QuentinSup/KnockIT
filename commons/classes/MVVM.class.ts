@@ -1,8 +1,8 @@
-module fr.fwk.knockit {
+module kit {
     
     import Logger = helpers.Logger;
     
-    var oLogger: Logger = Logger.getLogger('fr.fwk.knockit.MVVM');
+    var oLogger: Logger = Logger.getLogger('kit.MVVM');
     
     export class ViewModel implements IDisposable {
 

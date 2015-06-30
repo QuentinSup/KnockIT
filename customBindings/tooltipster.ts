@@ -2,7 +2,7 @@
  * @fileOverview This file defines the post custom binding
  *      It requires jQuery and KnockOut libraries.
  */
-module fr.fwk.knockit.bindings {
+module kit.bindings {
     
 	ko.bindingHandlers['tooltip'] = {
 		init : function(element, valueAccessor) {

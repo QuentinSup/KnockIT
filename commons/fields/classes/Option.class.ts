@@ -2,7 +2,7 @@
  * @fileOverview This file defines the Option class.
  *     It requires jQuery and KnockOut libraries.
  */
-module fr.fwk.knockit.fields {
+module kit.fields {
 
 	/**
 	 * An option in a select input.

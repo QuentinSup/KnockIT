@@ -43,8 +43,8 @@ interface IApplicationContext {
 
 interface IApplication {
     title: KnockoutObservable<string>
-    i18n: fr.fwk.knockit.manager.I18n
-    messageBox: fr.fwk.knockit.ui.MessageBox
+    i18n: kit.manager.I18n
+    messageBox: kit.ui.MessageBox
     servicesPath: string
     basePath: string
     appPath: string
@@ -58,7 +58,7 @@ interface IApplication {
     isReady: KnockoutObservable<boolean>
     ready(fn: Function, context?: any): void
     init(): void
-    manager: fr.fwk.knockit.AppManager
+    manager: kit.AppManager
 }
 
 interface Window {
@@ -151,7 +151,7 @@ function dispose(obj: Object): void {
     ko.utils.dispose(obj)
 }
 
-module fr.fwk.knockit {
+module kit {
     
     export function alert(text: string, callbackAlert?: Function, context?: any, opts?: ui.IMessageBoxOptions): ui.IMessageBoxReturn {
         if(app.messageBox) {

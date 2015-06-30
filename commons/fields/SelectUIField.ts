@@ -1,6 +1,6 @@
 /// <reference path="./classes/Option.class.ts"/>
 
-module fr.fwk.knockit.fields {
+module kit.fields {
    
     export class SelectUIField extends TextUIField {
 

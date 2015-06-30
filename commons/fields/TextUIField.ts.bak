@@ -81,8 +81,8 @@ module kit.fields {
         }
         
         public onBlurEventHandler(): void {
+            this.isFocused(false);
             defer((): void => {
-                this.isFocused(false);
                 this.hasBeenVisited(true);
             });
         }

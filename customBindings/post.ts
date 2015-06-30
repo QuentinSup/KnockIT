@@ -2,7 +2,7 @@
  * @fileOverview This file defines the post custom binding
  *      It requires jQuery and KnockOut libraries.
  */
-module fr.fwk.knockit.bindings {
+module kit.bindings {
 
 	function openWithPostData(url: string, data_get: any, data_post: any){
 		var idForm_: string = "kopostform";

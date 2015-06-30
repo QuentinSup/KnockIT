@@ -3,9 +3,9 @@
  * @example var _queryHelper = oneesp.module('commons.helper.query');
  * @example var _queryHelper = oneesp.module('commons.helper.query').helper({ domain: APPLICATION_ID });
  */
-module fr.fwk.knockit.helpers {
+module kit.helpers {
 
-    var log: Logger = Logger.getLogger('fr.fwk.knockit.helpers')
+    var log: Logger = Logger.getLogger('kit.helpers')
     
 	export interface IQueryOptions {
 		silent?: boolean

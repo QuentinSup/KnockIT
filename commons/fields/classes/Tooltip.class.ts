@@ -1,5 +1,5 @@
 
-module fr.fwk.knockit.fields {
+module kit.fields {
 
 	export class Tooltip {
     

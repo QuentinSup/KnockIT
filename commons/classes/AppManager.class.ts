@@ -1,4 +1,4 @@
-module fr.fwk.knockit {
+module kit {
 
 	export class AppManager {
 	

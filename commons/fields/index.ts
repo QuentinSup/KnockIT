@@ -14,7 +14,7 @@
  * @fileOverview This file defines the UIField class.
  *     It requires jQuery and KnockOut libraries.
  */
-module fr.fwk.knockit.fields {
+module kit.fields {
 
     export function getId(name: string, ind: number = null): string {
         return (name + (ind != null?'-' + ind:'')).replace(/[' \.]/gi, '_');

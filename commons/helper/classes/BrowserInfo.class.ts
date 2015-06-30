@@ -1,7 +1,7 @@
 ﻿/**
  * @fileOverview This file defines the browser support
  */
-module fr.fwk.knockit.helpers.browser {
+module kit.helpers.browser {
 
     var UNKNOWN: string = "Unknown"
 

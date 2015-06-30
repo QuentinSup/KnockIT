@@ -1,6 +1,6 @@
 /// <reference path="./classes/Tooltip.class.ts"/>
 
-module fr.fwk.knockit.fields {
+module kit.fields {
 
     export interface IUIField {
         isReadOnly: KnockoutObservable<boolean>

@@ -1,4 +1,4 @@
-module fr.fwk.knockit {
+module kit {
 
     import IUIField = fields.IUIField
     import BaseUIField = fields.BaseUIField
@@ -45,15 +45,15 @@ module fr.fwk.knockit {
             this.oComputedMessages = this.createComputedMessages();
             
             this.isLastInputValid = ko.computed((): boolean => {
-                return this.readBoolean('isLastInputValid', false);
+                return this.readBoolean('isLastInputValid', true, true);
             });
             
             this.isFormValid = ko.computed((): boolean => {
-                return this.readBoolean('isFormValid', false);
+                return this.readBoolean('isFormValid', true, true);
             });
             
             this.isEmpty = ko.computed((): boolean => {
-                return this.readBoolean('isEmpty', false);
+                return this.readBoolean('isEmpty', true, true);
             });
             
             this.isFocused.subscribe((v: boolean): void => {
@@ -72,7 +72,7 @@ module fr.fwk.knockit {
             this.oListOfUIField.push(PE_oUIField);
         }
         
-        private createComputedBoolean(subscribableName: string, testValue: boolean, allCombined: boolean = false, throttle: number = -1): KnockoutComputed<any> {
+        private createComputedBoolean(subscribableName: string, testValue: boolean, allCombined: boolean = false, throttle: number = null): KnockoutComputed<any> {
             return ko.computed({
                     read:   (): boolean => {
                                 return this.readBoolean(subscribableName, testValue, allCombined);
@@ -107,12 +107,20 @@ module fr.fwk.knockit {
 
             for(var i_: number = 0; i_ < len_; i_++) {
                 var oInputUIField_ = oListOfUIFieldArray_[i_];
-                 
+                
                 if(oInputUIField_[subscribableName].call(oInputUIField_) == testValue) {
-                    isValid_ = (allCombined?isValid_:true) && testValue
+                    isValid_ = true
+                    if(!allCombined) {
+                        break;
+                    }
+                } else {
+                    if(allCombined) {
+                        isValid_ = false;
+                        break;
+                    }
                 }
             }
-            
+
             return isValid_;
         }
         

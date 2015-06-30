@@ -1,5 +1,5 @@
 
-module fr.fwk.knockit {
+module kit {
     
     import Query = helpers.Query
 

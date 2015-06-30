@@ -36,6 +36,7 @@
 /// <reference path="./commons/classes/GroupUIField.class.ts"/>
 /// <reference path="./commons/classes/FieldsValidatorDigest.class.ts"/>
 
+/// <reference path="./locales.ts"/>
 /// <reference path="./main.ts"/>
 
 /// <reference path="./customBindings/readonly.ts"/>

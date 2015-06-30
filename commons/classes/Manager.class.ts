@@ -1,6 +1,6 @@
 /// <reference path="./EventsBinder.class.ts"/>
 
-module fr.fwk.knockit {
+module kit {
 
     export var inherits: Function = (prototype, id: string, opts: any): any => {
 

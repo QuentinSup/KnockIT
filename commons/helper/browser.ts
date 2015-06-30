@@ -3,7 +3,7 @@
 /**
  * @fileOverview This file defines the browser support
  */
-module fr.fwk.knockit.helpers.browser {
+module kit.helpers.browser {
 
 	var IS_BROWSER_SUPPORTED: string = "isBrowserSupported"
 	var IS_BROWSER_VERSION_SUPPORTED: string = "isBrowserVersionSupported"

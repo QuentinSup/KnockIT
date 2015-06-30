@@ -1,5 +1,5 @@
 
-module fr.fwk.knockit.utils {
+module kit.utils {
 
 	import Locale = manager.Locale
 

@@ -2,7 +2,7 @@
  * @fileOverview This file defines the format custom binding
  *		It requires jQuery and KnockOut libraries.
  */
-module fr.fwk.knockit.bindings {
+module kit.bindings {
 
     import Locale = manager.Locale;
     

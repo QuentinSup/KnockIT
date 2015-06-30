@@ -1,9 +1,9 @@
 /**
  * @fileOverview This file defines the files manager.
  */
-module fr.fwk.knockit.helpers {
+module kit.helpers {
      
-    var oLogger_: Logger = Logger.getLogger('fr.fwk.knockit.helpers');
+    var oLogger_: Logger = Logger.getLogger('kit.helpers');
     
     export function loadResource(resource: string, callback: Function, context?: any): void {
 

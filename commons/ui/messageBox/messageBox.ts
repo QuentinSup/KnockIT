@@ -1,4 +1,4 @@
-module fr.fwk.knockit.ui {
+module kit.ui {
 
 	// Count of box generated
 	var _boxCount: number = 0
