@@ -1,5 +1,6 @@
 /// <reference path="./InputUIField.ts"/>
 /// <reference path="./TextUIField.ts"/>
+/// <reference path="./PasswordUIField.ts"/>
 /// <reference path="./TextAreaUIField.ts"/>
 /// <reference path="./ToggleUIField.ts"/>
 /// <reference path="./LabelUIField.ts"/>
