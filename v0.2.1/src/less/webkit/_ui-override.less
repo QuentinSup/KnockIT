@@ -1,0 +1,303 @@
+/* PROGRESS BAR */
+
+.ui-progressbar  {
+	background: @DarkGray;
+	border: 1px solid @DarkGray;
+	height: 8px !important;
+}
+
+.ui-progressbar .ui-progressbar-value {
+	background: @ActiveColor !important;
+}
+
+/* UI DIALOG */
+
+
+.ui-dialog {
+    background-color        :@DialogBackgroundColor;
+    color                   :@DialogTextColor;
+    position                :absolute !important;
+    z-index                 :9999999;
+    overflow				:visible !important;
+    .rounded(@DialogBorderRadius);
+    max-width				:@DialogMaxWidth;
+}
+
+.ui-dialog:before {
+  content: '';
+  position: absolute;
+  border: @DialogBorderWidth solid @DialogBorderColor;
+  display: block;
+  top: -@DialogBorderWidth;
+  bottom: -@DialogBorderWidth;
+  left: -@DialogBorderWidth;
+  right: -@DialogBorderWidth;
+  .opacity(@DialogBorderOpacity);
+  .rounded(@DialogBorderRadius + 4);
+  z-index: -1; 
+}
+
+.ui-dialog-titlebar {
+  border-bottom             : @DialogHeadSeparatorWidth solid @DialogHeadSeparatorColor !important;
+  color                     : @DialogHeadTextColor;
+  font-family				: @DialogHeadFontFamily;
+  font-size					: @DialogHeadFontSize;
+}
+
+.ui-dialog.no-close .ui-dialog-titlebar-close {
+  display: none;
+}
+
+.ui-dialog-titlebar, .ui-datepicker-header {
+	background		: none !important;
+	border			: 0px !important;
+	font-weight				: normal;
+	border-bottom           : @DialogHeadSeparatorWidth solid @DialogHeadSeparatorColor !important;
+	color                   : @DialogHeadTextColor;
+	font-family				: @DialogHeadFontFamily;
+	font-size				: @DialogHeadFontSize;
+	border-bottom           : @DialogHeadSeparatorWidth solid @DialogHeadSeparatorColor !important;
+	.rounded(0px);
+}
+
+.ui-datepicker-header {
+	color					: @CalendarTextColor;	
+}
+
+// Modifie la taille de la zone de sélection de l'année (fix sur iOS)
+select.ui-datepicker-year {
+	width: 75px !important;
+}
+
+.ui-dialog-titlebar {
+	
+	.ui-dialog-titlebar-close,
+	.ui-dialog-titlebar-close:active,
+	.ui-dialog-titlebar-close:enabled:active {
+		background-color: inherit !important;
+		background-image: url('@{ImgSrc}/dialog/close.png') !important;
+		background-repeat: no-repeat !important;
+		background-position: center !important;
+		border: 0px !important;
+		margin-top: -10px !important;
+	}
+ 
+}
+
+.ui-datepicker-next {
+	background-image: url('@{ImgSrc}/calendar/arrowrightmonth.gif');
+	background-repeat: no-repeat;
+	background-position: center;
+} 
+
+.ui-datepicker-prev {
+	background-image: url('@{ImgSrc}/calendar/arrowleftmonth.gif');
+	background-repeat: no-repeat;
+	background-position: center;
+} 
+
+/* BOOTSTRAP */
+
+.form-horizontal .radio {
+	min-height: 20px !important;
+	padding-top: 0px;
+	padding-bottom: 0px;
+	vertical-align: middle;
+}
+
+label {
+	font-weight: normal !important;
+	margin-bottom: 0px !important;
+}
+
+.form-group {
+	margin: @FormGroupMargin !important;
+}
+
+.input-group-addon {
+	font-size: @InputAddOnFontSize;
+	padding: @InputAddOnPadding;
+	background-color: @InputAddOnBackgroundColor;
+	color: @InputAddOnColor;
+	border-color: @InputAddOnBorderColor;
+	top: 0px;
+	.transition(~"background @{GlobalTransitionDuration}, background-color @{GlobalTransitionDuration}, border-color @{GlobalTransitionDuration}");
+}
+
+.input-group {
+	border-spacing: 0px !important;
+}
+
+.btn-group {
+	
+	border: @InputBorderWidth solid @BtnGroupBorderColor !important;
+	.rounded(@BtnGroupBorderRadius);
+	overflow: hidden;
+	
+	> .btn {
+		padding: @BtnGroupButtonPadding !important;
+		font-size: @InputFontSize !important;
+		border-top-width: 0px !important;
+		border-bottom-width: 0px !important;
+		border-left-width: 1px !important;
+		border-right-width: 0px !important;
+		margin-bottom: 0px !important;
+		margin-left: 0px !important; 
+		
+		&:first-child {
+			border-left-width: 0px !important;	
+		}
+		
+		&:first-child:not(:last-child):not(.dropdown-toggle) { 
+			border-top-left-radius: @BtnGroupBorderRadius - 2;
+			border-bottom-left-radius: @BtnGroupBorderRadius - 2;
+		}
+		
+		
+		&:last-child:not(:first-child), .btn-group>.dropdown-toggle:not(:first-child) {
+			border-bottom-right-radius: @BtnGroupBorderRadius - 2;
+			border-top-right-radius: @BtnGroupBorderRadius - 2;
+		}
+		
+	}
+	
+}
+
+@media screen and (max-width: @MobileMaxWidth) {
+
+	.input-group {
+		width: 100% !important;
+	}
+}
+
+.ui-field-date-separator{
+	font-size: @InputAddOnFontSize;
+	text-align: center;
+	padding : @MediumPadding 0px;
+	color: @InputAddOnColor;
+}
+
+select.ui-datepicker-year {
+	padding-left: 0px;
+	padding-right :0px;
+}
+
+/* TOOLTIPSTER */
+
+/* This is the default Tooltipster theme (feel free to modify or duplicate and create multiple themes!): */
+.tooltipster-default {
+	.rounded(2px);
+	background: @ToolTipBackgroundColor;
+	border: 1px solid @ToolTipBorderColor;
+	color: @ToolTipTextColor;
+
+	/* Use this next selector to style things like font-size and line-height: */
+	.tooltipster-content {
+		padding: @ToolTipPadding;
+		font-size: @ToolTipFontSize;
+		font-family: @ToolTipFontFamily;
+		overflow: hidden;
+		line-height: 1.2em;
+		max-width: @ToolTipMaxWidth;
+	}
+	
+	/* This next selector defines the color of the border on the outside of the arrow. This will automatically match the color and size of the border set on the main tooltip styles. Set display: none; if you would like a border around the tooltip but no border around the arrow */
+	.tooltipster-arrow .tooltipster-arrow-border {
+		/* border-color: ... !important; */
+	}
+
+}
+
+/* If you're using the icon option, use this next selector to style them */
+
+.ui-ico-hint {
+	cursor: help;
+	background: transparent url('@{ImgIcoHintSrc}') no-repeat center;
+	background-size: @ImgIcoHintWidth @ImgIcoHintHeight;
+	width: @ImgIcoHintWidth;
+	height: @ImgIcoHintHeight;
+	vertical-align: middle;
+	display: inline-block;
+}
+
+.tooltipstered {
+	position: relative;
+	z-index: 1;
+}
+
+.ui-accordion-header {
+	padding-left: 20px !important;
+	.transition(~"border .2s, color .2s, background-color .2s");
+}
+
+.ui-accordion-content {
+	padding: @FieldsetPadding !important;
+	color: @FieldsetContentColor;
+	background: @FieldsetBackground;
+	border: @FieldsetBorder;
+	.border-radius(0, 5px, 5px, 0);
+}
+
+.ui-accordion-header.ui-state-default when not(@ImgAccordionClosed = '') {
+	background-image: url('@{ImgSrc}/@{ImgAccordionClosed}');
+	background-repeat: no-repeat;
+	background-position: @ImgAccordionClosedPosition;
+}
+
+.ui-accordion-header.ui-state-active when not(@ImgAccordionOpened = '') {
+	background-image: url('@{ImgSrc}/@{ImgAccordionOpened}');
+	background-repeat: no-repeat;
+	background-position: @ImgAccordionOpenedPosition;
+}
+
+.radio {
+	> input {
+		vertical-align: middle;
+		position: relative !important;
+		display: inline-block;
+	}
+	
+	> label, > span {
+		vertical-align: middle;
+		margin: 0px !important;
+		position: relative;
+		display: inline !important;
+		padding-left: 0px !important;
+	}
+	
+	> .ui-ico-hint {
+		margin-left: 6px;	
+	}
+}
+
+.form-inline .radio, .form-inline .checkbox {
+	display: inline-block !important;
+}
+
+.form-inline {
+	
+	.radio {
+		margin-right: 6px;
+	}
+}
+
+legend {
+	border: 0px;
+	margin: 0px;
+	padding: 0px;
+}
+
+input[type="radio"], 
+input[type="checkbox"] {
+	margin: 0px;
+	vertical-align: middle;
+}
+
+.radio input[type="radio"], 
+.radio-inline input[type="radio"], 
+.checkbox input[type="checkbox"], 
+.checkbox-inline input[type="checkbox"] {
+	position: relative;
+	margin-left: 1px;
+	margin-top: 0px;
+}

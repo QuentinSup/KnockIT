@@ -1,0 +1,259 @@
+
+/* Colors for form validity */
+
+.input-warned { 
+	.bg() when not(@InputWarnedBackgroundColor = '') { .bg-color(@InputWarnedBackgroundColor) !important };
+	.bg;
+	.color() when not(@InputWarnedTextColor = '') { color: @InputWarnedTextColor !important };
+	.color;
+	border-color: @InputWarnedBorderColor !important;
+	border-width: @InputWarnedBorderWidth !important;
+}
+
+.input-valid { 
+	.bg() when not(@InputValidBackgroundColor = '') { .bg-color(@InputValidBackgroundColor) !important };
+	.bg;
+	.color() when not(@InputValidTextColor = '') { color: @InputValidTextColor !important };
+	.color;
+	border-color: @InputValidBorderColor !important;
+	border-width: @InputValidBorderWidth !important;
+}
+
+.input-invalid { 
+	.bg() when not(@InputErrorBackgroundColor = '') { .bg-color(@InputErrorBackgroundColor) !important };
+	.bg;
+	.color() when not(@InputErrorTextColor = '') { color: @InputErrorTextColor !important };
+	.color;
+	border-color: @InputErrorBorderColor !important;
+	border-width: @InputErrorBorderWidth ! important;
+}
+
+/****************************************************************
+ * TEXT CONTROLS
+ ****************************************************************/
+
+input, select, select option, textarea {
+    color: @InputTextColor;
+    font-family: @InputTextFont;
+}
+
+.ui-field-select {
+	position: relative;
+}
+
+// Ciblage -web-kit
+@media all and (-webkit-min-device-pixel-ratio:0)
+{
+
+	input, select, select option, textarea {
+		.appearance(none);
+	}
+	
+	input[type="radio"] {
+		.appearance(radio);
+	}
+	
+	input[type="checkbox"] {
+		.appearance(checkbox);
+	}
+	
+	button {
+		.appearance(none);
+	}
+
+	.ui-field-select {
+		
+		select {
+			padding-right: @ImgSelectTargetPaddingAppearance + @ImgSelectTargetSizeAppearance;
+		}
+	
+	}
+
+	.ui-field-select::after {
+		content: '';
+		background-image: url("@{ImgSrc}/@{ImgSelectTargetAppearance}");
+		background-repeat: no-repeat;
+		background-position: center;
+		background-size: @ImgSelectTargetSizeAppearance;
+		display: block;
+		position: absolute;
+		right: @ImgSelectTargetPaddingAppearance;
+		width: @ImgSelectTargetSizeAppearance;
+		top: 0px;
+		bottom: 0px;
+		pointer-events: none;
+	}
+
+}
+/***********
+ * TextBox */
+    
+input[type="text"], input[type="email"], input[type="number"], input[type="password"], input[type="tel"],
+select, textarea {
+	text-wrap: normal;
+	border-color: @InputBorderColor;
+	box-sizing	: border-box;
+	padding		 : @InputPadding;
+	border-width: @InputBorderWidth;
+	border-style: solid;
+	font-size: @InputFontSize;
+	outline: none;
+	width: 100%;
+	.bg-color(@InputBackgroundColor);
+	.rounded(@InputRadius);
+	.transition(~"background @{GlobalTransitionDuration}, background-color @{GlobalTransitionDuration}, border-color @{GlobalTransitionDuration}");
+}
+
+select {
+	padding: @InputSelectPadding;
+}
+
+/* IE8 Fix */
+input[readOnly] {
+	color: @LightGray !important;
+}
+
+.ui-input-readonly {
+	background: @DisabledColor;
+	color: @DisabledColorText;
+}
+
+.ui-input-empty {
+	color: @DisabledColorText;
+}
+
+select option[value=""] { // IE<=9
+	color: @PlaceHolderColor;
+}
+
+::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+    color:    @PlaceHolderColor;
+}
+
+:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+   color:    @PlaceHolderColor;
+   .opacity(1);
+}
+
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+   color:    @PlaceHolderColor;
+   .opacity(1);
+}
+
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+   color:    @PlaceHolderColor;
+}
+
+select:disabled, select[readonly], select[readOnly],
+textarea:disabled, textarea[readonly], textarea[readOnly],
+input:disabled, input[readonly], input[readOnly] {
+	.ui-input-readonly;
+}
+
+input:not([readonly]):not([type=radio]):enabled:hover,
+select:enabled:hover, 
+textarea:not([readonly]):enabled:hover {
+	border-color: @BorderColorInput;
+}
+input:not([readonly]):not([type=radio]):enabled:focus,
+select:enabled:focus, 
+textarea:enabled:focus,
+select:enabled:active, 
+textarea:not([readonly]):enabled:active {
+	border-color: @ActiveBorderColor;
+}
+
+input[type="checkbox"] {
+	vertical-align	:middle;
+}
+
+/****************************************************************
+ * CLIC CONTROLS
+ ****************************************************************/
+
+/**********
+ * Button */
+
+a[data-role="button"] {
+    display :inline-block;
+	vertical-align: middle;
+	text-decoration: none;
+	text-align: center;
+}
+
+
+div.ieLayout {
+	display : inline-block;
+	position: relative;
+}
+
+div.ieLayout[disabled] {
+    -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=@DisabledOpacityPerc) !important;	
+    filter: "alpha(opacity=@{DisabledOpacityPerc})" !important; /* For IE8 and earlier */    
+}
+
+button,
+input[type="button"],
+a[data-role="button"] {
+	margin-bottom: 2px !important;
+	color: @ButtonColorText !important;
+	//margin: 0px @Padding !important;
+	border-width: 1px !important;
+	border-style: solid !important;
+	outline: none !important;
+	cursor: pointer !important;
+	font-family: @ButtonFontFamily;
+	line-height: @ButtonLineHeight;
+	font-weight: @ButtonFontWeight;
+	font-size: @ButtonFontSize !important;
+	background-color    : @ButtonColor !important;
+	padding				: @ButtonPadding !important;
+	border-color		: @ButtonBorderColor !important;
+	.insecable-btn-txt() when not(@ButtonTextInsecable = 'false') { .insecable(); };
+	.insecable-btn-txt;
+	.rounded(@ButtonRadius);
+	.gradient-button !important;
+	.transition(~"background @{GlobalTransitionDuration}, background-color @{GlobalTransitionDuration}, border-color @{GlobalTransitionDuration}");
+}
+
+button:enabled:focus,
+input[type="button"]:enabled:focus,
+a[data-role="button"]:focus {
+	border-color: @ActiveBorderColor !important;
+}
+
+button:disabled,
+input[type="button"]:disabled,
+a[data-role="button"].disabled {  
+	.opacity(@DisabledOpacity) !important;
+	cursor: not-allowed;
+}
+
+button:enabled:active,
+input[type="button"]:enabled:active,
+a[data-role="button"]:active {
+  .bg-color(@ActiveColor) !important;
+  color				: @ActiveColorText !important;
+  border-color		: @ActiveBorderColor !important;
+  .gradient-button-active !important;
+}
+
+button:enabled:hover, 
+input[type="button"]:enabled:hover,
+a[data-role="button"]:hover {
+	border-color: @ButtonHoverBorderColor !important;
+	.bg() when not(@ButtonHoverColor = '') {
+		color		: @ButtonHoverColorText !important; 
+		.bg-color(@ButtonHoverColor) !important;
+		.gradient-button-hover !important;
+	};
+	.bg
+}
+
+button[checked],
+input[type="button"][checked],
+a[data-role="button"][checked] {
+	.bg-color(@ButtonCheckedBackground) !important;
+	color: @ButtonCheckedColor !important;
+	.gradient-button-checked !important;
+} 

@@ -1,0 +1,25 @@
+ @import (reference) "./_resources.less";
+ 
+ /** Générateur de police */
+ 
+ /* Fonction qui intègre les 5 formats.
+  * A adapter en cas d'absence de fichier ou mauvaise lecture des fichiers.
+  */
+.FontFactory_(@Police, @FontFileName, @Epaisseur: "", @EpaisseurInFile: "regular", @CustomFontSrc: @FontSrc) {
+	@font-face {
+		@FontName: '@{Police}@{Epaisseur}';
+		
+	//	font-family: @FontName;
+	//	font-weight: @Epaisseur;
+		
+		font-family: @FontName;
+	//	font-weight: normal;
+	//	font-style: normal;
+		src: url('@{CustomFontSrc}@{Police}/@{FontFileName}-@{EpaisseurInFile}-webfont.eot');
+		src: local('☺'),
+			url('@{CustomFontSrc}@{Police}/@{FontFileName}-@{EpaisseurInFile}-webfont.woff2')	format('woff2'),
+			url('@{CustomFontSrc}@{Police}/@{FontFileName}-@{EpaisseurInFile}-webfont.woff')	format('woff'),
+			url('@{CustomFontSrc}@{Police}/@{FontFileName}-@{EpaisseurInFile}-webfont.ttf')	format('truetype'),
+			url('@{CustomFontSrc}@{Police}/@{FontFileName}-@{EpaisseurInFile}-webfont.svg')	format('svg');
+	}
+}

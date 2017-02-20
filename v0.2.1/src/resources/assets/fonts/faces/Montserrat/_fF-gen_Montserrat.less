@@ -1,0 +1,23 @@
+@import (reference) "../_resources.less";
+@import (reference) "../_fx_FontFactory.less";
+
+/** Montserrat V2
+ *  Sources générées via https://www.fontsquirrel.com/tools/webfont-generator depuis les fichiers "otf" originaux.  
+ */
+
+.Montserrat_(@Epaisseur: "", @EpaisseurInFile: "regular", @CustomFontSrc: @FontSrc) {
+	.FontFactory_('Montserrat', 'montserrat', @Epaisseur, @EpaisseurInFile, @CustomFontSrc);
+}
+
+/* Du plus fin au plus épais */
+// Note : à décommenter et remonter dans VSS uniquement si utilisé
+.Montserrat_Epaisseurs_(@CustomFontSrc: @FontSrc) {
+	//.Montserrat_("HairLine", "hairline", @CustomFontSrc);
+	//.Montserrat_("UltraLight", "ultralight", @CustomFontSrc);
+	.Montserrat_("-Light", "light", @CustomFontSrc);
+	.Montserrat_(@CustomFontSrc);
+	//.Montserrat_("-SemiBold", "semibold", @CustomFontSrc);
+	.Montserrat_("-Bold", "bold", @CustomFontSrc);
+	//.Montserrat_("-ExtraBold", "extrabold", @CustomFontSrc);
+	//.Montserrat_("-Black", "black", @CustomFontSrc);
+}

@@ -1,0 +1,303 @@
+h1 {
+	font-family: @TextTitleFont;
+	margin: @H1Margin;
+	padding: @H1Padding;
+	color: @H1TextColor;
+	font-size: @H1FontSize;
+	text-transform: @H1TextTransform;
+}
+
+.asH1 {
+	font-family: @TextTitleFont;
+	margin: @H1Margin;
+	padding: @H1Padding;
+	color: @H1TextColor;
+	font-size: @H1FontSize;
+	text-transform: @H1TextTransform;
+	font-weight: 700;
+}
+
+h2 {
+	font-family: @TextTitleFont;
+	margin: @H2Margin;
+	padding: @H2Padding;
+	line-height: @H2LineHeight;
+	color: @H2TextColor;
+	font-size: @H2FontSize;
+	font-weight: normal;
+	text-transform: @H2TextTransform;
+}
+
+.clickable {
+	cursor: pointer;
+}
+
+
+.unclickable, .no-clickable {
+	pointer-events: none;
+	position: relative;
+	
+	button, a, input, select, textarea {
+		pointer-events: none;	
+	}
+	
+}
+
+.infotip {
+	border-bottom: 1px dashed gray;
+	cursor: help;
+}
+
+.highlight {
+	color: @HighLightColor;
+}
+
+.progress-text {
+	text-align: right;
+	color: @ActiveColorText;
+	padding: 5px;
+	font-weight: bold;
+}
+
+.ui-title-head {
+	border-color: #dedede !important;
+	color: @ActiveColor !important;
+	padding: 0.4em 0.5em !important;
+	margin: 1px;
+	z-index: 1;
+    text-shadow: 1px 1px 0px @White;
+}
+
+/* =============================================================================
+   Tables
+   ========================================================================== */
+
+table[data-role="form"] {
+    width             :100%;
+}
+
+table[data-role="form"] > tbody > tr > td {
+	padding           :3px 0px;
+}
+
+.labelTD > label {
+    display             :inline-block;
+}
+
+table {
+	
+	> thead > tr > th {
+		position: relative;
+	}
+	
+	> tbody > tr > td {
+		padding: 3px 2px;
+	}
+}
+
+table[data-role="detail"], table.info-detail {
+	border		  	: @DetailBorder !important;
+	border-collapse	:separate !important;
+	border-spacing	:0px;
+
+	> thead th {
+		font-weight		:@DetailHeadFontWeight !important;
+		color			:@DetailHeadColor !important;
+	 	background-color:@DetailHeadBackGroundColor !important;
+	 	padding			:@DetailHeadPadding !important;
+	 			 
+		label {
+		    display : inline !important;
+		}
+	
+	}
+	
+	> tbody > tr {
+	
+		> td {
+			padding			: @DetailBodyPadding;
+			background-color: @DetailBodyBackgroundColor;
+			color			: @DetailBodyColor;
+		}
+	
+		&:last-child > td {
+			border-bottom: 0px;
+		}
+	}
+	
+	> tbody > tr.nth-child-even > td,
+	> tbody > tr:nth-child(even) > td {
+		background-color: @DetailBodyEvenBackgroundColor;
+	}	
+}
+
+
+table[data-role="list"], table.info-list {
+	
+	border		  	:@ListBorder !important;
+	border-collapse	:separate !important;
+	border-spacing	:0px;
+
+	tr.selected > td {
+		color: @White !important;
+		border-color: @LightGray !important;
+	}
+	
+	> thead th {
+		font-weight		:@ListHeadFontWeight !important;
+		color			:@ListHeadColor !important;
+	 	background-color:@ListHeadBackGroundColor !important;
+	 	padding			:@ListHeadPadding !important;
+	 			 
+		label {
+		    display : inline !important;
+		}
+	
+	}
+	
+	> tbody > tr {
+	
+		> td {
+			padding			: @ListBodyPadding;
+			background-color: @ListBodyBackgroundColor;
+			color			: @ListBodyColor;
+		}
+	
+		&:last-child > td {
+			border-bottom: 0px;
+		}
+	}
+	
+	/*> tbody > tr.nth-child-even > td,
+	> tbody > tr:nth-child(even) > td {
+		background-color: @ListBodyEvenBackgroundColor;
+	}*/
+	// Défactorisation sinon IE8 boude la propriété CSS2
+	> tbody > tr:nth-child(even) > td {
+		background-color: @ListBodyEvenBackgroundColor;
+	}
+	> tbody > tr.nth-child-even > td {
+		background-color: @ListBodyEvenBackgroundColor;
+	}
+}
+
+table[data-role="list"], table.info-list {
+	
+	.checkbox {
+		width				:15px !important;
+		text-align			:center !important;
+	}
+	
+	.actions {
+		padding:			0px !important;
+			
+		> input, > button {
+			padding: 2px 6px !important;
+		}
+	
+		> [data-icon] {
+			padding: 0px 4px !important;
+		}
+	
+	}
+	
+	.date {
+		width				:140px;
+		text-align			:center !important;
+	}
+
+	.datetime {
+		width				:150px;
+		text-align			:center !important;
+	}
+
+}
+
+.labelTD {
+	width	:40%;
+	position: relative;
+}
+
+label.input {
+	border-bottom	:1px solid #ccc;
+	padding			:1px 10px;
+	width			:100%;
+	.border-radius(3px);
+	width				:100%;
+	box-sizing			:border-box;
+-moz-box-sizing			:border-box;
+-webkit-box-sizing	    :border-box;
+	width				:100%;
+	margin				:1px 5px;
+	display				:inline-block;
+}
+
+ul.messages, .messages {
+	list-style: none;
+	.border-radius(0px, 6px, 6px, 0px);
+	padding: @MessagePadding;
+	background-color: @MessageBackgroundColor;
+	margin: @MessageMargin;
+}
+
+ul.messages > li, .message {
+	padding-bottom: @Padding / 2;
+	color: @MessageColor;
+}
+
+td > .ui-ico-hint {
+	position: absolute;
+	right: 2px;
+	top: 3px;
+}
+
+.tab-list {
+	
+	display: table;
+	width: 100%;
+	background-color: @MenuTabBackgroundColor;
+	
+	.tab-item {
+		display: table-cell;
+		padding: @Padding;
+		text-align: center;
+		font-size: @MenuTabFontSize;
+		cursor: default;
+		width: auto;
+		background-color: @MenuTabActiveBackgroundColor;
+		color: @MenuTabActiveColor;
+		position: relative;
+		
+		&.current {
+			background-color: @MenuTabSelectedBackgroundColor;
+			color: @MenuTabSelectedColor;
+			
+			.numero {
+				background-color: @MenuTabNumeroSelectedBackgroundColor;
+			}
+			
+		}
+
+		&.inactif {
+			background-color: @MenuTabBackgroundColor;
+			color: @MenuTabColor;
+			text-decoration: none;
+			
+			.numero {
+				background-color: @MenuTabNumeroBackgroundColor;
+			}
+			
+		}
+		
+		.numero {
+			background-color: @MenuTabNumeroActiveBackgroundColor;
+			display: block;
+			position: absolute;
+			left: 0px;
+			top: 0px;
+			bottom: 0px;
+			padding: 0px 12px;
+		}
+		
+	}
+}

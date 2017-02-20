@@ -1,0 +1,231 @@
+html { overflow: auto !important; overflow-x: hidden !important; }
+body { margin: 0; font-size: @TextFontSize; line-height: @LineHeight; background-color: @BackgroundColor; }
+body, button, pre, select, input, textarea { font-family: @TextFont; color: @TextColor; -moz-box-sizing: border-box; box-sizing: border-box; -webkit-box-sizing: border-box; }
+
+.gradient-button when not(@ButtonColor = '') {
+	.gradient(@ButtonColorStart, @ButtonColorEnd, @ButtonColor)
+}
+
+.gradient-button-active when not(@ButtonSelectColor = '') {
+	.gradient(@ButtonSelectColorStart, @ButtonSelectColorEnd, @ButtonSelectColor)
+}
+
+.gradient-button-checked when not(@ButtonCheckedBackground = '') {
+	.gradient(@ButtonCheckedBackground, @ButtonCheckedBackgroundEnd, @ButtonCheckedBackground)
+}
+
+.gradient-button-hover when not(@ButtonHoverColor = '') {
+	.gradient(@ButtonHoverColorStart, @ButtonHoverColorEnd, @ButtonHoverColor)
+}
+
+b, strong, .strong, .bold, table th {
+    @BoldRuleSet();
+}
+
+pre {
+	margin: 0px;
+	padding: 0px;
+	word-wrap: break-word;
+	white-space: pre-line;
+}
+
+.veryStrong {
+    font-weight: bold;
+    color: #018C94;
+    font-size: 1.5em;
+}
+
+p {
+    padding: 0px 0px !important;
+    margin:8px 0px !important;
+    text-align: justify;
+    font-size: @ParagraphFontSize;
+}
+
+ul {
+	padding: 0px;
+	margin: 0px;
+	list-style: none;
+	
+	> li {
+		padding: 0px;
+		margin: 0px;
+		list-style: none;
+	}
+	
+}
+
+hr {
+    height          :0px;
+    border-top		:1px solid @HrColor;
+    border-bottom   :1px solid @White;
+    margin			:1em 0;
+}
+
+a { color: @HyperLinkColor; }
+a:visited { color: @HyperLinkVisitedColor; }
+
+a.link, .nota {
+	color	:#00bdf2 !important;
+}
+
+a.disable {
+	color			:@HyperLinkDisabledColor !important;
+	text-decoration	:none !important;
+}
+
+.text-left {
+	text-align: left !important;
+}
+
+.text-center {
+	text-align: center !important;
+}
+
+.text-right {
+	text-align: right !important;
+}
+
+.text-justify {
+	text-align: justify !important;
+}
+
+.text-uppercase {
+	text-transform: uppercase !important;
+}
+
+.text-lowercase {
+	text-transform: lowercase !important;
+}
+
+.text-bigger {
+	font-size: 1.1em !important;
+}
+
+.text-smaller {
+	font-size: 0.9em !important;
+}
+
+.text-italic {
+	font-style: italic !important;
+}
+
+.green {
+	color: #008000;
+}
+
+.relative {
+	position: relative;
+}
+
+.TODO {
+	color: @ErrorLabelColor ;
+//	display: none;
+}
+
+.insecable {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.secable {
+	white-space: pre-line;	
+}
+
+fieldset > legend > label {
+    cursor: pointer; 
+    position: absolute; 
+    top     :-11px; 
+    right   :-250px;
+}
+
+.container {
+    padding     :0px !important;
+    margin      :0px !important;
+    width       :100% !important;
+    height      :100% !important;
+    display     :inline-block !important;
+    position    :relative !important;
+}
+
+.text {
+	padding: @FullPadding;	
+}
+
+.bordered {
+	border: 1px solid @BorderColor;	
+}
+
+.full-width {
+	width: 100%;
+}
+	
+.half-width {
+	width: 49%; /* Pour faire la marge */
+}
+
+@media screen and (min-width: @TabletMinWidth) {
+	
+	.col-lg-auto {
+		width: auto;
+	}
+	
+}
+
+
+@media screen and (min-width: @MobileMinWidth) {
+	
+	.col-sm-auto {
+		width: auto;
+	}
+	
+}
+
+@media screen and (max-width: @MobileMaxWidth) {
+	
+	.col-xs-auto {
+		width: auto;
+	}
+	
+}
+
+@media screen and (min-width: @MobileMinWidth) {
+
+	.visibility-xs {
+		visibility: hidden;
+	}
+	
+}
+
+@media screen and (max-width: @MobileMaxWidth) {
+
+	.full-width-xs {
+		width: 100%;
+	}
+	
+	.half-width-xs {
+		width: 49%; /* Pour faire la marge */
+	}
+	
+	.visibility-xs {
+		visibility: visible;
+	}
+	
+	.secable-xs { // Sécable en xs, ...
+		.secable() !important ;
+	}
+	
+}
+
+.secable-xs { // ... insécable en temps normal.
+	.insecable() ;
+}
+
+.text-underline {
+	text-decoration: underline;
+}
+
+.text-capitalize {
+	text-transform: capitalize;
+}
