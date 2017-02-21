@@ -1870,7 +1870,7 @@ declare module kit {
         onDOMField(fieldType: string, name: string, field: InputUIField): any;
     }
 }
-declare module kit.agilitedigitale.components {
+declare module kit.components {
     abstract class DefaultBinding implements KnockoutBindingHandler {
         private name;
         options: any;
@@ -1878,7 +1878,7 @@ declare module kit.agilitedigitale.components {
         getName(): string;
     }
 }
-declare module kit.agilitedigitale.components {
+declare module kit.components {
     import InputUIField = fields.InputUIField;
     class FieldBinding extends DefaultBinding {
         private static constructorList;
@@ -1889,12 +1889,12 @@ declare module kit.agilitedigitale.components {
         init(element: any, valueAccessor: any): void;
     }
 }
-declare module kit.agilitedigitale.components {
+declare module kit.components {
     class RegisterBindingsManager extends EventsBinder {
         register(binding: DefaultBinding): void;
     }
 }
-declare module kit.agilitedigitale.components {
+declare module kit.components {
     interface RegisterCallbacksInterface {
         create(domElement: HTMLElement): any;
         attach(domElement: HTMLElement): any;
@@ -1915,7 +1915,7 @@ declare module kit.agilitedigitale.components {
         modifyAttribute(domElement: HTMLElement): void;
     }
 }
-declare module kit.agilitedigitale.components {
+declare module kit.components {
     class WebKitFieldElement extends DefaultElement {
         constructor();
         private createFieldFromHTMLElement(domElement);
@@ -1925,12 +1925,12 @@ declare module kit.agilitedigitale.components {
 interface Document {
     registerElement: Function;
 }
-declare module kit.agilitedigitale.components {
+declare module kit.components {
     class RegisterElementManager extends EventsBinder {
         register(def: DefaultElement): void;
     }
 }
-declare module kit.agilitedigitale.main {
+declare module kit.main {
 }
 /**
  * @fileOverview This file defines the post custom binding

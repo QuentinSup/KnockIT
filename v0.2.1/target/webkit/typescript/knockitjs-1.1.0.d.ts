@@ -31,7 +31,8 @@ declare var HttpStatus: {
     NotImplemented: number;
     ServiceUnavailable: number;
     UnknownError: number;
-};// Type definitions for jQuery 1.10.x / 2.0.x
+};
+// Type definitions for jQuery 1.10.x / 2.0.x
 // Project: http://jquery.com/
 // Definitions by: Boris Yankov <https://github.com/borisyankov/>, Christian Hoffmeister <https://github.com/choffmeister>, Steve Fenton <https://github.com/Steve-Fenton>, Diullei Gomes <https://github.com/Diullei>, Tass Iliopoulos <https://github.com/tasoili>, Jason Swearingen <https://github.com/jasons-novaleaf>, Sean Hill <https://github.com/seanski>, Guus Goossens <https://github.com/Guuz>, Kelly Summerlin <https://github.com/ksummerlin>, Basarat Ali Syed <https://github.com/basarat>, Nicholas Wolverson <https://github.com/nwolverson>, Derek Cicerone <https://github.com/derekcicerone>, Andrew Gaspar <https://github.com/AndrewGaspar>, James Harrison Fisher <https://github.com/jameshfisher>, Seikichi Kondo <https://github.com/seikichi>, Benjamin Jackman <https://github.com/benjaminjackman>, Poul Sorensen <https://github.com/s093294>, Josh Strobl <https://github.com/JoshStrobl>, John Reilly <https://github.com/johnnyreilly/>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
@@ -3966,7 +3967,8 @@ declare module "jquery" {
     export = $;
 }
 declare var jQuery: JQueryStatic;
-declare var $: JQueryStatic;// Type definitions for jQueryUI 1.9
+declare var $: JQueryStatic;
+// Type definitions for jQueryUI 1.9
 // Project: http://jqueryui.com/
 // Definitions by: Boris Yankov <https://github.com/borisyankov/>, John Reilly <https://github.com/johnnyreilly>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
@@ -5726,7 +5728,8 @@ interface JQueryStatic {
     datepicker: JQueryUI.Datepicker;
     widget: JQueryUI.Widget;
     Widget: JQueryUI.Widget;
-}// Type definitions for Knockout v3.2.0-beta
+}
+// Type definitions for Knockout v3.2.0-beta
 // Project: http://knockoutjs.com
 // Definitions by: Boris Yankov <https://github.com/borisyankov/>, Igor Oleinikov <https://github.com/Igorbek/>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
@@ -6319,7 +6322,8 @@ declare module "knockout" {
     export = ko;
 }
 
-declare var ko: KnockoutStatic;interface Object {
+declare var ko: KnockoutStatic;
+interface Object {
     keysAt(o: Object, index: number): string;
     _keys(o: Object, index?: number): any;
     keys(o: Object): string[];
@@ -8191,7 +8195,7 @@ declare module kit {
         onDOMField(fieldType: string, name: string, field: InputUIField): any;
     }
 }
-declare module kit.agilitedigitale.components {
+declare module kit.components {
     abstract class DefaultBinding implements KnockoutBindingHandler {
         private name;
         options: any;
@@ -8199,7 +8203,7 @@ declare module kit.agilitedigitale.components {
         getName(): string;
     }
 }
-declare module kit.agilitedigitale.components {
+declare module kit.components {
     import InputUIField = fields.InputUIField;
     class FieldBinding extends DefaultBinding {
         private static constructorList;
@@ -8210,12 +8214,12 @@ declare module kit.agilitedigitale.components {
         init(element: any, valueAccessor: any): void;
     }
 }
-declare module kit.agilitedigitale.components {
+declare module kit.components {
     class RegisterBindingsManager extends EventsBinder {
         register(binding: DefaultBinding): void;
     }
 }
-declare module kit.agilitedigitale.components {
+declare module kit.components {
     interface RegisterCallbacksInterface {
         create(domElement: HTMLElement): any;
         attach(domElement: HTMLElement): any;
@@ -8236,7 +8240,7 @@ declare module kit.agilitedigitale.components {
         modifyAttribute(domElement: HTMLElement): void;
     }
 }
-declare module kit.agilitedigitale.components {
+declare module kit.components {
     class WebKitFieldElement extends DefaultElement {
         constructor();
         private createFieldFromHTMLElement(domElement);
@@ -8246,12 +8250,12 @@ declare module kit.agilitedigitale.components {
 interface Document {
     registerElement: Function;
 }
-declare module kit.agilitedigitale.components {
+declare module kit.components {
     class RegisterElementManager extends EventsBinder {
         register(def: DefaultElement): void;
     }
 }
-declare module kit.agilitedigitale.main {
+declare module kit.main {
 }
 /**
  * @fileOverview This file defines the post custom binding
