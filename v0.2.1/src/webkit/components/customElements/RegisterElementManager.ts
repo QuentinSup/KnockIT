@@ -2,7 +2,7 @@ interface Document {
     registerElement: Function
 }
 
-module kit.agilitedigitale.components {
+module kit.components {
 
     export class RegisterElementManager extends EventsBinder {
     

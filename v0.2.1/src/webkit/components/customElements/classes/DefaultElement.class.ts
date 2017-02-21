@@ -1,4 +1,4 @@
-module kit.agilitedigitale.components {
+module kit.components {
     
     export interface RegisterCallbacksInterface {
         create(domElement: HTMLElement)

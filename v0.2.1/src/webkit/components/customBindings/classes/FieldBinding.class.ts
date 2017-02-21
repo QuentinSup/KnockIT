@@ -1,4 +1,4 @@
-module kit.agilitedigitale.components {
+module kit.components {
 
     import InputUIField = fields.InputUIField;
 

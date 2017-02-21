@@ -1,4 +1,4 @@
-module kit.agilitedigitale.components {
+module kit.components {
 
     export class RegisterBindingsManager extends EventsBinder {
     

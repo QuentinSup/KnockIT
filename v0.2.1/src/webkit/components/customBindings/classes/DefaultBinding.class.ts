@@ -1,4 +1,4 @@
-module kit.agilitedigitale.components {
+module kit.components {
     
     export abstract class DefaultBinding implements KnockoutBindingHandler {
         
