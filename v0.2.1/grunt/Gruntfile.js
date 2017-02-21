@@ -85,11 +85,15 @@ module.exports = function(grunt) {
 	    },
     concat: {
         options: {
-          separator: '',
+          separator: '\n',
         },
         webkit_dependencies: {
 			src: ["<%= pkg.basedir %>/webkit/definitions/**/*.d.ts", "<%= pkg.targetDir %>knockitjs-<%= pkg.version %>.d.ts"],
     		dest: "<%= pkg.targetDir %>/typescript/knockitjs-<%= pkg.version %>.d.ts"
+		},
+        webkit_less: {
+			src: ["<%= pkg.basedir %>/less/**/*.less", "!<%= pkg.basedir %>/**/_index.less"],
+    		dest: "<%= pkg.targetDir %>/less/knockitjs-<%= pkg.version %>.less"
 		},
         webkit: {
 			src: ["<%= pkg.targetDir %>knockitjs-<%= pkg.version %>-vendors.js", "<%= pkg.basedir %>/resources/assets/js/presets/LocaleInfos.js", "<%= pkg.targetDir %>knockitjs-<%= pkg.version %>.js"],
@@ -192,7 +196,7 @@ module.exports = function(grunt) {
 	  grunt.log.writeln(this.data.msg + (new Date().toLocaleString()));
   });
 
-  grunt.registerTask('snapshot', 'Resources generation [SNAPSHOT]', ['conf', 'showtime:start', 'clean:target', 'copyto:snapshot', 'includereplace:vendorcss', 'includereplace:vendorjs', 'typescript:snapshotfwk', 'concat:webkit', 'concat:webkit_dependencies', 'clean:dependencies', 'less:snapshot', 'showtime:end']);
-  grunt.registerTask('release', 'Resources generation [RELEASE]', ['conf', 'showtime:start', 'clean:target', 'copyto:release', 'includereplace:vendorcss', 'includereplace:vendorjs', 'typescript:releasefwk', 'concat:webkit', 'concat:webkit_dependencies', 'uglify:release', 'htmlmin:release', 'clean:dependencies', 'less:release', 'showtime:end']);
+  grunt.registerTask('snapshot', 'Resources generation [SNAPSHOT]', ['conf', 'showtime:start', 'clean:target', 'copyto:snapshot', 'includereplace:vendorcss', 'includereplace:vendorjs', 'typescript:snapshotfwk', 'concat:webkit', 'concat:webkit_dependencies', 'concat:webkit_less', 'clean:dependencies', 'less:snapshot', 'showtime:end']);
+  grunt.registerTask('release', 'Resources generation [RELEASE]', ['conf', 'showtime:start', 'clean:target', 'copyto:release', 'includereplace:vendorcss', 'includereplace:vendorjs', 'typescript:releasefwk', 'concat:webkit', 'concat:webkit_dependencies', 'concat:webkit_less', 'uglify:release', 'htmlmin:release', 'clean:dependencies', 'less:release', 'showtime:end']);
 
 };
