@@ -54,7 +54,7 @@ module kit.fields {
             this.uid = getId(id);
             this.id = id;
             
-            this.label = app.i18n.getObservableString(id + '.label', '')
+            this.label = app.i18n.getObservableString(id + '.label', id)
             this.sub = app.i18n.getObservableString(id + '.sub', '')
             this.tooltip = new Tooltip(this.uid + '-tooltip')
             this.tooltip.setText(this.id + '.tooltip')
