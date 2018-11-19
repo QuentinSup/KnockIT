@@ -1,0 +1,74 @@
+/** initial setup **/
+.nano {
+  position : relative;
+  width    : 100%;
+  height   : 100%;
+  overflow : hidden;
+}
+.nano > .nano-content {
+  position      : absolute;
+  top           : 0;
+  right         : 0;
+  bottom        : 0;
+  left          : 0;
+}
+
+.has-scrollbar > .nano-content {
+	overflow      : scroll;
+  	overflow-x    : hidden;
+  	margin-right: 0px !important;
+}
+
+.has-scrollbar > .nano-content:focus {
+  outline: none !important;
+}
+
+.nano-content::-webkit-scrollbar {
+  display: none;
+}
+.has-scrollbar > .nano-content::-webkit-scrollbar {
+  display: block;
+}
+.has-scrollbar > .nano-pane {
+  display: block;
+  background : rgba(0,0,0,.25);
+  position   : absolute;
+  width      : 7px;
+  right      : 3px;
+  top        : 3px;
+  bottom     : 3px;
+  visibility : hidden\9; /* Target only IE7 and IE8 with this hack */
+  opacity    : .01;
+  -webkit-transition    : .2s;
+  -moz-transition       : .2s;
+  -o-transition         : .2s;
+  transition            : .2s;
+  -moz-border-radius    : 5px;
+  -webkit-border-radius : 5px;
+  border-radius         : 5px;
+}
+
+.has-scrollbar > .nano-content:before {
+ 	content: '';
+ 	display: block;
+ 	position: absolute;
+ 	top: 0px;
+ 	right: 0px;
+ 	bottom: 0px;
+ 	width: 17px;
+ 	background-color: #fff;
+ }
+  
+.has-scrollbar > .nano-pane > .nano-slider {
+  background: #444;
+  background: rgba(0,0,0,.5);
+  position              : relative;
+  margin                : 0 1px;
+  -moz-border-radius    : 3px;
+  -webkit-border-radius : 3px;
+  border-radius         : 3px;
+}
+.has-scrollbar:hover > .nano-pane, .nano-pane.active, .nano-pane.flashed {
+  visibility : visible\9; /* Target only IE7 and IE8 with this hack */
+  opacity    : 0.99;
+}

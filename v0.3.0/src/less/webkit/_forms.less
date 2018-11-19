@@ -1,0 +1,178 @@
+
+.requiredInput {
+	padding-left: 0px;
+    min-width   : 8px;
+    display     : @FormRequiredTagDisplay;
+    padding     : 0px;
+    margin		: @FormRequiredTagMargin;
+    text-align  : left;
+    position	: @FormRequiredTagPosition;
+	top			: 0px;
+	right		: 0px;
+}
+
+.form-submit {
+	padding:	@FullPadding 0px;
+}
+
+.form-label {
+	
+	text-align: @FormLabelAlignement;
+	font-size: @FormLabelFontSize;
+	color: @FormLabelTextColor;
+	padding: @FormLabelPadding;
+
+	div.label {
+		display: inline-block;
+		
+		.sub {
+			font-size: @FormLabelSubFontSize;
+			line-height: 1.2em;
+		}
+	}
+
+	label {
+		font-weight: @FormLabelFontWeight !important;
+		white-space: normal;
+		display: inline !important;
+	}
+
+}
+
+.form-label-left {
+	
+	.form-label {
+		text-align: left;
+	}
+	
+}
+
+.form-label-right {
+	
+	.form-label {
+		text-align: right;
+	}
+	
+}
+
+
+@media screen and (max-width: @MobileMaxWidth) {
+
+	.form-label {
+		text-align: left !important;
+	}
+}
+
+
+.field-row {
+	
+	.form-label {
+		text-align: left;
+	}
+	
+}
+
+.form-checked .ui-field-valid,
+.ui-field-visited.ui-field-valid {
+	
+	.form-label {
+		.color() when not(@SuccessLabelColor = '') { color: @SuccessLabelColor !important };
+		.color;
+	}
+	
+	.ui-input-valid {
+		.input-valid;
+	}
+		
+	input:valid, textarea:valid {
+		.input-valid;	
+	}
+		
+}
+
+
+.form-checked .ui-field-warned,
+.ui-field-visited.ui-field-warned {
+	
+	.form-label {
+		.color() when not(@WarnedLabelColor = '') { color: @WarnedLabelColor !important };
+		.color;
+	}
+	
+	.ui-input-valid {
+		.input-warned;
+	}
+		
+	input:valid, textarea:valid {
+		.input-warned;	
+	}
+		
+}
+
+.form-checked .ui-field-invalid,
+.ui-field-visited.ui-field-invalid {
+	.form-label {
+		color: @ErrorLabelColor !important;
+	}
+	
+	.ui-input-invalid {
+		.input-invalid;
+	}
+	
+	input:invalid, textarea:invalid
+	{ 
+		.input-invalid;
+	}
+		
+}
+
+.form-checked .ui-group-valid, 
+.ui-group-visited.ui-group-valid {
+
+	.form-label {
+		color: @SuccessLabelColor !important;
+	}
+		
+}
+
+.form-checked .ui-group-warned, 
+.ui-group-visited.ui-group-warned {
+
+	.form-label {
+		color: @WarnedLabelColor !important;
+	}
+		
+}
+
+.form-checked .ui-group-invalid, 
+.ui-group-visited.ui-group-invalid {
+
+	.form-label {
+		color: @ErrorLabelColor !important;
+	}
+		
+}
+
+.form-spacer {
+	margin: @FormSpacerMargin !important;
+}
+
+.form-group-label-row {
+	width: 100%;
+}
+
+.form-group-input-row {
+	width: 100%;
+}
+
+@media screen and (min-width: @MobileMinWidth) {
+	
+	.form-group {
+		
+		.ui-field-numeric {
+			width: @FieldNumericWidth;	
+		}
+		
+	}
+	
+}

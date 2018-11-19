@@ -1,0 +1,13 @@
+<div class="ui-glasspanel" data-bind="animate: animation(), attr:{id: 'glassp-' + id}, css:{ 'show': isVisible(), withSteps: steps }">
+    <div class="ui-glasspanel-after"></div>
+    <div class="ui-glasspanel-text" data-bind="animate: { animation: 'fadeIn', delay: 500 }, css: { 'hidden': !text() }, text: text"></div>
+    <!-- ko if: steps() -->
+    <div class="ui-glasspanel-content ui-dialog" data-bind="animate: { animation: 'fadeIn', delay: 1000 }">
+        <div class="ui-glasspanel-content-text" data-bind="text: progressionText() || text()"></div>
+        <div class="ui-progressbar">
+            <span data-bind="style: { width: (progression() > 1?1:progression()) * 100 + '%' }"></span>
+             <div class="ui-progressbar-text" data-bind="text: steps"></div>
+        </div>
+    </div>
+    <!-- /ko -->
+</div>

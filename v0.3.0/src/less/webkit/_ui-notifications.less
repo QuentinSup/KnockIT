@@ -1,0 +1,67 @@
+.notification  {
+	.rounded(@NotificationRadius);
+	padding: @MediumPadding;
+	color: @TextColor;
+	background-color: @NotificationBackgroundColor;
+	border:  1px solid @NotificationBackgroundColor;	
+}
+
+.notification.blank {
+    padding-left: 28px;
+    position    :relative;
+	color: @TextColor;
+	background-color: transparent;
+	border-color: @LightGray;
+}
+
+.notification.error {
+	color: #000000;
+	background-color: #ebf8fd;
+	border-color: @ErrorColor;
+    padding-left: 28px;
+    position    :relative;
+}
+
+
+.notification.success {
+	color: #468847;
+	background-color: #DFF0D8;
+	border-color: #D6E9C6;
+    padding-left: 28px;
+    position    :relative;
+}
+
+.notification.info {
+	color: @InfoColorText;
+	background-color: @InfoColor;
+	border-color: @InfoColor;
+    position    :relative;
+    padding: @MediumPadding;
+}
+
+.notification.focus {
+	.rounded(0px);
+	color: @InfoColorText;
+    position    :relative;
+    padding: 0px;
+	border: 1px solid #808080;
+
+	> div {
+    	padding: 5px;
+    	color: #000000;
+    	border: 1px solid #FFFFFF;
+	}
+	
+	a {
+		color: #177a81;
+		font-weight: bold;
+	}
+}
+
+.notification.warn {
+	color: @TextColor;
+	background-color: transparent;
+	border-color: @LightGray;
+    padding-left: 28px;
+    position    :relative;
+}

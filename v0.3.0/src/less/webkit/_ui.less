@@ -1,0 +1,493 @@
+.ui-glasspanel {
+	position	:fixed;	
+	z-index		:999;
+	left		:0px;
+	top			:0px;
+	right		:0px;
+	bottom		:0px;
+	display		:none;
+}
+
+.ui-glasspanel.withSteps {
+    z-index     :1000;
+}
+
+.ui-glasspanel-after, .ui-loader {
+	content		:'';
+	display		:block;
+	top         :0px;
+	left		:0px;
+	bottom		:0px;
+	right		:0px;
+    z-index     :999;
+	background-color: #fefefe;
+	background-image: url('@{ImgSrc}/loader-ie.gif');
+	background-repeat: no-repeat;
+	background-position: center;
+	position        :absolute;
+	.opacity(0.6);
+}
+
+.ui-glasspanel-after::after, .ui-loader::after {
+	content		:'';
+	display		:block;
+	top         :0px;
+	left		:0px;
+	bottom		:0px;
+	right		:0px;
+    z-index     :999;
+	background-image: url('@{ImgSrc}/tinyLogo.jpg');
+	background-repeat: no-repeat;
+	background-position: center;
+	position        :absolute;
+}
+
+.ui-glasspanel-text {
+	position: fixed;
+	z-index: 999;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+	padding: 10px;
+	font-size: 1em;
+	color: #000;
+}
+
+.ui-glasspanel-text::after {
+	content		:'';
+	display		:block;
+	top         :0px;
+	left		:0px;
+	bottom		:0px;
+	right		:0px;
+    z-index     :-1;
+	background-color: #fff;
+	position        :absolute;
+	.opacity(0.6);
+}
+
+@media screen and (max-width: @MobileMaxWidth) {
+	
+	.ui-glasspanel-text {
+		left: 5%;
+		right: 5%;	
+	}	
+}
+
+.ui-glasspanel.show {
+	display		:block;	
+}
+
+.ui-glasspanel-content {
+	position	:fixed;
+    z-index     :1000;
+	left		:33%;
+	right		:33%;
+	top         :33%;
+    padding     :10px 20px 20px 20px;
+}
+
+.ui-glasspanel-content-text {
+	font-size	:1.1em;
+	margin      :7px 0px;
+}
+
+.ui-progressbar {
+	margin		:0px 0px;
+	position	:relative;
+	padding		:0px;
+	height		:10px;
+}
+
+.ui-progressbar-text {
+	position	:absolute;
+	top			:-22px;
+	right		:1px;
+}
+
+.ui-progressbar > span {
+	position	:absolute;
+	top			:0px;
+	bottom		:0px;
+	left		:0px;
+	width		:100%;
+	background-color    : @ActiveColor;
+	.rounded(5px);
+}
+
+.ui-progressbar:after {
+	content		:"";
+	display		:block;
+	top		:-2px;
+	left		:-2px;
+	bottom		:-2px;
+	right		:-2px;
+	z-index		:-1;
+	position	:absolute;	
+	border		:1px solid #4d4d4d;	
+	.rounded(10px);	
+	background-color:#4d4d4d;
+}
+
+.ui-popin {
+    position        :fixed;
+    top             :10%;
+    left            :20%;
+    right           :20%;
+    padding         :1em;
+    font-size       :1em;
+    cursor          :pointer;
+	background-color: @DialogBackgroundColor;
+	border: 1px solid @DialogBorderColor;	
+    z-index             : 9999999;
+}
+
+.ui-popin > span.text {
+    line-height         :16px;
+    margin-left         :8px;
+    color				:@DialogTextColor;
+}
+
+.ui-popin[data-type="error"] {
+    background-color    :#ebf8fd;
+    border-color        :#dc0a0a;
+}
+
+.ui-popin[data-type="success"] {
+    background-color    :#ebf8fd;
+    border-color        :#87d200;
+}
+
+.ui-messagebox-content > .ui-ico-status {
+    float               :left;
+    margin-right        :16px;
+}
+
+.ui-messagebox-content > .ui-text {
+    margin                :0px;
+    padding               :8px;
+    max-width             :500px;
+    min-width             :350px;
+}
+
+fieldset {
+
+	> legend {
+	    position :relative;
+		font-size: @LegendFontSize !important;
+		font-family: @LegendFontFamily;
+	}
+
+	&.ui-widget {
+			
+		> legend {
+			color: @TextColor;
+			margin-bottom: @Padding;
+			width: @LegendWidth;
+	    	text-align		:@LegendTextAlignement;
+	    	background-color:@LegendBackgroundColor;
+	    	border: @LegendBorder;
+	    	text-transform: @LegendTextTransform;
+	    	
+	    	&.ui-state-active {
+	    		background-color:@LegendActiveBackgroundColor !important;
+	    		color:@LegendActiveColor !important;
+	    		border:@LegendActiveBorder !important;
+	    	}
+	    	
+		}
+	}
+	
+}
+
+.ui-datepicker {
+	background-color: @DialogBackgroundColor;
+	border: 1px solid @DialogBorderColor;	
+	width: auto;
+	margin-top: 1px;
+}
+
+.ui-datepicker a {
+	color: @CalendarTextColor;
+}
+
+.ui-datepicker thead th {
+	color: @CalendarTextColor;	
+}
+
+.ui-datepicker td {
+	border: 1px solid #fefefe;
+	background-color:	whitesmoke;
+}
+
+.ui-datepicker td a.ui-state-active {
+	background-color: @InfoColor !important;
+	color: @InfoColorText !important;
+}
+
+.ui-datepicker td a.ui-state-hover {
+	background-color: @ActiveColor !important;
+	color: @ActiveColorText !important;
+}
+
+.ui-datepicker td.ui-state-disabled {
+	background-color: #fff !important;
+	color: #aaa !important;
+}
+
+.ui-datepicker td.ui-datepicker-week-end {
+	background: #ededed;
+	
+	&.ui-state-disabled {
+		background-color: whitesmoke !important;
+	}
+	
+}
+
+.ui-datepicker .ui-icon-circle-triangle-w {
+		
+}
+
+.ui-field-textonly {
+	padding: @FieldReadOnlyTextPadding;
+	font-size: @InputFontSize;
+}
+
+.ui-group-date-multifield input {
+	text-align: center;
+}
+
+.ui-field-numeric {
+	
+	text-align: @FieldNumericTextAlign;
+	
+	input {
+		text-align: @FieldNumericTextAlign;
+	}
+	
+	input:focus {
+		text-align: @FieldNumericFocusTextAlign;
+	}
+
+}
+
+.ui-field-codepostal-input {
+	width:29% !important; 
+	margin-right:1% !important;
+}
+
+.ui-field-codepostal-select {
+	width:70% !important;
+}
+
+.ui-field-messages {
+	text-align: left;
+	list-style: none;
+	clear: both;
+	padding: @FieldMessagesPadding;
+	margin: @FieldMessagesMargin;
+}
+
+.ui-field-messages > li {
+	padding: @Padding / 2;
+	color: @FieldMessageColor;
+	font-size: @FieldMessageFontSize;
+	
+	&.warn {
+		color: @WarnedMessageColor;	
+	}
+	
+}
+
+.ui-pined-hint {
+	font-size: @FormLabelSubFontSize;
+	line-height: 1.2em;
+}
+
+.ui-toggle {
+
+	@ToggleBorderFullWidth: @ToggleSide + 2 * @ToggleBorderWidth;
+	@ToggleSwitchHShadow: -@ToggleSwitchDistance * cos(@ToggleSwitchLightAngle);
+	@ToggleSwitchVShadow: @ToggleSwitchDistance * sin(@ToggleSwitchLightAngle);
+
+	position: relative;
+	
+	.ui-toggle-component {
+
+	    position	: absolute; 
+	    width		: @ToggleWidth;
+	    -webkit-user-select	: none; 
+	    -moz-user-select	: none; 
+	    -ms-user-select		: none;
+	    
+	    > .ui-toggle-label {
+	    	display			: block; 
+	    	overflow		: hidden; 
+	    	cursor			: pointer;
+	    	border-radius	: @ToggleSide / 2;
+	    	height			: @ToggleBorderFullWidth;
+	    	
+	    	> .ui-toggle-inner {
+	    		display		: block; 
+    			width		: 100%;
+    			position	: absolute;
+    			height		: 100%;
+    			line-height	: @ToggleBorderFullWidth;
+    			padding-right	: @TogglePadding;
+    			background-color: @ToggleBackgroundColor; 
+    			border			: @ToggleBorderWidth solid @ToggleBorderColor;
+    			border-radius	: @ToggleSide / 2;
+    			color			: @ToggleOnColor;
+    			text-align		: right;
+    			.transition(~"background-color 0.2s ease-in 0s, color 0.2s ease-in 0s, border-color 0.2s ease-in 0s");
+	    	
+		    	> .ui-toggle-switch {
+		    		display				: block; 
+		    		width				: @ToggleSide;
+		    		height				: @ToggleSide;
+		    		background			: @ToggleColor;
+		    		position			: absolute; 
+		    		top					: 0; 
+		    		bottom				: 0;
+		    		border-radius		: 50%;
+		    		.box-shadow(~"@{ToggleSwitchHShadow} @{ToggleSwitchVShadow} 10px 0px rgba(0, 0, 0, 0.2)");
+		    		.transition(~"margin 0.15s ease-in 0s");
+		    	}
+	    	}
+	    }
+	    
+	    > input[type=checkbox] {
+	  		position: absolute;
+			width: 100%;
+			height: 100%;
+			z-index: 1;
+	    	.opacity(0);
+	    }
+	}
+	
+	.ui-toggle-component-checkbox {
+	    position	: absolute; 
+	    width		: @FullPadding + @ToggleWidth;
+	    height		: @ToggleSide;
+	    -webkit-user-select	: none; 
+	    -moz-user-select	: none; 
+	    -ms-user-select		: none;
+	    cursor: pointer;
+	    
+	    > input[type=checkbox] {
+	  		display: inline-block; 
+	    	width: 100%;
+			height: 100%;
+	    }
+	}
+	
+	.ui-toggle-text {
+	
+		padding: 0px @FullPadding 0px (@FullPadding + @ToggleWidth); // On noie la marge à gauche dans le padding pour IE8 VS Chrome de la N7
+		width: 100%; // IE8
+		.transition(~"color 0.1s ease-in 0s");
+		
+		.ui-field-textonly {
+			width: 100%;
+			padding: 0px;
+			text-decoration: line-through;
+		}
+		
+		label {
+			cursor: pointer;
+			position: relative;
+			
+			&:hover {
+				color: @InputHoverColorText;
+			}
+		}
+	}
+	
+	&.ui-toggle-state-checked {
+		.ui-toggle-component {
+		    > .ui-toggle-label {
+		    	> .ui-toggle-inner {
+	    			background-color: @ToggleOnBackgroundColor;
+	    			border-color	: @ToggleOnBorderColor;
+	    			color			: @ToggleOnColor;	
+		    	
+			    	> .ui-toggle-switch {
+			    		margin-left: @ToggleWidth - @ToggleBorderFullWidth;
+			    	}
+		    	}
+		    }
+		}
+	
+		.ui-toggle-text {
+			color: @HighLightColor;
+			
+			.ui-field-textonly {
+				text-decoration: none;
+			}
+		}		
+	}
+}
+
+.ui-radio-switch {
+	display				: block; 
+	width				: 25px;
+	height				: 25px;
+	margin				: @UIRadioSwitchMargin;
+	background			: #FFF;
+	background-position : center;
+	background-size		: 25px 25px;
+	position			: absolute; 
+	top					: 10px;
+	left				: 10px;
+	bottom				: 0;
+	border-radius		: 50%;
+	.transition(~"all 0.1s ease-in 0s");
+	border				: 1px solid @BorderColor;
+}
+
+// Plugin cookie bar
+#cookie-bar {
+	padding: @Padding;
+	height: auto;
+	color: #fff;
+	position: relative;
+}
+
+#cookie-bar:after {
+	display: block;
+	position: absolute;
+	content: '';
+	background-color: #000;
+	.opacity(.8);
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: -1;
+}
+
+#cookie-bar.fixed {position:fixed; top:0; left:0; width:100%;}
+#cookie-bar a { 
+	display:inline-block; 
+	.rounded(@ButtonRadius);
+	text-decoration:none; 
+	padding:@ButtonPadding; 
+	line-height: @ButtonLineHeight; 
+	margin-left:@FullPadding;
+}
+
+#cookie-bar.fixed.bottom {bottom:0; top:auto;}
+#cookie-bar p { margin:0 !important; padding:0 !important; text-align: center; }
+
+#cookie-bar .cb-enable { 
+	.gradient-button();
+	color: @ButtonColorText;
+}
+#cookie-bar .cb-enable:hover {
+	.gradient-button-hover();
+	color: @ActiveColorText;
+}
+#cookie-bar .cb-disable { .ui-input-readonly() }
+#cookie-bar .cb-disable:hover { .ui-input-readonly() }
+#cookie-bar .cb-policy { .gradient-button() }
+#cookie-bar .cb-policy:hover { .gradient-button-hover() }
