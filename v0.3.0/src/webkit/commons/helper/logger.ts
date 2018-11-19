@@ -1,10 +1,3 @@
-
-/**
- * @fileOverview This file defines the errors module. 
- * @example var _errorsHelper = oneesp.module('commons.helper.errors');
- */
-module fr.ca.cat.helpers {
-
     /**
      * MODES
      * @enum {int}
@@ -211,5 +204,3 @@ module fr.ca.cat.helpers {
         }
 
     }
-  
-}

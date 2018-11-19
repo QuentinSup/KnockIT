@@ -45,11 +45,6 @@ interface IApplicationContext {
     page: string
 }
 
-interface IEventsBinder {
-    on(eventId: any, callback: Function, context?: any): void
-    emit(...args: any[]): void
-}
-
 interface IApplication extends IEventsBinder {
     title: KnockoutObservable<string>
     i18n: fr.ca.cat.manager.I18n

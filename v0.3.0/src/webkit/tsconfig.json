@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@webkit/*": ["webkit/*" ],
+      "@webkit/core/*": ["webkit/classes/*" ],
+      "@webkit/form/*": ["webkit/fields/*"]
+    }
+  }
+}
