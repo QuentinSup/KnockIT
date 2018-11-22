@@ -1,10 +1,16 @@
 {
   "compilerOptions": {
     "baseUrl": "./",
+    "typeRoots": [
+      "./core/definitions/"
+    ],
     "paths": {
-      "@webkit/*": ["webkit/*" ],
-      "@webkit/core/*": ["webkit/classes/*" ],
-      "@webkit/form/*": ["webkit/fields/*"]
+      "@webkit/core/*": ["modules/classes/*"],
+      "@webkit/form/*": ["modules/forms/*"],
+      "@webkit/helper/*": ["modules/helpers/*"],
+      "@webkit/ui/*": ["modules/ui/*"],
+      "@webkit/manager/*": ["modules/managers/*"],
+      "@webkit/bindings/*": ["ko/bindings/*"]
     }
   }
 }
