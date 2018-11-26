@@ -1,0 +1,9 @@
+<!-- ko if: isVisible -->
+	<div class="form-group" data-bind="css: { 'ui-field-invalid': !isDisabled() && !isLastInputValid(), 'ui-field-valid': !isDisabled() && isLastInputValid(), 'ui-field-visited': hasBeenVisited() && !isReadOnly(), 'ui-field-readonly': isReadOnly(), 'ui-field-warned': hasWarns(), 'ui-field-disabled': isDisabled() }">
+		<div data-bind="css: { 'col-xs-6': !isEditable() && showLabel(), 'col-sm-6': showLabel(), 'hidden': !showLabel() }, template: { name: $data.labelTemplate }"></div>
+		<div data-bind="css: { 'col-xs-6': !isEditable() && showLabel(), 'col-sm-6': showLabel(), 'col-sm-12': !showLabel() }">
+			<!-- ko template: { name: $data.inputTemplate } --><!-- /ko -->
+			<!-- ko template: 'ui-field-template-messages' --><!-- /ko -->
+		</div>
+	</div>
+<!-- /ko -->

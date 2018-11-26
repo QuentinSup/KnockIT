@@ -1,0 +1,9 @@
+<!-- ko if: isEditable() -->
+<div class="ui-input">
+	<input id="" data-bind="inputType: inputType, valueUpdate: valueUpdateOn(), disable: isReadOnly() || isDisabled(), attr: { 'id': uid, 'name': name()?name:null, 'pattern':pattern()?pattern:null, 'placeholder': !isFocused()?placeholder:null, 'maxlength': maxLength }, event: { 'keydown': function(o, e) { return onKeyDownEventHandler(e); }, 'keyup': function(o, e) { return onKeyUpEventHandler(e); },  'blur': function(o, e) { return onBlurEventHandler(); }, 'focus': function(o, e) { return onFocusEventHandler(); } }, value: formattedValue, css: { /* QuickFix IE<=9 */ 'placeholdersjs': !value() && !isFocused(), 'ui-input-empty': !value() && !isFocused(), 'ui-input-invalid': !isDisabled() && !isLastInputValid(), 'ui-input-valid': !isDisabled() && isLastInputValid(), 'ui-input-readonly': isReadOnly() || isDisabled(), 'ui-input-visited': hasBeenVisited() }" type="text" placeholder="" />
+<div class="ui-input-after"></div>
+</div>
+<!-- /ko -->
+<!-- ko if: !isEditable() -->
+<div class="ui-field-textonly" data-bind="text: formattedValue() || '&nbsp;'"></div>
+<!-- /ko -->

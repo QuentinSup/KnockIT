@@ -1,0 +1,11 @@
+{
+  "name": "knockitjs",
+  "version": "0.3.0",
+  "description": "Web development framework using KnockoutJS and JQuery",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Quentin Supernant",
+  "license": "MIT"
+}

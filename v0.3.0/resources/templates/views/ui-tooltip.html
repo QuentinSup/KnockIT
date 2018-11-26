@@ -1,0 +1,11 @@
+<!-- ko if: text() -->
+	<!-- ko if: type() == "pined" -->
+		<div class="ui-pined-hint" data-bind="attr: { id: uid }, visible: show(), html: text"></div>
+	<!-- /ko -->
+	<!-- ko if: type() == "pined-sm" -->
+		<div class="ui-pined-hint hidden-md hidden-lg" data-bind="attr: { id: uid }, visible: show(), html: text"></div>
+	<!-- /ko -->
+	<!-- ko if: !type() -->
+		<div class="ui-ico-hint" data-bind="attr: { id: uid }, visible:  show(), tooltip: { text: text, animation: animation, position: position }"></div>
+	<!-- /ko -->
+<!-- /ko -->

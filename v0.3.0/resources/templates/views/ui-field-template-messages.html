@@ -1,0 +1,5 @@
+	<!-- ko if: showMessages() && messages().length > 0 -->
+	<ul class="ui-field-messages" data-bind="foreach: messages">
+		<li data-bind="html: $data.text, css: { 'warn': $data.isWarn }"></li>
+	</ul>
+	<!-- /ko -->

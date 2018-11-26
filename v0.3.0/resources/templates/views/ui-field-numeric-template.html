@@ -1,0 +1,11 @@
+<script id="ui-field-numeric-template" type="text/html">
+	<!-- ko if: isEditable() -->
+	<div class="ui-group-numeric" data-bind="css: { 'input-group': unit }">
+		<div class="ui-field-numeric" data-bind="template: { 'name': 'ui-field-text-template' }"></div>
+		<div class="input-group-addon" data-bind="visible: unit, html: unit"></div>
+	</div>	
+	<!-- /ko -->
+	<!-- ko if: !isEditable() -->
+	<div class="ui-group-numeric ui-field-numeric ui-field-textonly"><span data-bind="text: formattedValue() || '&nbsp;'"></span> <span data-bind="visible: unit() && value(), html: unit"></span></div>
+	<!-- /ko -->
+</script>

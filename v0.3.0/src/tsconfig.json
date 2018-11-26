@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "types": ["jquery", "jqueryui", "knockout"],
+    "module": "amd",
+    "outFile": "../index.js",
+    "paths": {
+      "@webkit/core/*": ["ts/modules/classes/*"],
+      "@webkit/form/*": ["ts/modules/forms/*"],
+      "@webkit/helper/*": ["ts/modules/helpers/*"],
+      "@webkit/ui/*": ["ts/modules/ui/*"],
+      "@webkit/manager/*": ["ts/modules/managers/*"],
+      "@webkit/bindings/*": ["ts/modules/bindings/*"]
+    }
+  }
+}

@@ -1,0 +1,8 @@
+<script id="ui-field-select-template" type="text/html">
+	<!-- ko if: isEditable() -->
+	<div data-bind="template: { name: 'ui-field-select-' + view() + '-template' }"></div>
+	<!-- /ko -->
+	<!-- ko if: !isEditable() -->
+	<div class="ui-field-textonly" data-bind="text: $('<a>'+selectedOptionText()+'</a>').text() || '&nbsp;'"></div>
+	<!-- /ko -->
+</script>

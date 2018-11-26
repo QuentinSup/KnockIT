@@ -1,0 +1,295 @@
+@MobileWidth: 767px;
+@MobileMaxWidth: @MobileWidth;
+@MobileMinWidth: (@MobileWidth + 1px);
+@TabletWidth: 991px;
+@TabletMaxWidth: @TabletWidth;
+@TabletMinWidth: (@TabletWidth + 1px);
+@UltraMobileWidth: 320px;
+@UltraMobileMaxWidth: @UltraMobileWidth;
+@UltraMobileMinWidth: (@UltraMobileWidth + 1px);
+@DesktopWidth:1200px;
+@DesktoMaxpWidth:@DesktopWidth;
+@DesktopMinWidth:(@DesktopWidth + 1px);
+
+@SelectDialogNumberOptionsVisible: 10;
+
+@ToggleSide: 25px;
+@ToggleWidth: 46px;
+@ToggleBorderWidth: 1px;
+@ToggleBackgroundColor: #efefef;
+@ToggleOnBackgroundColor: #3CC1D5;
+@ToggleBorderColor: #e2e2e2;	
+@ToggleOnBorderColor: rgba(0, 0, 0, 0);
+@ToggleColor: #FFFFFF;			
+@ToggleOnColor: #999999;
+@TogglePadding: 10px;
+@ToggleSwitchLightAngle: 51deg;
+@ToggleSwitchDistance: 3px;
+
+@TextFont: 'OpenSans',Arial, sans-serif;
+@TextStrong: 'OpenSans-Bold', sans-serif;
+@TextStrongAlternate: 'OpenSans-SemiBold', sans-serif;
+@TextTitleFont: 'OpenSans-Light',Arial, sans-serif;
+@TextFontSize: 16px;
+@LineHeight: 1.35;
+
+@BackgroundColor: #006675;
+
+@Padding: 6px;
+@MediumPadding: @Padding * 2;
+@FullPadding: @Padding * 3;
+@MaxFullPadding: @Padding * 4;
+
+@ParagraphFontSize: 1em;
+@ParagraphMargin: 1.5em 0em !important;
+@ParagraphPadding: 0px 0px !important;
+
+@InputPadding: .75em .7em;
+@InputGroupPadding: @InputPadding;
+@InputSelectPadding: .7em .7em;
+
+@InputRadius: 5px;
+@BtnGroupBorderRadius: @InputRadius;
+@BtnGroupButtonPadding: 0.5em 1em;
+@BtnGroupBorderColor: #006675;
+
+@HrColor: #ededed;
+
+@HyperLinkColor: #454545;
+@HyperLinkVisitedColor: @TextColor;
+@HyperLinkDisabledColor: gray;
+
+@TextColor: #454545;
+@NotificationRadius: 0px;
+@NotificationBackgroundColor: #efefef;
+
+@ActiveColor: #177a81;
+@ActiveColorText: #89c506;
+@ActiveBorderColor: #b4d4d6;
+
+@DisabledColor: #ededed;
+@DisabledColorText: @LightGray;
+@PlaceHolderColor: @DisabledColorText;
+
+@InfoColor: #C5E1E5;
+@InfoColorText: @TextColor;
+@InfoBorderColor: #b4d4d6;
+
+@ErrorColor: #ec1807;
+@ErrorColorText: @TextColor;
+@ErrorBorderColor: #DBC2C2;
+@ErrorLabelColor: @TextColor;
+
+@HighLightColor: @TextColor;
+
+@MessageBackgroundColor: inherit;
+@MessageColor: @ErrorColor;
+@MessagePadding: .2em 0em;
+@MessageMargin: 0;
+
+@ToolTipBackgroundColor: #fff;
+@ToolTipTextColor: #454545;
+@ToolTipBorderColor: #dedede;
+@ToolTipMaxWidth: 300px;
+@ToolTipFontSize: .9em;
+@ToolTipPadding: @FullPadding;
+@ToolTipFontFamily: 'OpenSans', serif;
+@ToolTipLineHeight: 1.2em;
+
+@DisabledOpacity: 0.5;
+@DisabledOpacityPerc: percentage(@DisabledOpacity);
+
+@LightGray: gray;
+@DarkGray: #494949;
+@White: #ffffff;
+
+@BorderColor: #D8D8D8;
+
+@BorderColorInput: @BorderColor;
+
+@ButtonColor: transparent;
+@ButtonColorStart: @ButtonColor;
+@ButtonColorEnd: @ButtonColor;
+@ButtonBorderColor: #006675;
+@ButtonColorText: #006675;
+@ButtonRadius: 3px;
+@ButtonFontFamily: @TextFont;
+
+@DialogBackgroundColor: #D8D8D8;
+@DialogTextColor: @TextColor; 
+@DialogBorderRadius: 0px;
+@DialogBorderWidth: 7px;
+@DialogBorderOpacity: .5;
+@DialogBorderColor: #dedede;
+@DialogHeadTextColor: @ActiveColor;
+@DialogHeadSeparatorWidth: 0px;
+@DialogHeadSeparatorColor: @White;
+@DialogHeadFontSize: 1.1em;
+@DialogHeadFontFamily: @TextFont;
+@DialogMaxWidth: 100%;
+
+@ButtonHoverColor: #006675;
+@ButtonHoverColorText: #89c506;
+@ButtonHoverColorStart: @ButtonHoverColor;
+@ButtonHoverColorEnd: @ButtonHoverColor;
+@ButtonHoverBorderColor: @ButtonBorderColor;
+@ButtonSelectColor: @ButtonHoverColor;
+@ButtonSelectColorStart: @ButtonSelectColor;
+@ButtonSelectColorEnd: @ButtonSelectColor;
+
+@MenuTabActiveBackgroundColor: #8ABD27;
+@MenuTabActiveColor: #ffffff;
+@MenuTabSelectedBackgroundColor: #009ea5;
+@MenuTabSelectedColor: #ffffff;
+@MenuTabBackgroundColor: #bfbfc0;
+@MenuTabColor: #ffffff;
+@MenuTabFontSize: 16px;
+
+@MenuTabNumeroActiveBackgroundColor: #75ad09;
+@MenuTabNumeroSelectedBackgroundColor: #008c95;
+@MenuTabNumeroBackgroundColor: #9b9b9b;
+
+@H1TextColor: #006675;
+@H1FontSize: 2.5em;
+@H1TextTransform: uppercase;
+@H1Padding: 0px;
+@H1Margin: @FullPadding 0px;
+@H1LineHeight: 1em;
+@H1FontFamily: 'OpenSans-Light', sans-serif;
+
+@H2TextColor: #454545;
+@H2FontSize: 1.7em;
+@H2TextTransform: uppercase;
+@H2Padding: 0px;
+@H2Margin: .5em 0em;
+@H2LineHeight: 25px;
+@H2FontFamily: 'OpenSans', sans-serif;
+
+@InputBackgroundColor: #ffffff;
+@InputBorderWidth: 1px;
+@InputBorderColor: @BorderColor;
+
+@InputTextColor: #000000;
+@InputFontSize: 16px;
+@InputTextFont: @TextFont;
+@InputHoverColorText: #89c506;
+
+@InputAddOnPadding: @InputPadding;
+@InputAddOnFontSize: @InputFontSize;
+@InputAddOnColor: #007D8F;
+@InputAddOnBorderColor: @InputBorderColor;
+@InputAddOnBackgroundColor: @InputBackgroundColor;
+
+@InputGroupBorderRightWidth: 0px;
+@InputGroupBorderRightStyle: none;
+@InputGroupRadiusRight: 0px;
+
+@SuccessLabelColor: '';
+@WarnedLabelColor: '';
+
+@InputWarnedBackgroundColor: @InputValidBackgroundColor;
+@InputWarnedTextColor: @InputValidTextColor;
+@InputWarnedBorderColor: @InputValidBorderColor;
+@InputWarnedBorderWidth: @InputValidBorderWidth;
+
+@InputValidBackgroundColor: '';
+@InputValidTextColor: '';
+@InputValidBorderColor: @BorderColor;
+@InputValidBorderWidth: 1px;
+
+@InputErrorBackgroundColor: @InputValidBackgroundColor;
+@InputErrorTextColor: @InputValidTextColor;
+@InputErrorBorderColor: @InputValidBorderColor;
+@InputErrorBorderWidth: @InputValidBorderWidth;
+
+@FormLabelFontSize: 0.875em;
+@FormLabelFontWeight: bold;
+@FormLabelAlignement: left;
+@FormLabelTextColor: @InputTextColor;
+@FormLabelPadding: .5em 0em;
+@FormLabelSubFontSize: 1.1em;
+
+@FormRequiredTagPosition: relative;
+@FormRequiredTagMargin: 0px;
+@FormRequiredTagDisplay: initial;
+
+@ButtonFontSize: 1em;
+@ButtonPadding: 0em;
+@ButtonLineHeight: 3em;
+@ButtonTextInsecable: 'true';
+@ButtonFontWeight: normal;
+
+@ButtonCheckedBackground: #006675;
+@ButtonCheckedBackgroundEnd: #006675;
+@ButtonCheckedColor: #fff;
+
+@LegendTextAlignement: left;
+@LegendWidth: 100%;
+@LegendBackgroundColor: #006675;
+@LegendBorder: 0px;
+@LegendTextTransform: uppercase;
+@LegendActiveBackgroundColor: #007D8F;
+@LegendActiveColor: #fff;
+@LegendActiveBorder: 0px;
+@LegendFontSize: 1em;
+@LegendFontFamily: @TextStrongAlternate;
+
+@FieldReadOnlyTextPadding: 0em;
+
+@FieldsetContentColor: @TextColor;
+@FieldsetBackground: #F5F5F5;
+@FieldsetBorder: 0px;
+@FieldsetPadding: 1em;
+
+@FieldMessagesPadding: 0.3em 0em;
+@FieldMessagesMargin: 0em;
+@FieldMessageColor: #fff;
+@WarnedMessageColor: @WarnedLabelColor;
+@FieldMessageFontSize: .9em;
+
+@FormGroupMargin: 0px 0px 10px 0px;
+@FormSpacerMargin: @FormGroupMargin;
+
+@ImgAccordionClosed: '';
+@ImgAccordionOpened: '';
+@ImgAccordionClosedPosition: 4px;
+@ImgAccordionOpenedPosition: 4px;
+@ImgSelectTargetAppearance: 'arrow.png';
+@ImgSelectTargetSizeAppearance: 15px;
+@ImgSelectTargetPaddingAppearance: 20px;
+
+@GlobalTransitionDuration:0.5s;
+@FieldNumericWidth:auto;
+@FieldNumericTextAlign: left;
+@FieldNumericFocusTextAlign: @FieldNumericTextAlign;
+
+@ListBorder: 0px;
+@ListHeadColor: #fff;
+@ListHeadFontWeight: bold;
+@ListHeadBackGroundColor: #009ea5;
+@ListHeadPadding: 10px;
+@ListBodyPadding: 10px 17px;
+@ListBodyColor:  #111;
+@ListBodyBackgroundColor: #d9eeef;
+@ListBodyEvenBackgroundColor: #d9eeef;
+
+@DetailHeadFontWeight: normal;
+@DetailBorder: 0px;
+@DetailHeadColor: #fff;
+@DetailHeadBackGroundColor: #898788;
+@DetailHeadPadding: 6px 10px 10px 10px;
+@DetailBodyPaddingHorizontal: 17px;
+@DetailBodyPaddingVertical: 10px;
+@DetailBodyPadding: @DetailBodyPaddingVertical @DetailBodyPaddingHorizontal;
+@DetailBodyColor:  #111;
+@DetailBodyBackgroundColor: #f3f3f3;
+@DetailBodyEvenBackgroundColor: #f3f3f3;
+
+@UIRadioSwitchMargin: @Padding;
+
+@ImgSrc: './images';
+@CalendarTextColor: @TextColor;
+@ImgIcoHintSrc: '';
+@ImgIcoHintWidth : 15;
+@ImgIcoHintHeight: 15;
+

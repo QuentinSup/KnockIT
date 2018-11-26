@@ -1,0 +1,8 @@
+<!-- ko if: isEditable() -->
+	<div class="ui-textarea">
+		<textarea data-bind="disable: isReadOnly() || isDisabled(), attr: { 'id': uid, 'name': name()?name:null, 'placeholder': !isFocused()?placeholder:null, 'rows': rows }, value: value, valueUpdate: valueUpdateOn(), event: { 'keydown': function(o, e) { return onKeyDownEventHandler(e); }, 'keyup': function(o, e) { return onKeyUpEventHandler(e); }, 'blur': function(o, e) { return onBlurEventHandler(); }, 'focus': function(o, e) { return onFocusEventHandler(); } }, css: { 'ui-input-empty': !value() && !isFocused(), 'ui-input-invalid': !isDisabled() && !isLastInputValid(), 'ui-input-valid': !isDisabled() && isLastInputValid(), 'ui-input-readonly': isReadOnly() || isDisabled(), 'ui-input-visited': hasBeenVisited() }"></textarea>
+	</div>
+<!-- /ko -->
+<!-- ko if: !isEditable() -->
+	<p class="ui-field-textonly" data-bind="text: value() || '&nbsp;'"></p>
+<!-- /ko -->

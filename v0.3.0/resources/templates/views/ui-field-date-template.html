@@ -1,0 +1,16 @@
+<!-- ko if: isEditable() -->
+<div class="input-group ui-field-date">
+	<div data-bind="template: { 'name': 'ui-field-text-template' }"></div>
+	<!-- ko if: isReadOnly() || isDisabled() -->
+		<div class="input-group-addon glyphicon glyphicon-calendar"></div>
+	<!-- /ko -->
+	<!-- ko if: !(isReadOnly() || isDisabled()) -->
+		<div class="input-group-addon glyphicon glyphicon-calendar clickable" data-bind="datepicker: { id: uid, options: { minDate: minDate(), maxDate: maxDate() } }"></div>
+	<!-- /ko -->
+</div>
+<!-- /ko -->
+<!-- ko if: !isEditable() -->
+<div class="ui-field-date ui-field-textonly">
+	<span data-bind="text: formattedValue() || '&nbsp;'"></span>
+</div>
+<!-- /ko -->

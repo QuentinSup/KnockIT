@@ -1,0 +1,8 @@
+<div class="form-label" data-bind="css: { 'with-tooltip': (tooltip.text() != '' && tooltip.show()) }" >
+	<div class="label">
+		<label for="" data-bind="attr: {'for': uid }, html: formattedLabel"></label>
+		<span class="requiredInput" data-bind="visible: showRequiredTag() && isEditable(), html: isRequired() && !isDisabled()?'*':'&nbsp;'"></span>
+		<!-- ko template: { name: 'ui-tooltip', data: tooltip } --><!-- /ko -->
+		<div class="sub" data-bind="html: sub, visible: !!sub()"></div>
+	</div>
+</div>
