@@ -5,9 +5,11 @@ export interface IValidationRule {
 
 export class RegExpValidationRule implements IValidationRule {
     private regExp: RegExp
+    
     constructor(regExp: RegExp) {
 		this.regExp = regExp
     }
+
 	public test(value: any): boolean {
 		if (value && value != "") {
 			if (this.regExp.test(value)) {

@@ -1,5 +1,5 @@
 import { Logger, TLogLevel, ConsoleAppender, RemoteAppender } from '@webkit/helper/logger';
-import { Browser } from '@webkit/helper/browser';
+import { Browser, ISupportedBrowserInfo } from '@webkit/helper/browser';
 import { I18n } from '@webkit/manager/i18n';
 import { SelectField } from '@webkit/form/SelectField';
 import { EventsBinder, IEventsBinder } from '@webkit/core/EventsBinder.class';
@@ -18,69 +18,79 @@ interface IApplicationContext {
     page: string
 }
 
-interface IApplication extends IEventsBinder {
-    title: KnockoutObservable<string>
-    i18n: I18n
-    browser: Browser
-    manager: AppManager
-    configuration: any
-    webkitPath: string
-    webkitLogUri: string
-    basePath: string
-    servicesPath: string
-    useDialog: boolean
-    version: string
-    logLevel: number
-    logConsole: boolean
-    onAjaxSend: Function
-    getFinalFileName(fileName: string): string
-    goto(uri: string): void
-    navigateTo(href: string): void
-    context: IApplicationContext
-    isReady: KnockoutObservable<boolean>
-    ready(fn: Function, context?: any): void
-    init(configuration?: any): void
-    mailto(data: any): void
-    postRedirect(url: string, data_post: any, target?: string, data_get?: any): void
-    dialog(title: string, text: string, buttons?: any, callback?: Function, opts?: any): any
-    alert(title: string, text: string, callbackAlert?: Function, opts?: any): any
-    confirm(title: string, text: string, callbackOk?: Function, callbackCancel?: Function, opts?: any): any
+interface IApplicationConfigurationPluginCookieBarOptions {
+    message?: string
+    acceptText?: string
+    declineText?: string
+    acceptButton?: boolean
+    zindex?: number
+    fixed?: boolean
+    bottom?: boolean
+    domain?: string
+    forceShow?: boolean
 }
+
+interface IApplicationConfigurationPluginCookieBar {
+    enabled?: boolean
+    options?: IApplicationConfigurationPluginCookieBarOptions
+}
+
+interface IApplicationConfigurationPlugins {
+    cookieBar: IApplicationConfigurationPluginCookieBar
+}
+
+interface IApplicationConfigurationScrollDetection {
+    enabled?: boolean
+    owner?: string
+    timeout?: number
+}
+
+interface IApplicationConfiguration {
+    basePath?: string
+    context?: IApplicationContext
+    logLevel?: number
+    logConsole?: boolean
+    remoteLogUri?: string
+    version?: string
+    plugins?: IApplicationConfigurationPlugins
+    scrollDetection?: IApplicationConfigurationScrollDetection
+    httpSafeMethods?: boolean
+    jetonCSRF?: string
+    browsers?: any
+    useNativeDialogSelect?: boolean
+}
+
 
 export class Application extends EventsBinder {
 
     public title: KnockoutObservable<string> = ko.observable<string>();
     public isReady: KnockoutObservable<boolean> = ko.observable<boolean>(false);
-    public version: string = null;
     public manager: AppManager = new AppManager();
     public useDialog: boolean = false;
     public servicesPath: string = "";
-    public basePath: string = "";
-    public webkitPath: string = "";
-    public webkitLogUri: string = "";
     public i18n: I18n
     public browser: Browser
-    public context: IApplicationContext = <any>{};
-    public configuration: any = {};
+    public configuration: IApplicationConfiguration = null;
     public onAjaxSend: Function = null;
 
-    constructor() {
+    constructor(lang: string = "en") {
         super();
 
         window.app = this;
 
         let location: any = window.location;
         this.servicesPath = location.protocol + "//" + location.host + "/";
-        this.webkitPath = this.servicesPath;
         this.browser = new Browser();
+        this.i18n = <I18n>this.manager.register('i18n', new I18n(lang));
+    }
 
-        this.i18n = <I18n>this.manager.register('i18n', new I18n(browserLocaleInfos["Locales"]));
-
+    public getVersion(): string {
+        return this.configuration.version;
     }
 
     public getFinalFileName(fileName: string): string {
-        if (this.version) {
-            fileName += (fileName.indexOf('?') == -1 ? '?' : '&') + '_v=' + encodeURIComponent(this.version)
+        if (this.getVersion()) {
+            fileName += (fileName.indexOf('?') == -1 ? '?' : '&') + '_v=' + encodeURIComponent(this.getVersion())
         }
         return fileName
     }
@@ -98,36 +108,36 @@ export class Application extends EventsBinder {
 
     /* Redirige l'internaute vers une url en méthode POST */
     public postRedirect(url: string, data_post: any, target: string = "_blank", data_get: any = null) {
-        let idForm_: string = "kopostform";
-        let urlDataPrefix_: string = "";
+        let idForm: string = "kopostform";
+        let urlDataPrefix: string = "";
 
         if (!url) return;
 
         if (url.indexOf("?") == -1) {
-            urlDataPrefix_ = "?";
+            urlDataPrefix = "?";
         }
 
         $.each(data_get || {}, function(k: string, v: string) {
-            url += urlDataPrefix_ + encodeURIComponent(k) + "=" + encodeURIComponent(v);
-            urlDataPrefix_ = "&";
+            url += urlDataPrefix + encodeURIComponent(k) + "=" + encodeURIComponent(v);
+            urlDataPrefix = "&";
         });
 
-        let sDataForm_ = "";
+        let sDataForm: string = "";
 
         $.each(data_post || {}, function(k: string, v: string) {
-            sDataForm_ += "<input type='hidden' name='" + k + "' value='" + v + "'>";
+            sDataForm += "<input type='hidden' name='" + k + "' value='" + v + "'>";
         });
 
-        let $form: JQuery = $("#" + idForm_);
+        let $form: JQuery = $("#" + idForm);
 
         if ($form.length > 0) {
             $form.attr("action", url);
-            $form.html(sDataForm_);
+            $form.html(sDataForm);
         } else {
-            $("body").append("<form id='" + idForm_ + "' action='" + url + "' method='POST' target='" + target + "'>" + sDataForm_ + "</form>");
+            $("body").append("<form id='" + idForm + "' action='" + url + "' method='POST' target='" + target + "'>" + sDataForm + "</form>");
         }
 
-        $("#" + idForm_).submit();
+        $("#" + idForm).submit();
 
     }
 
@@ -169,27 +179,27 @@ export class Application extends EventsBinder {
      */
     public showCookieBar(options?: any): void {
 
-        let opts_: any = {
+        let opts: IApplicationConfigurationPluginCookieBarOptions = {
             message: this.i18n.getString('app.plugins.cookieBar.message'),
             acceptText: this.i18n.getString('app.plugins.cookieBar.acceptText'),
             declineText: this.i18n.getString('app.plugins.cookieBar.declineText'),
             acceptButton: true,
-            zindex: '9999999',
+            zindex: 9999999,
             fixed: true,
             bottom: true,
             domain: this.servicesPath,
             forceShow: true
         };
 
-        if (this.configuration && this.configuration.plugins && this.configuration.cookieBar && typeof (this.configuration.plugins.cookieBar.options) == 'object') {
-            opts_ = $.extend(opts_, this.configuration.plugins.cookieBar.options);
+        if (this.configuration && this.configuration.plugins && typeof (this.configuration.plugins.cookieBar.options) == 'object') {
+            opts = $.extend(opts, this.configuration.plugins.cookieBar.options);
         }
 
         if (typeof (options) == 'object') {
-            opts_ = $.extend(opts_, options);
+            opts = $.extend(opts, options);
         }
 
-        $.cookieBar(opts_);
+        $.cookieBar(opts);
     }
 
 
@@ -243,9 +253,16 @@ export class Application extends EventsBinder {
     
     private initManagers(): void {
         
+        logger.info("Initialize app managers");
+
         let managersId: string[] = [];
         
         $.each(this.manager.getManagers(), (id: string, manager: BaseManager): void => {
+
+            if(logger.isDebugEnabled()) {
+                logger.debug("Initialize manager '" + id + "'");
+            }
+
             managersId.push(id);
             manager.init();
             manager.on('initError', (): void => {
@@ -258,24 +275,28 @@ export class Application extends EventsBinder {
         });
     }
 
-    public init(conf?: any): void {
+    public init(conf?: IApplicationConfiguration): void {
 
-        this.configuration = $.extend(this.configuration, conf || {});
+        this.configuration = $.extend({
+            logConsole: true
+        }, conf || {});
 
-        Logger.getDefaultLogger().level(this.configuration.logLevel || TLogLevel.ERROR);
+        // First, set loggers
+        let logLevel: number = isset(this.configuration.logLevel)?this.configuration.logLevel:TLogLevel.DEBUG;
+        Logger.getDefaultLogger().level(logLevel);
         if (this.configuration.logConsole === true) {
             Logger.getDefaultLogger().addAppender(new ConsoleAppender());
         }
 
-        if(this.webkitLogUri) {
-            let remoteAppender: RemoteAppender = new RemoteAppender(this.servicesPath + this.webkitLogUri + this.context.page);
+        if(this.configuration.remoteLogUri) {
+            let remoteAppender: RemoteAppender = new RemoteAppender(this.servicesPath + this.configuration.remoteLogUri + this.configuration.context.page);
             remoteAppender.level = TLogLevel.ERROR;
             Logger.getDefaultLogger().addAppender(remoteAppender);
         }
 
         this.emit('init');
 
-        logger.info("Initialisation de l'application");
+        logger.info("Initialize app");
         
         Query.defaultOptions.upToDate = true;
 
@@ -299,7 +320,7 @@ export class Application extends EventsBinder {
         if (this.configuration.httpSafeMethods === true) {
             $.ajaxPrefilter((options, originalOptions, jqXHR): void => {
                 if (options.type != 'GET' && options.type != 'POST') {
-                    logger.debug("Remplacement de la méthode '" + options.type + "' par 'POST' dans l'entête X-HTTP-Method-Override");
+                    logger.debug("Replace HTTP method '" + options.type + "' by 'POST' into header X-HTTP-Method-Override");
                     jqXHR.setRequestHeader('X-HTTP-Method-Override', options.type);
                     options.type = 'POST';
                 }
@@ -308,7 +329,7 @@ export class Application extends EventsBinder {
         
         if(this.configuration.jetonCSRF) {
             $.ajaxPrefilter((options, originalOptions, jqXHR): void => {
-                logger.debug("Ajout du jeton CSRF dans l'entête X-CSRF");
+                logger.debug("Add CSRF token into header X-CSRF");
                 jqXHR.setRequestHeader('X-CSRF', this.configuration.jetonCSRF);
             });      
         }
@@ -322,9 +343,9 @@ export class Application extends EventsBinder {
 
         if (this.configuration.plugins && this.configuration.plugins.cookieBar) {
 
-            let enableCookieBar_: boolean = this.configuration.plugins.cookieBar === true || this.configuration.plugins.cookieBar.enabled === true;
+            let enableCookieBar: boolean = this.configuration.plugins.cookieBar === true || this.configuration.plugins.cookieBar.enabled === true;
 
-            if (enableCookieBar_) {
+            if (enableCookieBar) {
 
                 this.ready((): void => {
                     this.showCookieBar({ forceShow: false });
@@ -338,11 +359,11 @@ export class Application extends EventsBinder {
 
         if (this.configuration.scrollDetection) {
             
-            if(this.configuration.scrollDetection.enable === true || !isset(this.configuration.scrollDetection.enable)) {
+            if(this.configuration.scrollDetection.enabled === true || !isset(this.configuration.scrollDetection.enabled)) {
                 this.enableScrollDetection(this.configuration.scrollDetection);
             }
         }
-        
+
         this.initManagers();
 
     }
@@ -354,7 +375,7 @@ export class Application extends EventsBinder {
         SelectField.useNativeDialogSelect(false);
     }
 
-    private enableScrollDetection(params: any): void {
+    private enableScrollDetection(params: IApplicationConfigurationScrollDetection): void {
 
         logger.debug('Scroll detection active');
         
@@ -366,8 +387,8 @@ export class Application extends EventsBinder {
         
         let friseScrollFunction: any = function(e: Event): void {
             
-            let $document = $(document);
-            let $app = $(owner);
+            let $document: JQuery<Document> = $(document);
+            let $app: JQuery = $(owner);
 
             if(!$app.hasClass('scrolling')) {
                 self.emit('scrollstart');
@@ -395,7 +416,7 @@ export class Application extends EventsBinder {
         $(window).on('resize.scrollDetection', friseScrollFunction);
 
         $(document).on('ready.scrollDetection scrollstop.scrollDetection', function() {
-            let $document = $(document);
+            let $document: JQuery<Document> = $(document);
             $(owner).removeClass('scrolling');
         });
 

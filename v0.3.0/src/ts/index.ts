@@ -1,6 +1,6 @@
 /// <reference path="./core/index.ts"/>
 
 declare var app: any;
-declare var browserLocaleInfos: any;
-declare var utils: any;
-declare var regex: any;
+declare var i18n: any;
+declare var i18n_def: any;
+declare var locales_def: any;

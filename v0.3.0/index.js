@@ -48,10 +48,20 @@ Object.values = function (o) {
 Object.findManyBy = function (o, field, value, maxCount) {
     var result = [], id = null;
     for (id in o) {
-        if (o.hasOwnProperty(id) && o[id][field] == value) {
-            result.push(o[id]);
-            if (isset(maxCount) && maxCount >= result.length) {
-                return result;
+        if (o.hasOwnProperty(id)) {
+            var prop = o[id][field];
+            var propValue = void 0;
+            if (typeof (prop) == 'function') {
+                propValue = o[id][field]();
+            }
+            else {
+                propValue = prop;
+            }
+            if (propValue == value) {
+                result.push(o[id]);
+                if (isset(maxCount) && maxCount >= result.length) {
+                    return result;
+                }
             }
         }
     }
@@ -721,551 +731,536 @@ function count_down(start, fn, delay) {
         return;
     };
 })(ko);
-define("modules/classes/Locale.class", ["require", "exports"], function (require, exports) {
-    "use strict";
-    exports.__esModule = true;
-    var Locale = /** @class */ (function () {
-        function Locale(language, isoCode) {
-            this.language = language;
-            this.isoCode = isoCode;
-        }
-        Locale.prototype.getLang = function () {
-            return this.language;
-        };
-        Locale.prototype.getIsoCode = function () {
-            return this.isoCode;
-        };
-        return Locale;
-    }());
-    exports.Locale = Locale;
-});
-define("core/namespaces/utils", ["require", "exports"], function (require, exports) {
-    "use strict";
-    exports.__esModule = true;
-    var utils;
-    (function (utils) {
-        var _flattenObject = function (result, object, prefix) {
-            for (var prop in object) {
-                var key = prop;
-                var value = object[key];
-                if (typeof value == "object") {
+var utils;
+(function (utils) {
+    var _flattenObject = function (result, object, prefix) {
+        for (var prop in object) {
+            var key = prop;
+            var value = object[key];
+            if (typeof value == "object") {
+                // Continue with sub object
+                _flattenObject(result, value, key + ".");
+            }
+            else if ((typeof value == "string") && value.indexOf("{") == 0) {
+                // Try to parse the string as an JSON string
+                try {
+                    value = JSON.parse(value);
                     // Continue with sub object
                     _flattenObject(result, value, key + ".");
                 }
-                else if ((typeof value == "string") && value.indexOf("{") == 0) {
-                    // Try to parse the string as an JSON string
-                    try {
-                        value = JSON.parse(value);
-                        // Continue with sub object
-                        _flattenObject(result, value, key + ".");
-                    }
-                    catch (e) {
-                        // Can not parse object, add the value as it
-                        result[prefix + key] = value;
-                    }
-                }
-                else {
-                    // Add the value
+                catch (e) {
+                    // Can not parse object, add the value as it
                     result[prefix + key] = value;
                 }
             }
-        };
-        /**
-         * Clones the given instance.
-         * @param {*} srcInstance An instance.
-         * @return {*} The clone of the given instance.
-         */
-        function clone(srcInstance) {
-            if (typeof (srcInstance) != 'object' || srcInstance == null) {
-                return srcInstance;
+            else {
+                // Add the value
+                result[prefix + key] = value;
             }
-            var newInstance = new srcInstance.constructor();
-            for (var i in srcInstance) {
-                newInstance[i] = clone(srcInstance[i]);
-            }
-            return newInstance;
         }
-        utils.clone = clone;
-        function getElementText(element) {
-            if (!element)
-                return null;
-            var text = element.text;
-            if (text !== undefined) {
-                return text;
-            }
-            text = element.textContent;
-            if (text !== undefined) {
-                return text;
-            }
-            return element.nodeValue;
+    };
+    /**
+     * Clones the given instance.
+     * @param {*} srcInstance An instance.
+     * @return {*} The clone of the given instance.
+     */
+    function clone(srcInstance) {
+        if (typeof (srcInstance) != 'object' || srcInstance == null) {
+            return srcInstance;
         }
-        utils.getElementText = getElementText;
-        function formatEmail(email) {
-            var t = email.split('@');
-            return t[0].substr(0, 64).replace(/[^.a-zA-Z0-9!#$%&'*_+-/=?^`{|}~]/g, '_') + (t[1] ? '@' + t[1] : '');
+        var newInstance = new srcInstance.constructor();
+        for (var i in srcInstance) {
+            newInstance[i] = clone(srcInstance[i]);
         }
-        utils.formatEmail = formatEmail;
-        /**
-         * Format a string by replacing argument expressed inside curly brackets with given arguments
-         * Search occurences of a pattern of the form ${XXXX} or $XXX with the dolar sign not escaped
-         * @return a formatted string
-         */
-        function formatString(str, parameters) {
-            var formatted, match, re, remaining, needToTraduce;
-            formatted = str;
-            needToTraduce = false;
-            remaining = str;
-            re = new RegExp("\\$(?:\\{(\\!{0,1}(\\w|\\.)+)\\}|(\\!{0,1}(\\w|\\.)+))", "");
+        return newInstance;
+    }
+    utils.clone = clone;
+    function getElementText(element) {
+        if (!element)
+            return null;
+        var text = element.text;
+        if (text !== undefined) {
+            return text;
+        }
+        text = element.textContent;
+        if (text !== undefined) {
+            return text;
+        }
+        return element.nodeValue;
+    }
+    utils.getElementText = getElementText;
+    function formatEmail(email) {
+        var t = email.split('@');
+        return t[0].substr(0, 64).replace(/[^.a-zA-Z0-9!#$%&'*_+-/=?^`{|}~]/g, '_') + (t[1] ? '@' + t[1] : '');
+    }
+    utils.formatEmail = formatEmail;
+    /**
+     * Format a string by replacing argument expressed inside curly brackets with given arguments
+     * Search occurences of a pattern of the form ${XXXX} or $XXX with the dolar sign not escaped
+     * @return a formatted string
+     */
+    function formatString(str, parameters) {
+        var formatted, match, re, remaining, needToTraduce;
+        formatted = str;
+        needToTraduce = false;
+        remaining = str;
+        re = new RegExp("\\$(?:\\{(\\!{0,1}(\\w|\\.)+)\\}|(\\!{0,1}(\\w|\\.)+))", "");
+        match = re.exec(remaining);
+        while (match) {
+            // Append the beginning of the match
+            var param = match[1];
+            if (param && param.startsWith('!')) {
+                param = param.substring(1);
+                needToTraduce = true;
+            }
+            // Search param the parameters
+            var value = ko.unwrap(parameters[param]);
+            if (isset(value)) {
+                if (needToTraduce) {
+                    value = app.i18n.getString(value, value);
+                }
+                // Substitute parameter
+                formatted = formatted.replace(match[0], value);
+            }
+            // 
+            remaining = remaining.substring(match[0].length);
+            // find next match
             match = re.exec(remaining);
-            while (match) {
-                // Append the beginning of the match
-                var param = match[1];
-                if (param && param.startsWith('!')) {
-                    param = param.substring(1);
-                    needToTraduce = true;
-                }
-                // Search param the parameters
-                var value = ko.unwrap(parameters[param]);
-                if (isset(value)) {
-                    if (needToTraduce) {
-                        value = app.i18n.getString(value, value);
-                    }
-                    // Substitute parameter
-                    formatted = formatted.replace(match[0], value);
-                }
-                // 
-                remaining = remaining.substring(match[0].length);
-                // find next match
-                match = re.exec(remaining);
-            }
-            return formatted;
         }
-        utils.formatString = formatString;
-        // Flatten an object. e.g. {"a" :"1", "b": {"c" : "2"} becomes {"a": "1", "b.c" : "2"}
-        function flattenObject(object) {
-            var result = {};
-            _flattenObject(result, object, "");
-            return result;
-        }
-        utils.flattenObject = flattenObject;
-        /**
-         * Parse a given log message
-         * log message MUST respect the following format
-         *
-         * 			var log_message = "log_id {param1:value1}{param2:value2}{param3:value3}"
-         *
-         * @param a log message as described above
-         *
-         * @return an object containing the log id and another object for the parameters
-         * that contains for each param id, its associated value.
-         */
-        function parseLogMessage(logMessage) {
-            var obj = {
-                id: null,
-                parameters: {}
-            };
-            var parameters = {};
-            var indexFirstBraket;
-            var indexSecondBraket;
-            // Get the position of the first parameters if it exists
-            indexFirstBraket = logMessage.indexOf("{");
-            indexSecondBraket = logMessage.indexOf("}");
-            if (indexFirstBraket > 0 && indexSecondBraket > 0 && indexFirstBraket < indexSecondBraket) {
-                // Get the log id
-                obj.id = logMessage.substr(0, indexFirstBraket).trim();
-                // Then, retrieve the parameters
-                var current = logMessage;
-                while ((indexFirstBraket >= 0) && (indexSecondBraket > 0) && (indexFirstBraket < indexSecondBraket)) {
-                    // Is there any parameters between curly brackets ?
-                    if (indexSecondBraket - indexFirstBraket > 1) {
-                        // Yes, there is a parameter.... extract it !
-                        var parameter = current.substr(indexFirstBraket + 1, (indexSecondBraket - indexFirstBraket - 1)).trim();
-                        var temp = parameter.split(":", 2);
-                        parameters[temp[0]] = temp[1];
-                    }
-                    // Test if we are at the end of the string
-                    if (indexSecondBraket == current.length) {
-                        break;
-                    }
-                    else {
-                        // We are not at the end of the string, so we can continue !
-                        current = current.substr(indexSecondBraket + 1);
-                        indexFirstBraket = current.indexOf("{");
-                        indexSecondBraket = current.indexOf("}");
-                    }
+        return formatted;
+    }
+    utils.formatString = formatString;
+    // Flatten an object. e.g. {"a" :"1", "b": {"c" : "2"} becomes {"a": "1", "b.c" : "2"}
+    function flattenObject(object) {
+        var result = {};
+        _flattenObject(result, object, "");
+        return result;
+    }
+    utils.flattenObject = flattenObject;
+    /**
+     * Parse a given log message
+     * log message MUST respect the following format
+     *
+     * 			let log_message = "log_id {param1:value1}{param2:value2}{param3:value3}"
+     *
+     * @param a log message as described above
+     *
+     * @return an object containing the log id and another object for the parameters
+     * that contains for each param id, its associated value.
+     */
+    function parseLogMessage(logMessage) {
+        var obj = {
+            id: null,
+            parameters: {}
+        };
+        var parameters = {};
+        var indexFirstBraket;
+        var indexSecondBraket;
+        // Get the position of the first parameters if it exists
+        indexFirstBraket = logMessage.indexOf("{");
+        indexSecondBraket = logMessage.indexOf("}");
+        if (indexFirstBraket > 0 && indexSecondBraket > 0 && indexFirstBraket < indexSecondBraket) {
+            // Get the log id
+            obj.id = logMessage.substr(0, indexFirstBraket).trim();
+            // Then, retrieve the parameters
+            var current = logMessage;
+            while ((indexFirstBraket >= 0) && (indexSecondBraket > 0) && (indexFirstBraket < indexSecondBraket)) {
+                // Is there any parameters between curly brackets ?
+                if (indexSecondBraket - indexFirstBraket > 1) {
+                    // Yes, there is a parameter.... extract it !
+                    var parameter = current.substr(indexFirstBraket + 1, (indexSecondBraket - indexFirstBraket - 1)).trim();
+                    var temp = parameter.split(":", 2);
+                    parameters[temp[0]] = temp[1];
                 }
-            }
-            else {
-                obj.id = logMessage.trim();
-            }
-            obj.parameters = parameters;
-            return obj;
-        }
-        utils.parseLogMessage = parseLogMessage;
-        /**
-         * Parse a given log message which has the following syntax :
-         * {"errorCode":0,"errorMessage":"<ID><{P}>*"}
-         * <ID> should be a valid message id present in the internationalization excel file.
-         * <{P}>* is the paramters which are not translated.
-         *
-         * example : {"errorCode":0,"errorMessage":"blabla{parameter1}{parameter2}"}
-         *
-         * @param a log message
-         * @return the internationalized string constructed from the id and the parameters contained
-         * in the logMessage string.
-         */
-        function getInternationalizedLogMessage(logMessage) {
-            var message;
-            var jsonObject;
-            try {
-                jsonObject = JSON.parse(logMessage);
-                var log = parseLogMessage(jsonObject.errorMessage);
-                var translated_message = app.i18n.getString(log.id);
-                if (translated_message) {
-                    message = formatString(translated_message, log.parameters);
-                }
-                else {
-                    message = log.id;
-                }
-            }
-            catch (e) {
-                message = e.message;
-            }
-            return message;
-        }
-        utils.getInternationalizedLogMessage = getInternationalizedLogMessage;
-        function getParamValue(param, url) {
-            var u = url == undefined ? document.location.href : url;
-            var reg = new RegExp('(\\?|&|^)' + param + '=(.*?)(&|$)');
-            var matches = u.match(reg);
-            if (matches) {
-                return matches[2] != undefined ? decodeURIComponent(matches[2]).replace(/\+/g, ' ') : '';
-            }
-            return '';
-        }
-        utils.getParamValue = getParamValue;
-        function formatMonthToYear(PE_nbMonth, strict) {
-            if (strict === void 0) { strict = true; }
-            var sRetour_ = "";
-            var iNbMois12_ = parseInt("" + (PE_nbMonth / 12));
-            if (iNbMois12_ <= 1) {
-                sRetour_ = iNbMois12_ + " " + app.i18n.getString('year');
-            }
-            else {
-                sRetour_ = iNbMois12_ + " " + app.i18n.getString('years');
-            }
-            if (!strict && PE_nbMonth % 12 != 0) {
-                sRetour_ += " " + app.i18n.getString('and') + " " + (PE_nbMonth % 12) + " " + app.i18n.getString('month');
-            }
-            return sRetour_;
-        }
-        utils.formatMonthToYear = formatMonthToYear;
-        /**
-         * format dates
-         * @param dateFormat the date format defines in local index
-         * @return a formatted string date in the "dateFormat" format
-         */
-        function formatDate(d, dateFormat, hourFormat, utc) {
-            if (hourFormat === void 0) { hourFormat = ""; }
-            if (utc === void 0) { utc = false; }
-            if (!d)
-                return null;
-            if (typeof (d) != "object") {
-                d = new Date(d);
-            }
-            var get2digits = function (num) {
-                return num.toString().lPad('0', 2);
-            };
-            var getLiteralMonth = function (monthNumber) {
-                var months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
-                return app.i18n.getString(months[monthNumber]);
-            };
-            var getLiteralDay = function (dayNumber) {
-                var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-                return app.i18n.getString(days[dayNumber]);
-            };
-            var iFullYear_;
-            var iMonth_;
-            var iDay_;
-            var iDate_;
-            var iHours_;
-            var iMinutes_;
-            var iSeconds_;
-            if (utc) {
-                iFullYear_ = d.getUTCFullYear();
-                iMonth_ = d.getUTCMonth();
-                iDate_ = d.getUTCDate();
-                iDay_ = d.getUTCDay();
-                iHours_ = d.getUTCHours();
-                iMinutes_ = d.getUTCMinutes();
-                iSeconds_ = d.getUTCSeconds();
-            }
-            else {
-                iFullYear_ = d.getFullYear();
-                iMonth_ = d.getMonth();
-                iDate_ = d.getDate();
-                iDay_ = d.getDay();
-                iHours_ = d.getHours();
-                iMinutes_ = d.getMinutes();
-                iSeconds_ = d.getSeconds();
-            }
-            dateFormat = dateFormat.toLowerCase();
-            dateFormat = dateFormat.replace('yyyy', iFullYear_.toString());
-            var monthType = null, dayType = null;
-            if (dateFormat.indexOf('month') != -1) {
-                monthType = 'month';
-                dateFormat = dateFormat.replace('month', '{0}');
-            }
-            else if (dateFormat.indexOf('mm') != -1) {
-                monthType = 'mm';
-                dateFormat = dateFormat.replace('mm', '{0}');
-            }
-            else if (dateFormat.indexOf('m') != -1) {
-                monthType = 'm';
-                dateFormat = dateFormat.replace('m', '{0}');
-            }
-            if (dateFormat.indexOf('day') != -1) {
-                dayType = 'day';
-                dateFormat = dateFormat.replace('day', '{1}');
-            }
-            else if (dateFormat.indexOf('dd') != -1) {
-                dayType = 'dd';
-                dateFormat = dateFormat.replace('dd', '{1}');
-            }
-            else if (dateFormat.indexOf('d') != -1) {
-                dayType = 'd';
-                dateFormat = dateFormat.replace('d', '{1}');
-            }
-            if (monthType == 'month') {
-                dateFormat = dateFormat.replace('{0}', getLiteralMonth(iMonth_));
-            }
-            else if (monthType == 'mm') {
-                dateFormat = dateFormat.replace('{0}', get2digits(iMonth_ + 1));
-            }
-            else if (monthType == 'm') {
-                dateFormat = dateFormat.replace('{0}', String(iMonth_ + 1));
-            }
-            if (dayType == 'day') {
-                dateFormat = dateFormat.replace('{1}', getLiteralDay(iDay_) + ' ' + iDate_.toString());
-            }
-            else if (dayType == 'dd') {
-                dateFormat = dateFormat.replace('{1}', get2digits(iDate_));
-            }
-            else if (dayType == 'd') {
-                dateFormat = dateFormat.replace('{1}', String(iDate_));
-            }
-            if (dateFormat.indexOf('hh') > -1) {
-                dateFormat = dateFormat.replace('hh', get2digits(iHours_));
-            }
-            if (dateFormat.indexOf('mm') > -1) {
-                dateFormat = dateFormat.replace('mm', get2digits(iMinutes_));
-            }
-            if (dateFormat.indexOf('ss') > -1) {
-                dateFormat = dateFormat.replace('ss', get2digits(iSeconds_));
-            }
-            var hours = '';
-            if (hourFormat.toLowerCase() == 'h12') {
-                var suffix = ' AM';
-                hours = get2digits(iHours_);
-                if (iHours_ >= 12) {
-                    suffix = ' PM';
-                    if (iHours_ != 12) {
-                        hours = get2digits(iHours_ - 12);
-                    }
-                }
-                else {
-                    if (hours == '00') {
-                        hours = '12';
-                    }
-                }
-                hours += ':' + get2digits(iMinutes_) + ':' + get2digits(iSeconds_) + suffix;
-            }
-            else if (hourFormat.toLowerCase() == 'h24') {
-                hours = get2digits(iHours_) + ':' + get2digits(iMinutes_) + ':' + get2digits(iSeconds_);
-            }
-            if (hours) {
-                return dateFormat + ' ' + hours;
-            }
-            else {
-                return dateFormat;
-            }
-        }
-        utils.formatDate = formatDate;
-        /**
-        * Traite et converti une chaine. La valeur peut être modifiée pour correspondre à une valeur date.
-        * Renvoi un objet Calendar contenant la chaine traitée.
-        *
-        * @param string	La chaine
-        * @param locale 	La locale utilisée
-        */
-        function parseLiteralDate(str, locale) {
-            if (!str)
-                return null;
-            var sValue_ = str;
-            var iJour_ = 0;
-            var iMois_ = 1;
-            var iAnnee_ = 2;
-            var iMarge_ = 50;
-            var tsDate_ = sValue_.split(locale.dateSeparator);
-            if (tsDate_.length == 1) {
-                if ([4, 6, 8].contains(sValue_.length)) {
-                    tsDate_ = [, ,];
-                    var sPosDay_ = locale.dateLiteralFormat.indexOf('D');
-                    var sPosMonth_ = locale.dateLiteralFormat.indexOf('M');
-                    var sPosYear_ = locale.dateLiteralFormat.indexOf('Y');
-                    var sLengthYear_ = Math.abs(8 - sValue_.length - 4);
-                    if (sLengthYear_ > 0) {
-                        if (sPosYear_ == 0) {
-                            tsDate_[iAnnee_] = sValue_.substr(0, sLengthYear_);
-                        }
-                        else if (sPosYear_ == 1) {
-                            tsDate_[iAnnee_] = sValue_.substr(2, sLengthYear_);
-                        }
-                        else {
-                            tsDate_[iAnnee_] = sValue_.substr(4, sLengthYear_);
-                        }
-                    }
-                    if (sPosDay_ == 0) {
-                        tsDate_[iJour_] = sValue_.substr(0, 2);
-                    }
-                    else if (sPosDay_ == 1) {
-                        if (sPosYear_ == 0) {
-                            tsDate_[iJour_] = sValue_.substr(sLengthYear_, 2);
-                        }
-                        else {
-                            tsDate_[iJour_] = sValue_.substr(2, 2);
-                        }
-                    }
-                    else {
-                        tsDate_[iJour_] = sValue_.substr(2 + sLengthYear_, 2);
-                    }
-                    if (sPosMonth_ == 0) {
-                        tsDate_[iMois_] = sValue_.substr(0, 2);
-                    }
-                    else if (sPosMonth_ == 1) {
-                        if (sPosYear_ == 0) {
-                            tsDate_[iMois_] = sValue_.substr(sLengthYear_, 2);
-                        }
-                        else {
-                            tsDate_[iMois_] = sValue_.substr(2, 2);
-                        }
-                    }
-                    else {
-                        tsDate_[iMois_] = sValue_.substr(2 + sLengthYear_, 2);
-                    }
-                }
-            }
-            else if (tsDate_.length == 2) {
-                return null;
-            }
-            var sJour_;
-            var sMois_;
-            var sAnnee_;
-            switch (tsDate_.length) {
-                case 3:
-                    sJour_ = tsDate_[iJour_];
-                    sMois_ = tsDate_[iMois_];
-                    sAnnee_ = tsDate_[iAnnee_];
+                // Test if we are at the end of the string
+                if (indexSecondBraket == current.length) {
                     break;
+                }
+                else {
+                    // We are not at the end of the string, so we can continue !
+                    current = current.substr(indexSecondBraket + 1);
+                    indexFirstBraket = current.indexOf("{");
+                    indexSecondBraket = current.indexOf("}");
+                }
+            }
+        }
+        else {
+            obj.id = logMessage.trim();
+        }
+        obj.parameters = parameters;
+        return obj;
+    }
+    utils.parseLogMessage = parseLogMessage;
+    /**
+     * Parse a given log message which has the following syntax :
+     * {"errorCode":0,"errorMessage":"<ID><{P}>*"}
+     * <ID> should be a valid message id present in the internationalization excel file.
+     * <{P}>* is the paramters which are not translated.
+     *
+     * example : {"errorCode":0,"errorMessage":"blabla{parameter1}{parameter2}"}
+     *
+     * @param a log message
+     * @return the internationalized string constructed from the id and the parameters contained
+     * in the logMessage string.
+     */
+    function getInternationalizedLogMessage(logMessage) {
+        var message;
+        var jsonObject;
+        try {
+            jsonObject = JSON.parse(logMessage);
+            var log = parseLogMessage(jsonObject.errorMessage);
+            var translated_message = app.i18n.getString(log.id);
+            if (translated_message) {
+                message = formatString(translated_message, log.parameters);
+            }
+            else {
+                message = log.id;
+            }
+        }
+        catch (e) {
+            message = e.message;
+        }
+        return message;
+    }
+    utils.getInternationalizedLogMessage = getInternationalizedLogMessage;
+    function getParamValue(param, url) {
+        var u = url == undefined ? document.location.href : url;
+        var reg = new RegExp('(\\?|&|^)' + param + '=(.*?)(&|$)');
+        var matches = u.match(reg);
+        if (matches) {
+            return matches[2] != undefined ? decodeURIComponent(matches[2]).replace(/\+/g, ' ') : '';
+        }
+        return '';
+    }
+    utils.getParamValue = getParamValue;
+    function formatMonthToYear(month, strict) {
+        if (strict === void 0) { strict = true; }
+        var sRetour_ = "";
+        var iNbMois12_ = parseInt("" + (month / 12));
+        if (iNbMois12_ <= 1) {
+            sRetour_ = iNbMois12_ + " " + app.i18n.getString('year');
+        }
+        else {
+            sRetour_ = iNbMois12_ + " " + app.i18n.getString('years');
+        }
+        if (!strict && month % 12 != 0) {
+            sRetour_ += " " + app.i18n.getString('and') + " " + (month % 12) + " " + app.i18n.getString('month');
+        }
+        return sRetour_;
+    }
+    utils.formatMonthToYear = formatMonthToYear;
+    /**
+     * format dates
+     * @param dateFormat the date format defines in local index
+     * @return a formatted string date in the "dateFormat" format
+     */
+    function formatDate(d, dateFormat, hourFormat, utc) {
+        if (hourFormat === void 0) { hourFormat = ""; }
+        if (utc === void 0) { utc = false; }
+        if (!d)
+            return null;
+        if (typeof (d) != "object") {
+            d = new Date(d);
+        }
+        var get2digits = function (num) {
+            return num.toString().lPad('0', 2);
+        };
+        var getLiteralMonth = function (monthNumber) {
+            var months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+            return app.i18n.getString(months[monthNumber]);
+        };
+        var getLiteralDay = function (dayNumber) {
+            var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            return app.i18n.getString(days[dayNumber]);
+        };
+        var iFullYear_;
+        var iMonth_;
+        var iDay_;
+        var iDate_;
+        var iHours_;
+        var iMinutes_;
+        var iSeconds_;
+        var iMilliseconds_;
+        if (utc) {
+            iFullYear_ = d.getUTCFullYear();
+            iMonth_ = d.getUTCMonth();
+            iDate_ = d.getUTCDate();
+            iDay_ = d.getUTCDay();
+            iHours_ = d.getUTCHours();
+            iMinutes_ = d.getUTCMinutes();
+            iSeconds_ = d.getUTCSeconds();
+            iMilliseconds_ = d.getUTCMilliseconds();
+        }
+        else {
+            iFullYear_ = d.getFullYear();
+            iMonth_ = d.getMonth();
+            iDate_ = d.getDate();
+            iDay_ = d.getDay();
+            iHours_ = d.getHours();
+            iMinutes_ = d.getMinutes();
+            iSeconds_ = d.getSeconds();
+            iMilliseconds_ = d.getMilliseconds();
+        }
+        dateFormat = dateFormat.toLowerCase();
+        dateFormat = dateFormat.replace('yyyy', iFullYear_.toString());
+        var monthType = null, dayType = null;
+        if (dateFormat.indexOf('month') != -1) {
+            monthType = 'month';
+            dateFormat = dateFormat.replace('month', '{0}');
+        }
+        else if (dateFormat.indexOf('mm') != -1) {
+            monthType = 'mm';
+            dateFormat = dateFormat.replace('mm', '{0}');
+        }
+        else if (dateFormat.indexOf('m') != -1) {
+            monthType = 'm';
+            dateFormat = dateFormat.replace('m', '{0}');
+        }
+        if (dateFormat.indexOf('day') != -1) {
+            dayType = 'day';
+            dateFormat = dateFormat.replace('day', '{1}');
+        }
+        else if (dateFormat.indexOf('dd') != -1) {
+            dayType = 'dd';
+            dateFormat = dateFormat.replace('dd', '{1}');
+        }
+        else if (dateFormat.indexOf('d') != -1) {
+            dayType = 'd';
+            dateFormat = dateFormat.replace('d', '{1}');
+        }
+        if (monthType == 'month') {
+            dateFormat = dateFormat.replace('{0}', getLiteralMonth(iMonth_));
+        }
+        else if (monthType == 'mm') {
+            dateFormat = dateFormat.replace('{0}', get2digits(iMonth_ + 1));
+        }
+        else if (monthType == 'm') {
+            dateFormat = dateFormat.replace('{0}', String(iMonth_ + 1));
+        }
+        if (dayType == 'day') {
+            dateFormat = dateFormat.replace('{1}', getLiteralDay(iDay_) + ' ' + iDate_.toString());
+        }
+        else if (dayType == 'dd') {
+            dateFormat = dateFormat.replace('{1}', get2digits(iDate_));
+        }
+        else if (dayType == 'd') {
+            dateFormat = dateFormat.replace('{1}', String(iDate_));
+        }
+        var hours = '';
+        if (hourFormat.toLowerCase() == 'h12') {
+            var suffix = ' AM';
+            hours = get2digits(iHours_);
+            if (iHours_ >= 12) {
+                suffix = ' PM';
+                if (iHours_ != 12) {
+                    hours = get2digits(iHours_ - 12);
+                }
+            }
+            else {
+                if (hours == '00') {
+                    hours = '12';
+                }
+            }
+            hours += ':' + get2digits(iMinutes_) + ':' + get2digits(iSeconds_) + suffix;
+        }
+        else if (hourFormat.toLowerCase() == 'h24') {
+            hours = get2digits(iHours_) + ':' + get2digits(iMinutes_) + ':' + get2digits(iSeconds_);
+        }
+        else {
+            if (hourFormat.indexOf('hh') > -1) {
+                hourFormat = hourFormat.replace('hh', get2digits(iHours_));
+            }
+            if (hourFormat.indexOf('mm') > -1) {
+                hourFormat = hourFormat.replace('mm', get2digits(iMinutes_));
+            }
+            if (hourFormat.indexOf('ss') > -1) {
+                hourFormat = hourFormat.replace('ss', get2digits(iSeconds_));
+            }
+            if (hourFormat.indexOf('t') > -1) {
+                hourFormat = hourFormat.replace('t', String(iMilliseconds_));
+            }
+            hours = hourFormat;
+        }
+        if (hours) {
+            return dateFormat + ' ' + hours;
+        }
+        return dateFormat;
+    }
+    utils.formatDate = formatDate;
+    /**
+    * Traite et converti une chaine. La valeur peut être modifiée pour correspondre à une valeur date.
+    * Renvoi un objet Calendar contenant la chaine traitée.
+    *
+    * @param string	La chaine
+    * @param locale 	La locale utilisée
+    */
+    function parseLiteralDate(str, locale) {
+        if (!str)
+            return null;
+        var sValue_ = str;
+        var iJour_ = 0;
+        var iMois_ = 1;
+        var iAnnee_ = 2;
+        var iMarge_ = 50;
+        var tsDate_ = sValue_.split(locale.dateSeparator);
+        if (tsDate_.length == 1) {
+            if ([4, 6, 8].contains(sValue_.length)) {
+                tsDate_ = [, ,];
+                var sPosDay_ = locale.dateLiteralFormat.indexOf('D');
+                var sPosMonth_ = locale.dateLiteralFormat.indexOf('M');
+                var sPosYear_ = locale.dateLiteralFormat.indexOf('Y');
+                var sLengthYear_ = Math.abs(8 - sValue_.length - 4);
+                if (sLengthYear_ > 0) {
+                    if (sPosYear_ == 0) {
+                        tsDate_[iAnnee_] = sValue_.substr(0, sLengthYear_);
+                    }
+                    else if (sPosYear_ == 1) {
+                        tsDate_[iAnnee_] = sValue_.substr(2, sLengthYear_);
+                    }
+                    else {
+                        tsDate_[iAnnee_] = sValue_.substr(4, sLengthYear_);
+                    }
+                }
+                if (sPosDay_ == 0) {
+                    tsDate_[iJour_] = sValue_.substr(0, 2);
+                }
+                else if (sPosDay_ == 1) {
+                    if (sPosYear_ == 0) {
+                        tsDate_[iJour_] = sValue_.substr(sLengthYear_, 2);
+                    }
+                    else {
+                        tsDate_[iJour_] = sValue_.substr(2, 2);
+                    }
+                }
+                else {
+                    tsDate_[iJour_] = sValue_.substr(2 + sLengthYear_, 2);
+                }
+                if (sPosMonth_ == 0) {
+                    tsDate_[iMois_] = sValue_.substr(0, 2);
+                }
+                else if (sPosMonth_ == 1) {
+                    if (sPosYear_ == 0) {
+                        tsDate_[iMois_] = sValue_.substr(sLengthYear_, 2);
+                    }
+                    else {
+                        tsDate_[iMois_] = sValue_.substr(2, 2);
+                    }
+                }
+                else {
+                    tsDate_[iMois_] = sValue_.substr(2 + sLengthYear_, 2);
+                }
+            }
+        }
+        else if (tsDate_.length == 2) {
+            return null;
+        }
+        var sJour_;
+        var sMois_;
+        var sAnnee_;
+        switch (tsDate_.length) {
+            case 3:
+                sJour_ = tsDate_[iJour_];
+                sMois_ = tsDate_[iMois_];
+                sAnnee_ = tsDate_[iAnnee_];
+                break;
+            case 2:
+                sJour_ = tsDate_[iJour_];
+                sMois_ = tsDate_[iMois_];
+                sAnnee_ = CString(new Date().getFullYear());
+                break;
+            default:
+                return null;
+        }
+        if (isNaN(sJour_) || isNaN(sMois_) || isNaN(sAnnee_)) {
+            return null;
+        }
+        iMois_ = parseInt(sMois_, 10);
+        if (iMois_ == 0) {
+            iMois_ = 1;
+            sMois_ = "1";
+        }
+        if (iMois_ > 0 && iMois_ < 13) {
+            var iJourMax_ = 31;
+            switch (iMois_) {
                 case 2:
-                    sJour_ = tsDate_[iJour_];
-                    sMois_ = tsDate_[iMois_];
-                    sAnnee_ = CString(new Date().getFullYear());
+                    iJourMax_ = 29;
                     break;
-                default:
-                    return null;
+                case 4:
+                case 6:
+                case 9:
+                case 11:
+                    iJourMax_ = 30;
+                    break;
             }
-            if (isNaN(sJour_) || isNaN(sMois_) || isNaN(sAnnee_)) {
+            if (parseInt(sJour_, 10) > iJourMax_) {
                 return null;
             }
-            var iMois_ = parseInt(sMois_, 10);
-            if (iMois_ == 0) {
-                iMois_ = 1;
-                sMois_ = "1";
-            }
-            if (iMois_ > 0 && iMois_ < 13) {
-                var iJourMax_ = 31;
-                switch (iMois_) {
-                    case 2:
-                        iJourMax_ = 29;
-                        break;
-                    case 4:
-                    case 6:
-                    case 9:
-                    case 11:
-                        iJourMax_ = 30;
-                        break;
-                }
-                if (parseInt(sJour_, 10) > iJourMax_) {
-                    return null;
-                }
-            }
-            else {
-                return null;
-            }
-            sAnnee_ = sAnnee_.lPad("0", 2);
-            var iAnCour_ = new Date().getFullYear();
-            var iAnTemp_ = iAnCour_ - iMarge_;
-            var sAnTemp_ = sAnnee_.lPad(CString(iAnTemp_).substr(0, 2), 4);
-            if (parseInt(sAnTemp_, 10) < (iAnCour_ - iMarge_)) {
-                sAnnee_ = sAnnee_.lPad(CString(iAnCour_).substr(0, 2), 4);
-            }
-            else {
-                sAnnee_ = sAnTemp_;
-            }
-            if (parseInt(sAnnee_, 10) < 1900 || parseInt(sAnnee_, 10) > 9999) {
-                return null;
-            }
-            return new Date(parseInt(sAnnee_, 10), parseInt(sMois_, 10) - 1, parseInt(sJour_, 10));
         }
-        utils.parseLiteralDate = parseLiteralDate;
-        ;
-        function formatDecimal(str, digits, locale) {
-            if (is_numeric(str)) {
-                if (!isset(locale)) {
-                    locale = app.i18n.getCurrentLocale();
-                }
-                var sign = "";
-                if (Number(str) < 0) {
-                    sign = "-";
-                }
-                var fvalue_ = Math.abs(Number(str));
-                if (isset(digits)) {
-                    fvalue_ = fvalue_.round(digits);
-                }
-                var sVal_ = String(fvalue_);
-                var sGroupSeparator_ = locale.decimalGroupSeparator;
-                var sSeparator_ = locale.decimalSeparator;
-                var iGroupDigits_ = locale.decimalGroupDigits;
-                sVal_ = sVal_.replace(".", sSeparator_);
-                var tsVal_ = sVal_.split(sSeparator_);
-                var sEnt_ = tsVal_[0];
-                var sDec_ = tsVal_[1] || '';
-                if (sEnt_.length > iGroupDigits_) {
-                    var iNbPart_ = Math.round(sEnt_.length / iGroupDigits_);
-                    if (iNbPart_ < sEnt_.length / iGroupDigits_)
-                        iNbPart_++;
-                    var tsPart_ = [];
-                    for (var i_ = 0; i_ < iNbPart_; i_++) {
-                        tsPart_[iNbPart_ - i_ - 1] = String(sEnt_).substring(sEnt_.length - iGroupDigits_ * (i_ + 1), sEnt_.length - iGroupDigits_ * i_);
-                    }
-                    sEnt_ = tsPart_.join(sGroupSeparator_);
-                }
-                if (isset(digits)) {
-                    sDec_ = sDec_.rPad('0', digits);
-                }
-                return sign + (sDec_.length != 0 ? sEnt_.concat(sSeparator_).concat(sDec_) : sEnt_);
+        else {
+            return null;
+        }
+        sAnnee_ = sAnnee_.lPad("0", 2);
+        var iAnCour_ = new Date().getFullYear();
+        var iAnTemp_ = iAnCour_ - iMarge_;
+        var sAnTemp_ = sAnnee_.lPad(CString(iAnTemp_).substr(0, 2), 4);
+        if (parseInt(sAnTemp_, 10) < (iAnCour_ - iMarge_)) {
+            sAnnee_ = sAnnee_.lPad(CString(iAnCour_).substr(0, 2), 4);
+        }
+        else {
+            sAnnee_ = sAnTemp_;
+        }
+        if (parseInt(sAnnee_, 10) < 1900 || parseInt(sAnnee_, 10) > 9999) {
+            return null;
+        }
+        return new Date(parseInt(sAnnee_, 10), parseInt(sMois_, 10) - 1, parseInt(sJour_, 10));
+    }
+    utils.parseLiteralDate = parseLiteralDate;
+    ;
+    function formatDecimal(str, digits, locale) {
+        if (is_numeric(str)) {
+            if (!isset(locale)) {
+                locale = app.i18n.getCurrentLocale();
             }
-            return str;
+            var sign = "";
+            if (Number(str) < 0) {
+                sign = "-";
+            }
+            var fvalue_ = Math.abs(Number(str));
+            if (isset(digits)) {
+                fvalue_ = fvalue_.round(digits);
+            }
+            var sVal_ = String(fvalue_);
+            var sGroupSeparator_ = locale.decimalGroupSeparator;
+            var sSeparator_ = locale.decimalSeparator;
+            var iGroupDigits_ = locale.decimalGroupDigits;
+            sVal_ = sVal_.replace(".", sSeparator_);
+            var tsVal_ = sVal_.split(sSeparator_);
+            var sEnt_ = tsVal_[0];
+            var sDec_ = tsVal_[1] || '';
+            if (sEnt_.length > iGroupDigits_) {
+                var iNbPart_ = Math.round(sEnt_.length / iGroupDigits_);
+                if (iNbPart_ < sEnt_.length / iGroupDigits_)
+                    iNbPart_++;
+                var tsPart_ = [];
+                for (var i_ = 0; i_ < iNbPart_; i_++) {
+                    tsPart_[iNbPart_ - i_ - 1] = String(sEnt_).substring(sEnt_.length - iGroupDigits_ * (i_ + 1), sEnt_.length - iGroupDigits_ * i_);
+                }
+                sEnt_ = tsPart_.join(sGroupSeparator_);
+            }
+            if (isset(digits)) {
+                sDec_ = sDec_.rPad('0', digits);
+            }
+            return sign + (sDec_.length != 0 ? sEnt_.concat(sSeparator_).concat(sDec_) : sEnt_);
         }
-        utils.formatDecimal = formatDecimal;
-        function genId(l) {
-            if (l === void 0) { l = 10; }
-            return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".random(l);
-        }
-        utils.genId = genId;
-    })(utils || (utils = {}));
-});
+        return str;
+    }
+    utils.formatDecimal = formatDecimal;
+    function genId(l) {
+        if (l === void 0) { l = 10; }
+        return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".random(l);
+    }
+    utils.genId = genId;
+})(utils || (utils = {}));
 var regexp;
 (function (regexp) {
     regexp.CdPost = /^(([0-8][1-9]|9[0-5]|[1-9]0)[0-9]{3})|(97[1-6][0-9]{2})$/;
@@ -1486,187 +1481,9 @@ define("modules/bindings/autocomplete", ["require", "exports", "modules/classes/
     }(AbstractBinding_class_3.AbstractBinding));
     exports.AutoCompleteBinding = AutoCompleteBinding;
 });
-define("modules/helpers/logger", ["require", "exports"], function (require, exports) {
-    "use strict";
-    exports.__esModule = true;
-    /**
-     * MODES
-     * @enum {int}
-     * @memberOf oneesp.module.commons.helper.errors#
-     */
-    var TLogLevel;
-    (function (TLogLevel) {
-        TLogLevel[TLogLevel["TRACE"] = 0] = "TRACE";
-        TLogLevel[TLogLevel["DEBUG"] = 1] = "DEBUG";
-        TLogLevel[TLogLevel["INFO"] = 2] = "INFO";
-        TLogLevel[TLogLevel["WARN"] = 3] = "WARN";
-        TLogLevel[TLogLevel["ERROR"] = 4] = "ERROR";
-        TLogLevel[TLogLevel["FATAL"] = 5] = "FATAL";
-    })(TLogLevel = exports.TLogLevel || (exports.TLogLevel = {}));
-    var Appender = /** @class */ (function () {
-        function Appender(level) {
-            if (level === void 0) { level = TLogLevel.TRACE; }
-            this.level = level;
-        }
-        Appender.prototype.formatMessage = function (className, date, level, message) {
-            return TLogLevel[level] + ' - ' + className + ' - ' + date.toString() + ': ' + message;
-        };
-        return Appender;
-    }());
-    exports.Appender = Appender;
-    var ConsoleAppender = /** @class */ (function (_super) {
-        __extends(ConsoleAppender, _super);
-        function ConsoleAppender() {
-            return _super.call(this) || this;
-        }
-        ConsoleAppender.prototype.log = function (className, level, message, exception, date) {
-            if (date === void 0) { date = new Date(); }
-            if (this.level > level) {
-                return;
-            }
-            var e = exception || '';
-            var console = isset(window.console) ? window.console : null;
-            if (isset(console)) {
-                var text = this.formatMessage(className, date, level, message);
-                if (level == TLogLevel.DEBUG && typeof (console.debug) != 'undefined') {
-                    console.debug(text, e);
-                    return;
-                }
-                if (level == TLogLevel.INFO && typeof (console.info) != 'undefined') {
-                    console.info(text, e);
-                    return;
-                }
-                if (level == TLogLevel.WARN && typeof (console.warn) != 'undefined') {
-                    console.warn(text, e);
-                    return;
-                }
-                if (level == TLogLevel.ERROR && typeof (console.error) != 'undefined') {
-                    console.error(text, e);
-                    return;
-                }
-                if (level == TLogLevel.FATAL && typeof (console.error) != 'undefined') {
-                    console.error(text, e);
-                    return;
-                }
-                if (typeof (console.log) != 'undefined') {
-                    console.log(text, e);
-                    return;
-                }
-            }
-        };
-        return ConsoleAppender;
-    }(Appender));
-    exports.ConsoleAppender = ConsoleAppender;
-    var RemoteAppender = /** @class */ (function (_super) {
-        __extends(RemoteAppender, _super);
-        function RemoteAppender(url) {
-            var _this = _super.call(this) || this;
-            _this.url = url;
-            return _this;
-        }
-        RemoteAppender.prototype.log = function (className, level, message, exception, date) {
-            if (date === void 0) { date = new Date(); }
-            if (this.level <= level) {
-                var e = exception || '';
-                var text = this.formatMessage(className, date, level, message);
-                Query.PUT(this.url, { date: date.getUTCTime(), className: className, level: level, message: text, originalMessage: message, exception: e }, null, this, { silent: true });
-            }
-        };
-        return RemoteAppender;
-    }(Appender));
-    exports.RemoteAppender = RemoteAppender;
-    var Logger = /** @class */ (function () {
-        function Logger(id, level) {
-            if (level === void 0) { level = TLogLevel.INFO; }
-            this.appenders = [];
-            /**
-             * The current mode
-             * @name mode
-             * @type observable
-             * @defaultValue Modes.DEVELOPMENT
-             * @memberOf oneesp.module.commons.helper.errors#
-             */
-            this.level = ko.observable(TLogLevel.INFO);
-            this.id = null;
-            this.level(level);
-            this.id = id;
-        }
-        Logger.prototype.isTraceEnabled = function () {
-            return this.level() >= TLogLevel.TRACE;
-        };
-        Logger.prototype.isInfoEnabled = function () {
-            return this.level() >= TLogLevel.INFO;
-        };
-        Logger.prototype.isDebugEnabled = function () {
-            return this.level() >= TLogLevel.DEBUG;
-        };
-        Logger.prototype.isWarnEnabled = function () {
-            return this.level() >= TLogLevel.WARN;
-        };
-        Logger.prototype.info = function (text, e) {
-            this.log(this.id, TLogLevel.INFO, text, e);
-        };
-        Logger.prototype.warn = function (text, e) {
-            this.log(this.id, TLogLevel.WARN, text, e);
-        };
-        Logger.prototype.trace = function (text, e) {
-            this.log(this.id, TLogLevel.TRACE, text, e);
-        };
-        Logger.prototype.debug = function (text, e) {
-            this.log(this.id, TLogLevel.DEBUG, text, e);
-        };
-        Logger.prototype.error = function (text, e) {
-            this.log(this.id, TLogLevel.ERROR, text, e);
-        };
-        Logger.prototype.fatal = function (text, e) {
-            this.log(this.id, TLogLevel.FATAL, text, e);
-        };
-        Logger.prototype.log = function (className, level, message, exception, date) {
-            if (date === void 0) { date = new Date(); }
-            if ((this.level() <= level) && this.appenders) {
-                for (var i = 0, len = this.appenders.length; i < len; i++) {
-                    if (this.appenders[i].level <= level) {
-                        this.appenders[i].log(className, level, message, exception, date);
-                    }
-                }
-            }
-        };
-        Logger.prototype.addAppender = function (appender) {
-            this.appenders.pushOnce(appender);
-        };
-        /** return logger
-         * @param {string} className
-         */
-        Logger.getLogger = function (className) {
-            if (!Logger.loggers[className]) {
-                var oLogger_ = new Logger(className);
-                if (className != 'default') {
-                    oLogger_.log = function (className, level, text, e) {
-                        var oLogger = Logger.getDefaultLogger();
-                        if (oLogger) {
-                            oLogger.log(className, level, text, e);
-                        }
-                    };
-                }
-                Logger.loggers[className] = oLogger_;
-            }
-            return Logger.loggers[className];
-        };
-        Logger.getDefaultLogger = function () {
-            return Logger.getLogger('default');
-        };
-        Logger.getConsoleAppender = function () {
-            return new ConsoleAppender();
-        };
-        Logger.loggers = {};
-        return Logger;
-    }());
-    exports.Logger = Logger;
-});
 define("modules/helpers/query", ["require", "exports", "modules/helpers/logger"], function (require, exports, logger_1) {
     "use strict";
     exports.__esModule = true;
-    var log = logger_1.Logger.getLogger('Query');
     /**
      * @private
      */
@@ -1693,6 +1510,9 @@ define("modules/helpers/query", ["require", "exports", "modules/helpers/logger"]
             this.id = id;
             this.opts = opts;
         }
+        Query.log = function () {
+            return logger_1.Logger.getLogger('Query');
+        };
         /** Return the current stack of requests
          * @memberOf oneesp.module.commons.helper.query#
          * @returns {array}
@@ -1798,8 +1618,8 @@ define("modules/helpers/query", ["require", "exports", "modules/helpers/logger"]
             if (callbacks === void 0) { callbacks = {}; }
             if (opts === void 0) { opts = {}; }
             if (Query.isLocked()) {
-                if (log.isWarnEnabled()) {
-                    log.warn("Query is locked: request '%s %s' has not been sent".format(method, url));
+                if (Query.log().isWarnEnabled()) {
+                    Query.log().warn("Query is locked: request '%s %s' has not been sent".format(method, url));
                 }
                 return;
             }
@@ -1816,8 +1636,8 @@ define("modules/helpers/query", ["require", "exports", "modules/helpers/logger"]
                 if (Query.nbQueries() == 0) {
                     _timer = setTimeout(function () {
                         if (Query.nbQueries() > 0) {
-                            if (log.isTraceEnabled()) {
-                                log.trace('Inform that Query processes are busy (delay: %s)'.format(opts.delay));
+                            if (Query.log().isTraceEnabled()) {
+                                Query.log().trace('Inform that Query processes are busy (delay: %s)'.format(opts.delay));
                             }
                             Query.isBusy(true);
                         }
@@ -1825,8 +1645,8 @@ define("modules/helpers/query", ["require", "exports", "modules/helpers/logger"]
                 }
                 var nb = Query.nbQueries() + 1;
                 Query.nbQueries(nb);
-                if (log.isTraceEnabled()) {
-                    log.trace('Current query processes is now'.format(nb));
+                if (Query.log().isTraceEnabled()) {
+                    Query.log().trace('Current query processes is now'.format(nb));
                 }
             }
             if (typeof (callbacks) == 'function') {
@@ -1891,8 +1711,8 @@ define("modules/helpers/query", ["require", "exports", "modules/helpers/logger"]
             if (opts.timeout != undefined && !isNaN(opts.timeout)) {
                 params.timeout = opts.timeout;
             }
-            if (log.isTraceEnabled()) {
-                log.trace("Send request '%s %s'".format(method, url), params);
+            if (Query.log().isTraceEnabled()) {
+                Query.log().trace("Send request '%s %s'".format(method, url), params);
             }
             var jqXHR = $.ajax(params);
             jqXHR.always(function (data, textStatus, jqXHR) {
@@ -1900,15 +1720,15 @@ define("modules/helpers/query", ["require", "exports", "modules/helpers/logger"]
                 if (!this.options.silent) {
                     var nb = Query.nbQueries() - 1;
                     Query.nbQueries(nb);
-                    if (log.isTraceEnabled()) {
-                        log.trace('Current query processes is now %s'.format(nb));
+                    if (Query.log().isTraceEnabled()) {
+                        Query.log().trace('Current query processes is now %s'.format(nb));
                     }
                     if (Query.nbQueries() == 0) {
                         clearTimeout(_timer);
                         _timer = null;
                         Query.isBusy(false);
-                        if (log.isTraceEnabled()) {
-                            log.trace('Query processes are no longer busy');
+                        if (Query.log().isTraceEnabled()) {
+                            Query.log().trace('Query processes are no longer busy');
                         }
                     }
                 }
@@ -2078,6 +1898,192 @@ define("modules/helpers/query", ["require", "exports", "modules/helpers/logger"]
         return Query;
     }());
     exports.Query = Query;
+});
+define("modules/helpers/logger", ["require", "exports", "modules/helpers/query"], function (require, exports, query_1) {
+    "use strict";
+    exports.__esModule = true;
+    /**
+     * MODES
+     * @enum {int}
+     * @memberOf oneesp.module.commons.helper.errors#
+     */
+    var TLogLevel;
+    (function (TLogLevel) {
+        TLogLevel[TLogLevel["TRACE"] = 0] = "TRACE";
+        TLogLevel[TLogLevel["DEBUG"] = 1] = "DEBUG";
+        TLogLevel[TLogLevel["INFO"] = 2] = "INFO";
+        TLogLevel[TLogLevel["WARN"] = 3] = "WARN";
+        TLogLevel[TLogLevel["ERROR"] = 4] = "ERROR";
+        TLogLevel[TLogLevel["FATAL"] = 5] = "FATAL";
+    })(TLogLevel = exports.TLogLevel || (exports.TLogLevel = {}));
+    var Appender = /** @class */ (function () {
+        function Appender(level) {
+            if (level === void 0) { level = TLogLevel.TRACE; }
+            this.level = level;
+        }
+        return Appender;
+    }());
+    exports.Appender = Appender;
+    var ConsoleAppender = /** @class */ (function (_super) {
+        __extends(ConsoleAppender, _super);
+        function ConsoleAppender() {
+            return _super.call(this) || this;
+        }
+        ConsoleAppender.prototype.formatMessage = function (level, date, message) {
+            return TLogLevel[level].rPad(' ', 5) + ' - ' + utils.formatDate(date, "dd/mm/yyyy", "hh:mm:ss.t") + ': ' + message;
+        };
+        ConsoleAppender.prototype.log = function (className, level, message, exception, date) {
+            if (date === void 0) { date = new Date(); }
+            if (this.level > level) {
+                return;
+            }
+            var e = exception || '';
+            var console = isset(window.console) ? window.console : null;
+            if (isset(console)) {
+                var fn = void 0;
+                if (level == TLogLevel.DEBUG && typeof (console.debug) != 'undefined') {
+                    fn = console.debug;
+                }
+                if (level == TLogLevel.INFO && typeof (console.info) != 'undefined') {
+                    fn = console.info;
+                }
+                if (level == TLogLevel.WARN && typeof (console.warn) != 'undefined') {
+                    fn = console.warn;
+                }
+                if (level == TLogLevel.ERROR && typeof (console.error) != 'undefined') {
+                    fn = console.error;
+                }
+                if (level == TLogLevel.FATAL && typeof (console.error) != 'undefined') {
+                    fn = console.error;
+                }
+                if (!fn && typeof (console.log) != 'undefined') {
+                    fn = console.log;
+                }
+                if (!fn) {
+                    return;
+                }
+                var text = this.formatMessage(level, date, message);
+                if (ConsoleAppender.useFormat) {
+                    fn("%c" + className, ConsoleAppender.formatCSS, text, e);
+                }
+                else {
+                    fn(className, text, e);
+                }
+            }
+        };
+        ConsoleAppender.useFormat = true;
+        ConsoleAppender.formatCSS = "padding: .1em .5em; color: #000; border: 1px solid #ddd; background-color: #93e458; border-radius: 3px";
+        return ConsoleAppender;
+    }(Appender));
+    exports.ConsoleAppender = ConsoleAppender;
+    var RemoteAppender = /** @class */ (function (_super) {
+        __extends(RemoteAppender, _super);
+        function RemoteAppender(url) {
+            var _this = _super.call(this) || this;
+            _this.url = url;
+            return _this;
+        }
+        RemoteAppender.prototype.formatMessage = function (className, date, level, message) {
+            return TLogLevel[level] + ' - ' + className + ' - ' + date.toString() + ': ' + message;
+        };
+        RemoteAppender.prototype.log = function (className, level, message, exception, date) {
+            if (date === void 0) { date = new Date(); }
+            if (this.level <= level) {
+                var e = exception || '';
+                var text = this.formatMessage(className, date, level, message);
+                query_1.Query.PUT(this.url, { date: date.getUTCTime(), className: className, level: level, message: text, originalMessage: message, exception: e }, null, this, { silent: true });
+            }
+        };
+        return RemoteAppender;
+    }(Appender));
+    exports.RemoteAppender = RemoteAppender;
+    var Logger = /** @class */ (function () {
+        function Logger(id, level) {
+            if (level === void 0) { level = TLogLevel.INFO; }
+            this.appenders = [];
+            /**
+             * The current mode
+             * @name mode
+             * @type observable
+             * @defaultValue Modes.DEVELOPMENT
+             * @memberOf oneesp.module.commons.helper.errors#
+             */
+            this.level = ko.observable(TLogLevel.INFO);
+            this.id = null;
+            this.level(level);
+            this.id = id;
+        }
+        Logger.prototype.isTraceEnabled = function () {
+            return this.level() >= TLogLevel.TRACE;
+        };
+        Logger.prototype.isInfoEnabled = function () {
+            return this.level() >= TLogLevel.INFO;
+        };
+        Logger.prototype.isDebugEnabled = function () {
+            return this.level() >= TLogLevel.DEBUG;
+        };
+        Logger.prototype.isWarnEnabled = function () {
+            return this.level() >= TLogLevel.WARN;
+        };
+        Logger.prototype.info = function (text, e) {
+            this.log(this.id, TLogLevel.INFO, text, e);
+        };
+        Logger.prototype.warn = function (text, e) {
+            this.log(this.id, TLogLevel.WARN, text, e);
+        };
+        Logger.prototype.trace = function (text, e) {
+            this.log(this.id, TLogLevel.TRACE, text, e);
+        };
+        Logger.prototype.debug = function (text, e) {
+            this.log(this.id, TLogLevel.DEBUG, text, e);
+        };
+        Logger.prototype.error = function (text, e) {
+            this.log(this.id, TLogLevel.ERROR, text, e);
+        };
+        Logger.prototype.fatal = function (text, e) {
+            this.log(this.id, TLogLevel.FATAL, text, e);
+        };
+        Logger.prototype.log = function (className, level, message, exception, date) {
+            if (date === void 0) { date = new Date(); }
+            if ((this.level() <= level) && this.appenders) {
+                for (var i = 0, len = this.appenders.length; i < len; i++) {
+                    if (this.appenders[i].level <= level) {
+                        this.appenders[i].log(className, level, message, exception, date);
+                    }
+                }
+            }
+        };
+        Logger.prototype.addAppender = function (appender) {
+            this.appenders.pushOnce(appender);
+        };
+        /** return logger
+         * @param {string} className
+         */
+        Logger.getLogger = function (className) {
+            if (!Logger.loggers[className]) {
+                var log = new Logger(className);
+                if (className != 'default') {
+                    log.log = function (className, level, text, e) {
+                        var logger = Logger.getDefaultLogger();
+                        if (logger) {
+                            logger.log(className, level, text, e);
+                        }
+                    };
+                }
+                Logger.loggers[className] = log;
+            }
+            return Logger.loggers[className];
+        };
+        Logger.getDefaultLogger = function () {
+            return Logger.getLogger('default');
+        };
+        Logger.getConsoleAppender = function () {
+            return new ConsoleAppender();
+        };
+        Logger.loggers = {};
+        return Logger;
+    }());
+    exports.Logger = Logger;
 });
 define("modules/helpers/storage", ["require", "exports"], function (require, exports) {
     "use strict";
@@ -2259,99 +2265,176 @@ define("modules/classes/Manager.class", ["require", "exports", "modules/classes/
     }(EventsBinder_class_1.EventsBinder));
     exports.BaseManager = BaseManager;
 });
-define("modules/managers/i18n", ["require", "exports", "modules/helpers/logger", "modules/helpers/query", "modules/classes/Manager.class", "modules/classes/Locale.class"], function (require, exports, logger_2, query_1, Manager_class_1, Locale_class_1) {
+define("modules/classes/Locale.class", ["require", "exports"], function (require, exports) {
     "use strict";
     exports.__esModule = true;
-    var TSupportedLanguages;
-    (function (TSupportedLanguages) {
-        TSupportedLanguages[TSupportedLanguages["fr_FR"] = 0] = "fr_FR";
-    })(TSupportedLanguages = exports.TSupportedLanguages || (exports.TSupportedLanguages = {}));
+    var Locale = /** @class */ (function () {
+        function Locale(language, isoCode) {
+            this._language = language;
+            this._isoCode = isoCode;
+        }
+        Locale.prototype.getLang = function () {
+            return this._language;
+        };
+        Locale.prototype.getIsoCode = function () {
+            return this._isoCode;
+        };
+        Locale.autoLoadClass = true;
+        Locale.autoloadedLocales = [];
+        return Locale;
+    }());
+    exports.Locale = Locale;
+});
+define("modules/classes/locale/en", ["require", "exports", "modules/classes/Locale.class"], function (require, exports, Locale_class_1) {
+    "use strict";
+    exports.__esModule = true;
+    var Locale_en = /** @class */ (function (_super) {
+        __extends(Locale_en, _super);
+        function Locale_en() {
+            var _this = _super.call(this, 'en', 'en_US') || this;
+            _this.displayName = "English";
+            _this.decimalSeparator = ".";
+            _this.decimalGroupSeparator = ",";
+            _this.decimalGroupDigits = 3;
+            _this.dateFormat = "yyyy-mm-dd";
+            _this.dateSeparator = "-";
+            _this.dateLiteralFormat = "YMD";
+            _this.currencySymbol = "€";
+            return _this;
+        }
+        return Locale_en;
+    }(Locale_class_1.Locale));
+    exports.Locale_en = Locale_en;
+});
+define("modules/managers/i18n", ["require", "exports", "modules/helpers/logger", "modules/helpers/query", "modules/classes/Manager.class", "modules/classes/Locale.class", "modules/classes/locale/en"], function (require, exports, logger_2, query_2, Manager_class_1, Locale_class_2, en_1) {
+    "use strict";
+    exports.__esModule = true;
     exports.SUPPORTED_LANGUAGES = {};
     var logger = logger_2.Logger.getLogger('i18n');
-    /**
-     * The default localization file.
-     * @type {Object.<string, ko.observable(string)>}
-     */
-    var DEFAULT_LANGUAGE = TSupportedLanguages[TSupportedLanguages.fr_FR];
     var I18n = /** @class */ (function (_super) {
         __extends(I18n, _super);
-        function I18n(browserLanguageInfos) {
+        function I18n(defaultLanguage) {
+            if (defaultLanguage === void 0) { defaultLanguage = "en"; }
             var _this = _super.call(this) || this;
             _this.uri = "/i18n/";
-            _this.locales = {};
+            _this.useRemoteUrl = false;
             _this.isStringsReady = ko.observable(false);
             _this.localizedStrings = {};
             _this.localizedObservableStrings = {};
+            _this.locales = {};
             /**
              * The current resources language.
              * @type {ko.observable(string)}
              */
             _this.language = ko.observable();
-            $.each(browserLanguageInfos, function (id, value) {
-                exports.SUPPORTED_LANGUAGES[value.isoCode] = value.localeName;
-                if (value.defaultLanguage == "true") {
-                    DEFAULT_LANGUAGE = value.isoCode;
-                }
-                var locale = new Locale_class_1.Locale(id, value.isoCode);
-                locale.displayName = value.localeName;
-                locale.decimalGroupSeparator = value.format.decimal.groupSeparator;
-                locale.decimalGroupDigits = value.format.decimal.groupDigits;
-                locale.decimalSeparator = value.format.decimal.separator;
-                locale.currencySymbol = value.format.currency.symbol;
-                locale.dateFormat = value.format.date.format;
-                locale.dateSeparator = value.format.date.separator;
-                locale.dateLiteralFormat = value.format.date.literalFormat;
-                _this.locales[value.isoCode] = locale;
-            });
+            exports.DEFAULT_LANGUAGE = defaultLanguage;
+            window['i18n'] = _this;
             return _this;
         }
+        I18n.prototype.initLocales = function () {
+            var _this = this;
+            // Default locale
+            this.addLocale(new en_1.Locale_en());
+            // Load from autoloaded locales instances
+            $.each(Locale_class_2.Locale.autoloadedLocales, function (i, locale) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Add locale from autoloader", locale);
+                }
+                _this.addLocale(locale);
+            });
+            // Load from configuration locales global var
+            $.each(window['locales_def'] || {}, function (id, localeConf) {
+                var locale = new Locale_class_2.Locale(id, localeConf.isoCode);
+                locale.displayName = localeConf.localeName;
+                locale.decimalGroupSeparator = localeConf.format.decimal.groupSeparator;
+                locale.decimalGroupDigits = localeConf.format.decimal.groupDigits;
+                locale.decimalSeparator = localeConf.format.decimal.separator;
+                locale.currencySymbol = localeConf.format.currency.symbol;
+                locale.dateFormat = localeConf.format.date.format;
+                locale.dateSeparator = localeConf.format.date.separator;
+                locale.dateLiteralFormat = localeConf.format.date.literalFormat;
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Add locale from global configuration", locale);
+                }
+                _this.addLocale(locale);
+            });
+        };
+        I18n.prototype.initLanguage = function (defaultLanguage) {
+            var locale;
+            if (defaultLanguage) {
+                locale = this.getLocaleByLang(defaultLanguage);
+            }
+            if (!locale) {
+                locale = this.getLocaleByLang(this.getBrowserLanguage());
+            }
+            if (locale) {
+                this.language(locale.getLang());
+                return;
+            }
+            logger.error("Error loading language '%s'".format(defaultLanguage));
+            this.emit('initError', defaultLanguage);
+        };
         I18n.prototype.getCurrentLocale = function () {
             return this.getLocale(this.language());
         };
         I18n.prototype.getLocale = function (isoCode) {
             return this.locales[isoCode];
         };
+        I18n.prototype.getLocaleByLang = function (lang) {
+            return Object.findBy(this.locales, 'getLang', lang);
+        };
         I18n.prototype.getSupportedLanguages = function () {
             return exports.SUPPORTED_LANGUAGES;
         };
-        I18n.prototype.loadStrings = function (lang) {
-            var context, url;
-            var self = this;
-            var stringsLoaded = function (json, status) {
-                if (this.requestedLanguage != self.language()) {
-                    // The user changed the language between the request and the response
-                    return;
-                }
-                if (status == query_1.Query.Status.SUCCESS) {
-                    // Update the cache for each application
-                    $.each(json, function (k, v) {
-                        self.localizedStrings[k] = v;
-                    });
-                    // Update the current resources language
-                    self.language(this.requestedLanguage);
-                    // Update the observable strings
-                    self.updateObservableStrings();
-                    self.isStringsReady(true);
-                    self.emit('change', self.language());
-                }
-                else {
-                    logger.fatal('Erreur lors du chargement des libellés %s: %s'.format(url, status));
-                    self.emit('initError');
-                    throw 'Erreur lors du chargement des libellés %s: %s'.format(url, status);
-                }
-            };
-            // Set the language
-            lang = lang || this.language() || DEFAULT_LANGUAGE;
-            if (exports.SUPPORTED_LANGUAGES[lang]) {
-                // Get the url of the strings
-                url = this.getStringsUrl(lang);
-                // Set the context
-                context = {
-                    requestedLanguage: lang
-                };
-                // Load the strings
-                query_1.Query.GETasJson(url, stringsLoaded, context, { upToDate: false });
+        I18n.prototype.addLocale = function (locale) {
+            exports.SUPPORTED_LANGUAGES[locale.getIsoCode()] = locale.getLang();
+            this.locales[locale.getIsoCode()] = locale;
+        };
+        I18n.prototype.loadJsonStrings = function (json) {
+            var _this = this;
+            // Update the cache for each
+            $.each(json, function (k, v) {
+                _this.localizedStrings[k] = v;
+            });
+            // Update the observables strings
+            this.updateObservableStrings();
+            this.isStringsReady(true);
+        };
+        I18n.prototype.loadLanguageAsJson = function (lang, json) {
+            this.loadJsonStrings(json);
+            // Update the current resources language
+            this.language(lang);
+        };
+        I18n.prototype.loadLanguage = function (lang) {
+            var _this = this;
+            // Load i18n from js global var i18n
+            var globalI18n = window['i18n_def'];
+            if (globalI18n && globalI18n[lang]) {
+                this.loadLanguageAsJson(lang, globalI18n[lang]);
+                return;
             }
+            if (this.useRemoteUrl) {
+                // Get the url
+                var url_1 = this.getRemoteUrl(lang);
+                // Load the strings
+                query_2.Query.GETasJson(url_1, function (json, status) {
+                    if (lang != _this.language()) {
+                        // The user changed the language between the request and the response
+                        return;
+                    }
+                    if (status == query_2.Query.Status.SUCCESS) {
+                        // Update the current language
+                        _this.loadLanguageAsJson(lang, json);
+                    }
+                    else {
+                        logger.fatal('Erreur lors du chargement des libellés %s: %s'.format(url_1, status));
+                        _this.emit('initError', lang);
+                        throw 'Erreur lors du chargement des libellés %s: %s'.format(url_1, status);
+                    }
+                }, null, { upToDate: false });
+                return;
+            }
+            logger.warn('No internationalized message found (lang: %s)'.format(lang));
         };
         I18n.prototype.updateObservableStrings = function () {
             var _this = this;
@@ -2386,44 +2469,44 @@ define("modules/managers/i18n", ["require", "exports", "modules/helpers/logger",
         I18n.prototype.getString = function (key, defaultValue) {
             return I18n.getStringOrKey(this.localizedStrings[key], isset(defaultValue) ? defaultValue : key);
         };
+        /**
+         * Gets the localized string for the given key.
+         * @param {string} key The key of the desired label.
+         * @return {string} The localized string.
+         * @see getString
+         */
+        I18n.prototype._ = function (key, defaultValue) {
+            return this.getString(key, defaultValue);
+        };
         I18n.prototype.getCurrentLanguage = function () {
-            var locale = this.language();
-            if (exports.SUPPORTED_LANGUAGES[locale]) {
-                return locale;
+            var lang = this.language();
+            if (exports.SUPPORTED_LANGUAGES[lang]) {
+                return lang;
             }
-            return DEFAULT_LANGUAGE;
+            return null;
         };
         // return the browser language if this language is one of the supported ones
         // else it returns the default language set in the browserLanguageInfos.js file 
-        I18n.prototype.getLanguageFromBrowser = function () {
-            var language = app.browser.getCurrentBrowserInfos().countryCode;
-            if (language) {
-                var locale = Object.findBy(this.locales, 'getLang', language);
-                if (locale) {
-                    return locale.getIsoCode();
-                }
-            }
-            return DEFAULT_LANGUAGE;
+        I18n.prototype.getBrowserLanguage = function () {
+            return app.browser.getCurrentBrowserInfos().countryCode;
         };
         I18n.getStringOrKey = function (str, key) {
             return (str === null || str === undefined) ? key : str;
         };
-        I18n.prototype.getStringsUrl = function (language) {
+        I18n.prototype.getRemoteUrl = function (language) {
             return app.servicesPath + this.uri + app.context.page + "/" + language;
         };
         I18n.prototype.init = function () {
             var _this = this;
+            this.initLocales();
             this.language.subscribe(function (lang) {
-                if (exports.SUPPORTED_LANGUAGES[lang]) {
-                    _this.loadStrings(lang);
-                }
+                _this.loadLanguage(lang);
+                _this.emit('change', lang);
             });
-            this.language(this.getLanguageFromBrowser());
-            ko.computed(function () {
-                if (_this.isStringsReady()) {
-                    _this.isReady(true);
-                }
-            }, this);
+            this.isStringsReady.subscribe(function () {
+                _this.isReady(true);
+            });
+            this.initLanguage(exports.DEFAULT_LANGUAGE);
         };
         return I18n;
     }(Manager_class_1.BaseManager));
@@ -3029,7 +3112,7 @@ define("modules/bindings/tooltipster", ["require", "exports", "modules/classes/A
     }(AbstractBinding_class_12.AbstractBinding));
     exports.TooltipterBinding = TooltipterBinding;
 });
-define("modules/classes/API.class", ["require", "exports", "modules/helpers/query"], function (require, exports, query_2) {
+define("modules/classes/API.class", ["require", "exports", "modules/helpers/query"], function (require, exports, query_3) {
     "use strict";
     exports.__esModule = true;
     /**
@@ -3049,31 +3132,31 @@ define("modules/classes/API.class", ["require", "exports", "modules/helpers/quer
          * Execute a POST request
          */
         API.prototype.create = function (fnDone, fnFail, opts) {
-            query_2.Query.POST(this.uri, this.toJson(), { success: fnDone, fail: fnFail }, this, opts);
+            query_3.Query.POST(this.uri, this.toJson(), { success: fnDone, fail: fnFail }, this, opts);
         };
         /**
          * Execute a PUT request
          */
         API.prototype.update = function (fnDone, fnFail, opts) {
-            query_2.Query.PUT(this.uri + "/" + this.id, this.toJson(), { success: fnDone, fail: fnFail }, this, opts);
+            query_3.Query.PUT(this.uri + "/" + this.id, this.toJson(), { success: fnDone, fail: fnFail }, this, opts);
         };
         /**
          * Execute a PATCH request
          */
         API.prototype.patch = function (fnDone, fnFail, opts) {
-            query_2.Query.PATCH(this.uri + "/" + this.id, this.toJson(), { success: fnDone, fail: fnFail }, this, opts);
+            query_3.Query.PATCH(this.uri + "/" + this.id, this.toJson(), { success: fnDone, fail: fnFail }, this, opts);
         };
         /**
          * Execute a DELETE request
          */
         API.prototype.remove = function (fnDone, fnFail, opts) {
-            query_2.Query.DELETE(this.uri + "/" + this.id, { success: fnDone, fail: fnFail }, this, opts);
+            query_3.Query.DELETE(this.uri + "/" + this.id, { success: fnDone, fail: fnFail }, this, opts);
         };
         /**
          * Execute a GET request
          */
         API.prototype.load = function (fnDone, fnFail, opts) {
-            query_2.Query.GET(this.uri + "/" + this.id, { success: fnDone, fail: fnFail }, this, opts);
+            query_3.Query.GET(this.uri + "/" + this.id, { success: fnDone, fail: fnFail }, this, opts);
         };
         /**
          * Execute a GET request and fill data
@@ -3092,7 +3175,7 @@ define("modules/classes/API.class", ["require", "exports", "modules/helpers/quer
          * Execute a GET request
          */
         API.prototype.list = function (fnDone, fnFail, opts) {
-            query_2.Query.GET(this.uri, { success: fnDone, fail: fnFail }, this, opts);
+            query_3.Query.GET(this.uri, { success: fnDone, fail: fnFail }, this, opts);
         };
         /**
          * Save data depending on id
@@ -3482,193 +3565,7 @@ define("modules/forms/classes/Option.class", ["require", "exports", "modules/for
     }());
     exports.Option = Option;
 });
-define("modules/forms/LabelField", ["require", "exports", "modules/forms/InputField"], function (require, exports, InputField_1) {
-    "use strict";
-    exports.__esModule = true;
-    var LabelField = /** @class */ (function (_super) {
-        __extends(LabelField, _super);
-        function LabelField(id, value, required) {
-            if (required === void 0) { required = false; }
-            var _this = _super.call(this, id, value, required, true) || this;
-            _this.className = ko.observable(null);
-            _this.inputTemplate = "labelInputTemplate";
-            return _this;
-        }
-        return LabelField;
-    }(InputField_1.InputField));
-    exports.LabelField = LabelField;
-});
-define("modules/forms/TextField", ["require", "exports", "modules/forms/InputField"], function (require, exports, InputField_2) {
-    "use strict";
-    exports.__esModule = true;
-    var TTextCase;
-    (function (TTextCase) {
-        TTextCase[TTextCase["none"] = 0] = "none";
-        TTextCase[TTextCase["upper"] = 1] = "upper";
-        TTextCase[TTextCase["lower"] = 2] = "lower";
-        TTextCase[TTextCase["proper"] = 3] = "proper";
-    })(TTextCase = exports.TTextCase || (exports.TTextCase = {}));
-    var TextField = /** @class */ (function (_super) {
-        __extends(TextField, _super);
-        function TextField(id, value, required, readOnly) {
-            var _this = _super.call(this, id, value, required, readOnly) || this;
-            _this.maxLength = 1000;
-            _this.minLength = 0;
-            _this.pattern = ko.observable();
-            _this.useFormat = ko.observable(true);
-            _this.formatFunction = null;
-            _this.unformatFunction = null;
-            _this.defaultAutoValidationDelay = 2000;
-            _this._autoValidationCoeff = 1.50;
-            _this.autoTrim = ko.observable(true);
-            _this.textCase = ko.observable(TTextCase.none);
-            _this.inputType = ko.observable('text'); //=> Disabled because of bug on IE8 when settings 'type' attribute
-            _this.valueUpdateOn = ko.observable('change');
-            _this.autoValidationDelay = "auto";
-            _this.inputTemplate = "ui-field-text-template";
-            _this.hasTextChanged = ko.computed(_this.computeHasTextChanged, _this);
-            _this.formattedValue = ko.computed({
-                read: function () {
-                    if (_this.isFocused()) {
-                        return _this.value();
-                    }
-                    return _this.useFormat() ? _this.formatValue(_this.dataValue()) : _this.dataValue();
-                },
-                write: function (v) {
-                    _this.value(v);
-                }
-            }, _this);
-            _this.value.subscribe(function (v) {
-                _this._updateValue(v);
-                if (!_this.hasBeenVisited() && _this.isFocused()) {
-                    defer(function () {
-                        _this.hasBeenVisited(true);
-                    });
-                }
-            });
-            _this.isFocused.subscribe(function (v) {
-                if (!v) {
-                    _this.validateValue();
-                }
-            });
-            _this.textCase.immediateSubscribe(function (v) {
-                _this._updateValue();
-            });
-            _this.autoTrim.subscribe(function (b) {
-                _this._updateValue();
-            });
-            return _this;
-        }
-        TextField.prototype._updateValue = function (v) {
-            var sCurrentValue_ = v || this.value();
-            var sNewValue_ = this.transform(sCurrentValue_);
-            if (sNewValue_ != sCurrentValue_) {
-                this.value(sNewValue_);
-            }
-        };
-        TextField.prototype.transform = function (value) {
-            if (!value || typeof (value) != "string") {
-                return value;
-            }
-            if (this.autoTrim()) {
-                value = value.trim();
-            }
-            switch (this.textCase()) {
-                case TTextCase.upper:
-                case TTextCase[TTextCase.upper]: return value.toUpperCase();
-                case TTextCase.lower:
-                case TTextCase[TTextCase.lower]: return value.toLowerCase();
-                case TTextCase.proper:
-                case TTextCase[TTextCase.proper]: return value.toProperCase();
-            }
-            return value;
-        };
-        TextField.prototype.formatValue = function (value) {
-            return typeof (this.formatFunction) == "function" ? this.formatFunction.call(this, value) : value;
-        };
-        TextField.prototype.cleanFormatValue = function (value) {
-            return typeof (this.unformatFunction) == "function" ? this.unformatFunction.call(this, value) : value;
-        };
-        TextField.prototype.getDataValue = function () {
-            var v = _super.prototype.getDataValue.call(this);
-            if (isset(v)) {
-                return CString(this.cleanFormatValue(v));
-            }
-            return null;
-        };
-        TextField.prototype.isValidateValue = function (value) {
-            var b = _super.prototype.isValidateValue.call(this, value);
-            if (b && !this.valueIsEmpty(value)) {
-                value = CString(value);
-                if ((this.minLength && value.length < this.minLength) || (this.maxLength && value.length > this.maxLength)) {
-                    b = false;
-                }
-            }
-            return b;
-        };
-        TextField.prototype.computeHasTextChanged = function () {
-            var oldValue = '' + (this.oldValue() == null || this.oldValue() == undefined ? '' : this.oldValue());
-            var value = '' + (this.value() == null || this.value() == undefined ? '' : this.value());
-            return (oldValue != value);
-        };
-        /**
-         * Override
-         */
-        TextField.prototype.onFocusEventHandler = function (e) {
-            var autoValidationDelay = isNaN(this.autoValidationDelay) ? this.defaultAutoValidationDelay : this.autoValidationDelay;
-            this._autoValidationCountset = 1;
-            this._autoValidationTimecount = autoValidationDelay;
-            this._autoValidationDelay = autoValidationDelay;
-            return _super.prototype.onFocusEventHandler.call(this, e);
-        };
-        TextField.prototype.onBlurEventHandler = function (e) {
-            clearTimeout(this._autoValidationDelayTimeout);
-            return _super.prototype.onBlurEventHandler.call(this, e);
-        };
-        TextField.prototype.onKeyDownEventHandler = function (e) {
-            clearTimeout(this._autoValidationDelayTimeout);
-            var t_ = new Date().getTime();
-            if (this.autoValidationDelay == "auto" || this.autoValidationDelay == true) {
-                if (this._previousAutoValidationTimeset > 0) {
-                    var lDiff_ = t_ - this._previousAutoValidationTimeset;
-                    if (lDiff_ > 50 && lDiff_ <= this._autoValidationDelay * 2) {
-                        this._autoValidationCountset++;
-                        this._autoValidationTimecount += lDiff_;
-                        this._autoValidationDelay = this._autoValidationTimecount / this._autoValidationCountset * this._autoValidationCoeff;
-                    }
-                }
-            }
-            this._previousAutoValidationTimeset = t_;
-            return true;
-        };
-        TextField.prototype.onKeyUpEventHandler = function (e) {
-            var _this = this;
-            clearTimeout(this._autoValidationDelayTimeout);
-            if (this.autoValidationDelay != "none" && this.autoValidationDelay != false) {
-                this._autoValidationDelayTimeout = defer(function () {
-                    defer(function () {
-                        if (_this.isValidateValue($(e.target).val())) {
-                            $(e.target).triggerHandler('change');
-                        }
-                        else {
-                            _this._autoValidationDelayTimeout = defer(function () {
-                                $(e.target).triggerHandler('change');
-                            }, _this.defaultAutoValidationDelay);
-                        }
-                    });
-                }, this._autoValidationDelay);
-            }
-            return true;
-        };
-        TextField.prototype.dispose = function () {
-            _super.prototype.dispose.call(this);
-            dispose(this.formattedValue);
-        };
-        return TextField;
-    }(InputField_2.InputField));
-    exports.TextField = TextField;
-});
-define("modules/forms/index", ["require", "exports", "modules/forms/InputField", "modules/forms/LabelField", "modules/forms/SelectField", "modules/forms/TextField"], function (require, exports, InputField_3, LabelField_1, SelectField_1, TextField_1) {
+define("modules/forms/index", ["require", "exports"], function (require, exports) {
     "use strict";
     exports.__esModule = true;
     var RegExpValidationRule = /** @class */ (function () {
@@ -3691,223 +3588,6 @@ define("modules/forms/index", ["require", "exports", "modules/forms/InputField",
         return RegExpValidationRule;
     }());
     exports.RegExpValidationRule = RegExpValidationRule;
-    var ProgressBarField = /** @class */ (function (_super) {
-        __extends(ProgressBarField, _super);
-        function ProgressBarField(id, value) {
-            var _this = _super.call(this, id, value, false) || this;
-            _this.inputTemplate = "progressBarTemplate";
-            _this.value.immediateSubscribe(function (v) {
-                _this.refresh();
-            });
-            return _this;
-        }
-        ProgressBarField.prototype.refresh = function () {
-            $('#' + this.uid + '-progressbar').progressbar({ value: this.value() });
-        };
-        return ProgressBarField;
-    }(InputField_3.InputField));
-    exports.ProgressBarField = ProgressBarField;
-    var StatusField = /** @class */ (function (_super) {
-        __extends(StatusField, _super);
-        function StatusField(id, value) {
-            var _this = _super.call(this, id, value, false) || this;
-            _this.isRunning = ko.observable(false);
-            _this.inputTemplate = "statusInputTemplate";
-            _this.isRunning.immediateSubscribe(function (b) {
-                defer(function () {
-                    if (b) {
-                        $('#' + _this.uid + '-progressbar').progressbar({ value: false });
-                    }
-                    else {
-                        $('#' + _this.uid + '-progressbar').progressbar('destroy');
-                    }
-                });
-            });
-            return _this;
-        }
-        return StatusField;
-    }(LabelField_1.LabelField));
-    exports.StatusField = StatusField;
-    var CustomSelectField = /** @class */ (function (_super) {
-        __extends(CustomSelectField, _super);
-        function CustomSelectField(id, choices, value, required, readOnly, customField) {
-            var _this = _super.call(this, id, value, required, readOnly) || this;
-            _this.options = ko.observableArray();
-            _this.isCustomChoiceSelected = ko.observable(false);
-            _this.selectField = ko.observable();
-            _this.customField = ko.observable();
-            _this.selectField(new SelectField_1.SelectField(id, null, null, required, readOnly));
-            if (!customField) {
-                customField = new TextField_1.TextField(CustomSelectField.CUSTOM_CHOICE + id, "", false, true);
-            }
-            _this.customField(customField);
-            // Use custom update choices
-            _this.updateChoices(choices);
-            _this.template = "customRowPropertyTemplate";
-            _this.selectField.immediateSubscribe(function (Field) {
-                // TODO : unsubscription
-                Field.value.subscribe(function (v) {
-                    _this.isCustomChoiceSelected(v == CustomSelectField.CUSTOM_CHOICE);
-                    if (!_this.isCustomChoiceSelected()) {
-                        _this.value(v);
-                    }
-                    else {
-                        _this.value(CustomSelectField.CUSTOM_CHOICE + _this.customField().value());
-                    }
-                });
-            });
-            _this.customField.immediateSubscribe(function (Field) {
-                // TODO : unsubscription
-                Field.value.subscribe(function (v) {
-                    if (_this.isCustomChoiceSelected()) {
-                        _this.value(CustomSelectField.CUSTOM_CHOICE + v);
-                    }
-                });
-            });
-            _this.isRequired.immediateSubscribe(function (b) {
-                _this.selectField().isRequired(true);
-            });
-            _this.isReadOnly.immediateSubscribe(function (b) {
-                _this.selectField().isReadOnly(b);
-                _this.customField().isReadOnly(!_this.isCustomChoiceSelected() || b);
-            });
-            _this.isCustomChoiceSelected.immediateSubscribe(function (b) {
-                _this.customField().isRequired(b);
-                _this.customField().isReadOnly(_this.isReadOnly() || !b);
-            });
-            _this.value.immediateSubscribe(function (v) {
-                if (_this.isCustomValue(v)) {
-                    _this.selectField().value(CustomSelectField.CUSTOM_CHOICE);
-                    _this.customField().value(_this.cleanCustomValue(v));
-                }
-                else {
-                    _this.selectField().value(v);
-                }
-            });
-            return _this;
-        }
-        CustomSelectField.prototype.isCustomValue = function (v) {
-            return v && v.indexOf(CustomSelectField.CUSTOM_CHOICE) != -1;
-        };
-        CustomSelectField.prototype.cleanCustomValue = function (v) {
-            if (this.isCustomValue(v)) {
-                return v.substring(CustomSelectField.CUSTOM_CHOICE.length);
-            }
-            return v;
-        };
-        CustomSelectField.prototype.getCustomOption = function () {
-            return this.selectField().options().findBy('value', CustomSelectField.CUSTOM_CHOICE);
-        };
-        CustomSelectField.prototype.hasCustomOption = function () {
-            return this.getCustomOption() != null;
-        };
-        CustomSelectField.prototype.addRemoveCustomChoice = function (bAdd) {
-            if (bAdd) {
-                if (!this.hasCustomOption()) {
-                    this.selectField().addChoices([CustomSelectField.CUSTOM_CHOICE]);
-                }
-            }
-            else {
-                var opt = this.getCustomOption();
-                if (opt) {
-                    this.selectField().removeChoices([CustomSelectField.CUSTOM_CHOICE]);
-                }
-            }
-        };
-        /**
-         * Validates the value for the property.
-         * @param {?(number|string)} value The value for this property.
-         * @type {function({?(number|string)})}
-         */
-        CustomSelectField.prototype.isValidateValue = function (value) {
-            var isValid = _super.prototype.isValidateValue.call(this, value);
-            if (isValid && this.selectField /* prevent validation by constructor */) {
-                isValid = this.selectField().isLastInputValid() && this.customField().isLastInputValid();
-            }
-            return isValid;
-        };
-        /**
-         * Update this select with the given choices.
-         */
-        CustomSelectField.prototype.updateChoices = function (newChoices) {
-            this.selectField().updateChoices(newChoices);
-            this.addRemoveCustomChoice(true);
-        };
-        CustomSelectField.CUSTOM_CHOICE = "custom:";
-        return CustomSelectField;
-    }(InputField_3.InputField));
-    exports.CustomSelectField = CustomSelectField;
-    var AutoCompleteField = /** @class */ (function (_super) {
-        __extends(AutoCompleteField, _super);
-        function AutoCompleteField(id, value, required, readOnly) {
-            var _this = _super.call(this, id, value, required, readOnly) || this;
-            _this.valuesList = ko.observableArray();
-            _this.inputTemplate = "autoCompleteInputTemplate";
-            return _this;
-        }
-        return AutoCompleteField;
-    }(TextField_1.TextField));
-    exports.AutoCompleteField = AutoCompleteField;
-    var SelectCondField = /** @class */ (function (_super) {
-        __extends(SelectCondField, _super);
-        function SelectCondField(id, condField, condValue, choices, value, required, readOnly) {
-            var _this = _super.call(this, id, choices, value, required, readOnly) || this;
-            _this.condField = condField;
-            _this.condValue = condValue;
-            _this.inputTemplate = "ui-field-selectcond-template";
-            _this.condField.value.immediateSubscribe(function (v) {
-                _this.isReadOnly(v != _this.condValue);
-                _this.validateValue();
-            });
-            _this.isReadOnly.subscribe(function (b) {
-                if (_this.autoValidate()) {
-                    _this.validateValue();
-                }
-            });
-            _this.value.subscribe(function (v) {
-                if (v) {
-                    _this.condField.value(_this.condValue);
-                }
-            });
-            return _this;
-        }
-        /**
-         * Validates the value for the property.
-         * @param {?(number|string)} value The value for this property.
-         * @type {function({?(number|string)})}
-         */
-        SelectCondField.prototype.isValidateValue = function (value) {
-            if (!this.condField)
-                return false;
-            var isValid = _super.prototype.isValidateValue.call(this, value);
-            if (!this.condField.value() || !this.isReadOnly()) {
-                return isValid;
-            }
-            return true;
-        };
-        return SelectCondField;
-    }(SelectField_1.SelectField));
-    exports.SelectCondField = SelectCondField;
-    var ActionField = /** @class */ (function (_super) {
-        __extends(ActionField, _super);
-        function ActionField(id, label, action, context, readOnly) {
-            var _this = _super.call(this, id, null, false, readOnly) || this;
-            _this.inputTemplate = "buttonTemplate";
-            // Resources Manager
-            _this.value = app.i18n.getObservableString(label);
-            if (context) {
-                _this.action = function (vm, jqEvent) {
-                    action.call(context, vm, jqEvent);
-                };
-            }
-            else {
-                _this.action = action;
-            }
-            return _this;
-        }
-        return ActionField;
-    }(InputField_3.InputField));
-    exports.ActionField = ActionField;
 });
 define("modules/forms/InputField", ["require", "exports", "modules/forms/classes/Tooltip.class", "modules/classes/EventsBinder.class", "modules/forms/index"], function (require, exports, Tooltip_class_2, EventsBinder_class_2, index_1) {
     "use strict";
@@ -4274,7 +3954,7 @@ define("modules/forms/InputField", ["require", "exports", "modules/forms/classes
     }(BaseField));
     exports.InputField = InputField;
 });
-define("modules/forms/SelectField", ["require", "exports", "modules/forms/classes/Option.class", "modules/forms/InputField"], function (require, exports, Option_class_1, InputField_4) {
+define("modules/forms/SelectField", ["require", "exports", "modules/forms/classes/Option.class", "modules/forms/InputField"], function (require, exports, Option_class_1, InputField_1) {
     "use strict";
     exports.__esModule = true;
     var SelectField = /** @class */ (function (_super) {
@@ -4571,7 +4251,7 @@ define("modules/forms/SelectField", ["require", "exports", "modules/forms/classe
         };
         SelectField.useNativeDialogSelect = ko.observable(true);
         return SelectField;
-    }(InputField_4.InputField));
+    }(InputField_1.InputField));
     exports.SelectField = SelectField;
     SelectField.useNativeDialogSelect.subscribe(function (b) {
         $(document).unbind('.disableNativeDialogSelect');
@@ -4759,7 +4439,7 @@ define("modules/classes/ViewModel.class", ["require", "exports", "modules/classe
     }(EventsBinder_class_3.EventsBinder));
     exports.ViewModel = ViewModel;
 });
-define("modules/helpers/files", ["require", "exports", "modules/helpers/logger", "modules/helpers/query"], function (require, exports, logger_3, query_3) {
+define("modules/helpers/files", ["require", "exports", "modules/helpers/logger", "modules/helpers/query"], function (require, exports, logger_3, query_4) {
     "use strict";
     exports.__esModule = true;
     var logger = logger_3.Logger.getLogger('files');
@@ -4783,7 +4463,7 @@ define("modules/helpers/files", ["require", "exports", "modules/helpers/logger",
         if (!((resource || "").toLowerCase().startsWith('http'))) {
             resource = app.servicesPath + resource;
         }
-        query_3.Query.GET(resource, callback, context, { silent: true, upToDate: false });
+        query_4.Query.GET(resource, callback, context, { silent: true, upToDate: false });
     }
     exports.loadResource = loadResource;
 });
@@ -5352,38 +5032,35 @@ define("modules/ui/messageBox", ["require", "exports", "modules/classes/MVVMDial
     }(MVVMDialog_class_1.MVVMDialog));
     exports.MessageBox = MessageBox;
 });
-define("modules/classes/Application.class", ["require", "exports", "modules/helpers/logger", "modules/helpers/browser", "modules/managers/i18n", "modules/forms/SelectField", "modules/classes/EventsBinder.class", "modules/classes/AppManager.class", "modules/ui/messageBox", "modules/classes/MVVMDialog.class", "modules/helpers/query"], function (require, exports, logger_6, browser_1, i18n_1, SelectField_2, EventsBinder_class_4, AppManager_class_1, messageBox_1, MVVMDialog_class_2, query_4) {
+define("modules/classes/Application.class", ["require", "exports", "modules/helpers/logger", "modules/helpers/browser", "modules/managers/i18n", "modules/forms/SelectField", "modules/classes/EventsBinder.class", "modules/classes/AppManager.class", "modules/ui/messageBox", "modules/classes/MVVMDialog.class", "modules/helpers/query"], function (require, exports, logger_6, browser_1, i18n_1, SelectField_1, EventsBinder_class_4, AppManager_class_1, messageBox_1, MVVMDialog_class_2, query_5) {
     "use strict";
     exports.__esModule = true;
-    var logger = logger_6.Logger.getLogger('fr.ca.cat.Application');
+    var logger = logger_6.Logger.getLogger('Application');
     var Application = /** @class */ (function (_super) {
         __extends(Application, _super);
-        function Application() {
+        function Application(lang) {
+            if (lang === void 0) { lang = "en"; }
             var _this = _super.call(this) || this;
             _this.title = ko.observable();
             _this.isReady = ko.observable(false);
-            _this.version = null;
             _this.manager = new AppManager_class_1.AppManager();
-            _this.logLevel = 5;
-            _this.logConsole = false;
             _this.useDialog = false;
             _this.servicesPath = "";
-            _this.basePath = "";
-            _this.webkitPath = "";
-            _this.webkitLogUri = "";
-            _this.context = {};
-            _this.userData = {};
+            _this.configuration = null;
             _this.onAjaxSend = null;
+            window.app = _this;
             var location = window.location;
             _this.servicesPath = location.protocol + "//" + location.host + "/";
-            _this.webkitPath = _this.servicesPath;
             _this.browser = new browser_1.Browser();
-            _this.i18n = _this.manager.register('i18n', new i18n_1.I18n(browserLocaleInfos["Locales"]));
+            _this.i18n = _this.manager.register('i18n', new i18n_1.I18n(lang));
             return _this;
         }
+        Application.prototype.getVersion = function () {
+            return this.configuration.version;
+        };
         Application.prototype.getFinalFileName = function (fileName) {
-            if (this.version) {
-                fileName += (fileName.indexOf('?') == -1 ? '?' : '&') + '_v=' + encodeURIComponent(this.version);
+            if (this.getVersion()) {
+                fileName += (fileName.indexOf('?') == -1 ? '?' : '&') + '_v=' + encodeURIComponent(this.getVersion());
             }
             return fileName;
         };
@@ -5398,30 +5075,30 @@ define("modules/classes/Application.class", ["require", "exports", "modules/help
         Application.prototype.postRedirect = function (url, data_post, target, data_get) {
             if (target === void 0) { target = "_blank"; }
             if (data_get === void 0) { data_get = null; }
-            var idForm_ = "kopostform";
-            var urlDataPrefix_ = "";
+            var idForm = "kopostform";
+            var urlDataPrefix = "";
             if (!url)
                 return;
             if (url.indexOf("?") == -1) {
-                urlDataPrefix_ = "?";
+                urlDataPrefix = "?";
             }
             $.each(data_get || {}, function (k, v) {
-                url += urlDataPrefix_ + encodeURIComponent(k) + "=" + encodeURIComponent(v);
-                urlDataPrefix_ = "&";
+                url += urlDataPrefix + encodeURIComponent(k) + "=" + encodeURIComponent(v);
+                urlDataPrefix = "&";
             });
-            var sDataForm_ = "";
+            var sDataForm = "";
             $.each(data_post || {}, function (k, v) {
-                sDataForm_ += "<input type='hidden' name='" + k + "' value='" + v + "'>";
+                sDataForm += "<input type='hidden' name='" + k + "' value='" + v + "'>";
             });
-            var $form = $("#" + idForm_);
+            var $form = $("#" + idForm);
             if ($form.length > 0) {
                 $form.attr("action", url);
-                $form.html(sDataForm_);
+                $form.html(sDataForm);
             }
             else {
-                $("body").append("<form id='" + idForm_ + "' action='" + url + "' method='POST' target='" + target + "'>" + sDataForm_ + "</form>");
+                $("body").append("<form id='" + idForm + "' action='" + url + "' method='POST' target='" + target + "'>" + sDataForm + "</form>");
             }
-            $("#" + idForm_).submit();
+            $("#" + idForm).submit();
         };
         Application.prototype.ready = function (fn, context) {
             if (this.isReady()) {
@@ -5458,24 +5135,24 @@ define("modules/classes/Application.class", ["require", "exports", "modules/help
          * Affiche la bar pour acceptation des cookies
          */
         Application.prototype.showCookieBar = function (options) {
-            var opts_ = {
+            var opts = {
                 message: this.i18n.getString('app.plugins.cookieBar.message'),
                 acceptText: this.i18n.getString('app.plugins.cookieBar.acceptText'),
                 declineText: this.i18n.getString('app.plugins.cookieBar.declineText'),
                 acceptButton: true,
-                zindex: '9999999',
+                zindex: 9999999,
                 fixed: true,
                 bottom: true,
                 domain: this.servicesPath,
                 forceShow: true
             };
-            if (this.userData && this.userData.plugins && this.userData.cookieBar && typeof (this.userData.plugins.cookieBar.options) == 'object') {
-                opts_ = $.extend(opts_, this.userData.plugins.cookieBar.options);
+            if (this.configuration && this.configuration.plugins && typeof (this.configuration.plugins.cookieBar.options) == 'object') {
+                opts = $.extend(opts, this.configuration.plugins.cookieBar.options);
             }
             if (typeof (options) == 'object') {
-                opts_ = $.extend(opts_, options);
+                opts = $.extend(opts, options);
             }
-            $.cookieBar(opts_);
+            $.cookieBar(opts);
         };
         /**
          * Envoi d'un email
@@ -5522,12 +5199,16 @@ define("modules/classes/Application.class", ["require", "exports", "modules/help
         };
         Application.prototype.initManagers = function () {
             var _this = this;
+            logger.info("Initialize app managers");
             var managersId = [];
             $.each(this.manager.getManagers(), function (id, manager) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Initialize manager '" + id + "'");
+                }
                 managersId.push(id);
                 manager.init();
                 manager.on('initError', function () {
-                    this.emit('initError', manager);
+                    _this.emit('initManagerError', manager);
                 });
             });
             app.manager.ready(managersId, function () {
@@ -5536,17 +5217,23 @@ define("modules/classes/Application.class", ["require", "exports", "modules/help
         };
         Application.prototype.init = function (conf) {
             var _this = this;
-            this.userData = $.extend(this.userData, conf || {});
-            logger_6.Logger.getDefaultLogger().level(app.logLevel);
-            if (this.logConsole) {
+            this.configuration = $.extend({
+                logConsole: true
+            }, conf || {});
+            // First, set loggers
+            var logLevel = isset(this.configuration.logLevel) ? this.configuration.logLevel : logger_6.TLogLevel.DEBUG;
+            logger_6.Logger.getDefaultLogger().level(logLevel);
+            if (this.configuration.logConsole === true) {
                 logger_6.Logger.getDefaultLogger().addAppender(new logger_6.ConsoleAppender());
             }
-            var oRemoteAppender_ = new logger_6.RemoteAppender(this.servicesPath + this.webkitLogUri + this.context.page);
-            oRemoteAppender_.level = logger_6.TLogLevel.ERROR;
-            logger_6.Logger.getDefaultLogger().addAppender(oRemoteAppender_);
+            if (this.configuration.remoteLogUri) {
+                var remoteAppender = new logger_6.RemoteAppender(this.servicesPath + this.configuration.remoteLogUri + this.configuration.context.page);
+                remoteAppender.level = logger_6.TLogLevel.ERROR;
+                logger_6.Logger.getDefaultLogger().addAppender(remoteAppender);
+            }
             this.emit('init');
-            logger.info("Initialisation de l'application");
-            query_4.Query.defaultOptions.upToDate = true;
+            logger.info("Initialize app");
+            query_5.Query.defaultOptions.upToDate = true;
             if (!window.location.origin) {
                 var location_1 = window.location;
                 location_1.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
@@ -5559,48 +5246,48 @@ define("modules/classes/Application.class", ["require", "exports", "modules/help
                 settings.url = _this.getFinalFileName(settings.url);
             });
             this.initEvents();
-            if (this.userData.httpSafeMethods === true) {
+            if (this.configuration.httpSafeMethods === true) {
                 $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
                     if (options.type != 'GET' && options.type != 'POST') {
-                        logger.debug("Remplacement de la méthode '" + options.type + "' par 'POST' dans l'entête X-HTTP-Method-Override");
+                        logger.debug("Replace HTTP method '" + options.type + "' by 'POST' into header X-HTTP-Method-Override");
                         jqXHR.setRequestHeader('X-HTTP-Method-Override', options.type);
                         options.type = 'POST';
                     }
                 });
             }
-            if (this.userData.jetonCSRF) {
+            if (this.configuration.jetonCSRF) {
                 $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
-                    logger.debug("Ajout du jeton CSRF dans l'entête X-CSRF");
-                    jqXHR.setRequestHeader('X-CSRF', _this.userData.jetonCSRF);
+                    logger.debug("Add CSRF token into header X-CSRF");
+                    jqXHR.setRequestHeader('X-CSRF', _this.configuration.jetonCSRF);
                 });
             }
-            if (this.userData.browsers) {
-                this.browser.setSupportedVersions(this.userData.browsers);
+            if (this.configuration.browsers) {
+                this.browser.setSupportedVersions(this.configuration.browsers);
                 this.browser.check(function (result, browserInfo) {
                     _this.emit('initBrowserVerification', result, browserInfo);
                 });
             }
-            if (this.userData.plugins && this.userData.plugins.cookieBar) {
-                var enableCookieBar_ = this.userData.plugins.cookieBar === true || this.userData.plugins.cookieBar.enabled === true;
-                if (enableCookieBar_) {
+            if (this.configuration.plugins && this.configuration.plugins.cookieBar) {
+                var enableCookieBar = this.configuration.plugins.cookieBar === true || this.configuration.plugins.cookieBar.enabled === true;
+                if (enableCookieBar) {
                     this.ready(function () {
                         _this.showCookieBar({ forceShow: false });
                     });
                 }
             }
-            if (this.userData.useNativeDialogSelect === false) {
+            if (this.configuration.useNativeDialogSelect === false) {
                 this.disabledNativeDialogSelect();
             }
-            if (this.userData.scrollDetection) {
-                if (this.userData.scrollDetection.enable === true || !isset(this.userData.scrollDetection.enable)) {
-                    this.enableScrollDetection(this.userData.scrollDetection);
+            if (this.configuration.scrollDetection) {
+                if (this.configuration.scrollDetection.enabled === true || !isset(this.configuration.scrollDetection.enabled)) {
+                    this.enableScrollDetection(this.configuration.scrollDetection);
                 }
             }
             this.initManagers();
         };
         Application.prototype.disabledNativeDialogSelect = function () {
             logger.debug('Disable native dialog');
-            SelectField_2.SelectField.useNativeDialogSelect(false);
+            SelectField_1.SelectField.useNativeDialogSelect(false);
         };
         Application.prototype.enableScrollDetection = function (params) {
             logger.debug('Scroll detection active');
@@ -5663,7 +5350,7 @@ define("modules/classes/Application.class", ["require", "exports", "modules/help
     }
     exports.confirm = confirm;
 });
-define("modules/classes/GroupFields.class", ["require", "exports", "modules/forms/InputField"], function (require, exports, InputField_5) {
+define("modules/classes/GroupFields.class", ["require", "exports", "modules/forms/InputField"], function (require, exports, InputField_2) {
     "use strict";
     exports.__esModule = true;
     var GroupFields = /** @class */ (function (_super) {
@@ -5803,10 +5490,10 @@ define("modules/classes/GroupFields.class", ["require", "exports", "modules/form
             dispose(this.computedMessages);
         };
         return GroupFields;
-    }(InputField_5.BaseField));
+    }(InputField_2.BaseField));
     exports.GroupFields = GroupFields;
 });
-define("modules/classes/FieldsValidatorDigest.class", ["require", "exports", "modules/forms/InputField", "modules/classes/GroupFields.class"], function (require, exports, InputField_6, GroupFields_class_1) {
+define("modules/classes/FieldsValidatorDigest.class", ["require", "exports", "modules/forms/InputField", "modules/classes/GroupFields.class"], function (require, exports, InputField_3, GroupFields_class_1) {
     "use strict";
     exports.__esModule = true;
     var FieldsValidatorDigest = /** @class */ (function (_super) {
@@ -5865,7 +5552,7 @@ define("modules/classes/FieldsValidatorDigest.class", ["require", "exports", "mo
                                 str = observable();
                             }
                             var message = utils.formatString(str, messagesArgs);
-                            field.messages.push(new InputField_6.InputFieldMessage(message, validationConstraint.isWarn));
+                            field.messages.push(new InputField_3.InputFieldMessage(message, validationConstraint.isWarn));
                         }
                     }
                 }
@@ -5877,7 +5564,7 @@ define("modules/classes/FieldsValidatorDigest.class", ["require", "exports", "mo
                         observable = app.i18n.getObservableString(field.id + '.invalid', 'form.field.invalid');
                     }
                     var message = utils.formatString(observable(), messagesArgs);
-                    field.messages.push(new InputField_6.InputFieldMessage(message));
+                    field.messages.push(new InputField_3.InputFieldMessage(message));
                 }
                 if (field.oListOfField && bRecursive) {
                     // Traitement récursifs des enfants
@@ -6302,7 +5989,7 @@ define("modules/classes/Template.class", ["require", "exports", "modules/classes
     }(EventsBinder_class_6.EventsBinder));
     exports.Template = Template;
 });
-define("modules/classes/_QueryPolling.class", ["require", "exports", "modules/helpers/query", "modules/classes/EventsBinder.class"], function (require, exports, query_5, EventsBinder_class_7) {
+define("modules/classes/_QueryPolling.class", ["require", "exports", "modules/helpers/query", "modules/classes/EventsBinder.class"], function (require, exports, query_6, EventsBinder_class_7) {
     "use strict";
     exports.__esModule = true;
     var QueryPolling = /** @class */ (function (_super) {
@@ -6369,13 +6056,13 @@ define("modules/classes/_QueryPolling.class", ["require", "exports", "modules/he
                 dataType: this.dataType
             };
             this.emit('query', request);
-            this.__jqxhr = query_5.Query.GET(request.query, request.callback, request.context, { dataType: request.dataType, silent: request.silent, cache: request.cache, domain: request.domain, timeout: request.timeout });
+            this.__jqxhr = query_6.Query.GET(request.query, request.callback, request.context, { dataType: request.dataType, silent: request.silent, cache: request.cache, domain: request.domain, timeout: request.timeout });
             if (this.__jqxhr) {
                 this.__jqxhr.always(function (result, status) {
                     _this.__jqxhr = null;
                     if (!_this.__interrupt) {
-                        if ((status != query_5.Query.Status.SUCCESS) && (status != query_5.Query.Status.NOCONTENT)) {
-                            if (status == query_5.Query.Status.TIMEOUT || status == query_5.Query.Status.ABORT) {
+                        if ((status != query_6.Query.Status.SUCCESS) && (status != query_6.Query.Status.NOCONTENT)) {
+                            if (status == query_6.Query.Status.TIMEOUT || status == query_6.Query.Status.ABORT) {
                                 _this.execute();
                             }
                             else {
@@ -6398,7 +6085,198 @@ define("modules/classes/_QueryPolling.class", ["require", "exports", "modules/he
     }(EventsBinder_class_7.EventsBinder));
     exports.QueryPolling = QueryPolling;
 });
-define("modules/forms/CodePostalField", ["require", "exports", "modules/forms/InputField", "modules/forms/SelectField", "modules/forms/TextField"], function (require, exports, InputField_7, SelectField_3, TextField_2) {
+define("modules/classes/locale/fr", ["require", "exports", "modules/classes/Locale.class"], function (require, exports, Locale_class_3) {
+    "use strict";
+    exports.__esModule = true;
+    var Locale_fr = /** @class */ (function (_super) {
+        __extends(Locale_fr, _super);
+        function Locale_fr() {
+            var _this = _super.call(this, 'fr', 'fr_FR') || this;
+            _this.displayName = "Français";
+            _this.decimalSeparator = ",";
+            _this.decimalGroupSeparator = " ";
+            _this.decimalGroupDigits = 3;
+            _this.dateFormat = "dd/mm/yyyy";
+            _this.dateSeparator = "/";
+            _this.dateLiteralFormat = "DMY";
+            _this.currencySymbol = "€";
+            return _this;
+        }
+        return Locale_fr;
+    }(Locale_class_3.Locale));
+    exports.Locale_fr = Locale_fr;
+});
+define("modules/forms/TextField", ["require", "exports", "modules/forms/InputField"], function (require, exports, InputField_4) {
+    "use strict";
+    exports.__esModule = true;
+    var TTextCase;
+    (function (TTextCase) {
+        TTextCase[TTextCase["none"] = 0] = "none";
+        TTextCase[TTextCase["upper"] = 1] = "upper";
+        TTextCase[TTextCase["lower"] = 2] = "lower";
+        TTextCase[TTextCase["proper"] = 3] = "proper";
+    })(TTextCase = exports.TTextCase || (exports.TTextCase = {}));
+    var TextField = /** @class */ (function (_super) {
+        __extends(TextField, _super);
+        function TextField(id, value, required, readOnly) {
+            var _this = _super.call(this, id, value, required, readOnly) || this;
+            _this.maxLength = 1000;
+            _this.minLength = 0;
+            _this.pattern = ko.observable();
+            _this.useFormat = ko.observable(true);
+            _this.formatFunction = null;
+            _this.unformatFunction = null;
+            _this.defaultAutoValidationDelay = 2000;
+            _this._autoValidationCoeff = 1.50;
+            _this.autoTrim = ko.observable(true);
+            _this.textCase = ko.observable(TTextCase.none);
+            _this.inputType = ko.observable('text'); //=> Disabled because of bug on IE8 when settings 'type' attribute
+            _this.valueUpdateOn = ko.observable('change');
+            _this.autoValidationDelay = "auto";
+            _this.inputTemplate = "ui-field-text-template";
+            _this.hasTextChanged = ko.computed(_this.computeHasTextChanged, _this);
+            _this.formattedValue = ko.computed({
+                read: function () {
+                    if (_this.isFocused()) {
+                        return _this.value();
+                    }
+                    return _this.useFormat() ? _this.formatValue(_this.dataValue()) : _this.dataValue();
+                },
+                write: function (v) {
+                    _this.value(v);
+                }
+            }, _this);
+            _this.value.subscribe(function (v) {
+                _this._updateValue(v);
+                if (!_this.hasBeenVisited() && _this.isFocused()) {
+                    defer(function () {
+                        _this.hasBeenVisited(true);
+                    });
+                }
+            });
+            _this.isFocused.subscribe(function (v) {
+                if (!v) {
+                    _this.validateValue();
+                }
+            });
+            _this.textCase.immediateSubscribe(function (v) {
+                _this._updateValue();
+            });
+            _this.autoTrim.subscribe(function (b) {
+                _this._updateValue();
+            });
+            return _this;
+        }
+        TextField.prototype._updateValue = function (v) {
+            var sCurrentValue_ = v || this.value();
+            var sNewValue_ = this.transform(sCurrentValue_);
+            if (sNewValue_ != sCurrentValue_) {
+                this.value(sNewValue_);
+            }
+        };
+        TextField.prototype.transform = function (value) {
+            if (!value || typeof (value) != "string") {
+                return value;
+            }
+            if (this.autoTrim()) {
+                value = value.trim();
+            }
+            switch (this.textCase()) {
+                case TTextCase.upper:
+                case TTextCase[TTextCase.upper]: return value.toUpperCase();
+                case TTextCase.lower:
+                case TTextCase[TTextCase.lower]: return value.toLowerCase();
+                case TTextCase.proper:
+                case TTextCase[TTextCase.proper]: return value.toProperCase();
+            }
+            return value;
+        };
+        TextField.prototype.formatValue = function (value) {
+            return typeof (this.formatFunction) == "function" ? this.formatFunction.call(this, value) : value;
+        };
+        TextField.prototype.cleanFormatValue = function (value) {
+            return typeof (this.unformatFunction) == "function" ? this.unformatFunction.call(this, value) : value;
+        };
+        TextField.prototype.getDataValue = function () {
+            var v = _super.prototype.getDataValue.call(this);
+            if (isset(v)) {
+                return CString(this.cleanFormatValue(v));
+            }
+            return null;
+        };
+        TextField.prototype.isValidateValue = function (value) {
+            var b = _super.prototype.isValidateValue.call(this, value);
+            if (b && !this.valueIsEmpty(value)) {
+                value = CString(value);
+                if ((this.minLength && value.length < this.minLength) || (this.maxLength && value.length > this.maxLength)) {
+                    b = false;
+                }
+            }
+            return b;
+        };
+        TextField.prototype.computeHasTextChanged = function () {
+            var oldValue = '' + (this.oldValue() == null || this.oldValue() == undefined ? '' : this.oldValue());
+            var value = '' + (this.value() == null || this.value() == undefined ? '' : this.value());
+            return (oldValue != value);
+        };
+        /**
+         * Override
+         */
+        TextField.prototype.onFocusEventHandler = function (e) {
+            var autoValidationDelay = isNaN(this.autoValidationDelay) ? this.defaultAutoValidationDelay : this.autoValidationDelay;
+            this._autoValidationCountset = 1;
+            this._autoValidationTimecount = autoValidationDelay;
+            this._autoValidationDelay = autoValidationDelay;
+            return _super.prototype.onFocusEventHandler.call(this, e);
+        };
+        TextField.prototype.onBlurEventHandler = function (e) {
+            clearTimeout(this._autoValidationDelayTimeout);
+            return _super.prototype.onBlurEventHandler.call(this, e);
+        };
+        TextField.prototype.onKeyDownEventHandler = function (e) {
+            clearTimeout(this._autoValidationDelayTimeout);
+            var t_ = new Date().getTime();
+            if (this.autoValidationDelay == "auto" || this.autoValidationDelay == true) {
+                if (this._previousAutoValidationTimeset > 0) {
+                    var lDiff_ = t_ - this._previousAutoValidationTimeset;
+                    if (lDiff_ > 50 && lDiff_ <= this._autoValidationDelay * 2) {
+                        this._autoValidationCountset++;
+                        this._autoValidationTimecount += lDiff_;
+                        this._autoValidationDelay = this._autoValidationTimecount / this._autoValidationCountset * this._autoValidationCoeff;
+                    }
+                }
+            }
+            this._previousAutoValidationTimeset = t_;
+            return true;
+        };
+        TextField.prototype.onKeyUpEventHandler = function (e) {
+            var _this = this;
+            clearTimeout(this._autoValidationDelayTimeout);
+            if (this.autoValidationDelay != "none" && this.autoValidationDelay != false) {
+                this._autoValidationDelayTimeout = defer(function () {
+                    defer(function () {
+                        if (_this.isValidateValue($(e.target).val())) {
+                            $(e.target).triggerHandler('change');
+                        }
+                        else {
+                            _this._autoValidationDelayTimeout = defer(function () {
+                                $(e.target).triggerHandler('change');
+                            }, _this.defaultAutoValidationDelay);
+                        }
+                    });
+                }, this._autoValidationDelay);
+            }
+            return true;
+        };
+        TextField.prototype.dispose = function () {
+            _super.prototype.dispose.call(this);
+            dispose(this.formattedValue);
+        };
+        return TextField;
+    }(InputField_4.InputField));
+    exports.TextField = TextField;
+});
+define("modules/forms/CodePostalField", ["require", "exports", "modules/forms/InputField", "modules/forms/SelectField", "modules/forms/TextField"], function (require, exports, InputField_5, SelectField_2, TextField_1) {
     "use strict";
     exports.__esModule = true;
     var CodePostalField = /** @class */ (function (_super) {
@@ -6406,8 +6284,8 @@ define("modules/forms/CodePostalField", ["require", "exports", "modules/forms/In
         function CodePostalField(id, value, required, readOnly) {
             var _this = _super.call(this, id, value, required, readOnly) || this;
             _this.isLoadingValues = ko.observable(false);
-            _this.oSelectField = new SelectField_3.SelectField(id + ".select", [], null, required, readOnly);
-            _this.oTextField = new TextField_2.TextField(id + ".text", null, false, readOnly);
+            _this.oSelectField = new SelectField_2.SelectField(id + ".select", [], null, required, readOnly);
+            _this.oTextField = new TextField_1.TextField(id + ".text", null, false, readOnly);
             _this.oTextField.inputType('tel');
             _this.oTextField.setValidationRegExp(regexp.CdPost);
             _this.oTextField.maxLength = 5;
@@ -6523,10 +6401,10 @@ define("modules/forms/CodePostalField", ["require", "exports", "modules/forms/In
             return isValid;
         };
         return CodePostalField;
-    }(InputField_7.InputField));
+    }(InputField_5.InputField));
     exports.CodePostalField = CodePostalField;
 });
-define("modules/forms/NumericField", ["require", "exports", "modules/forms/TextField"], function (require, exports, TextField_3) {
+define("modules/forms/NumericField", ["require", "exports", "modules/forms/TextField"], function (require, exports, TextField_2) {
     "use strict";
     exports.__esModule = true;
     var TNumericTypes;
@@ -6651,7 +6529,7 @@ define("modules/forms/NumericField", ["require", "exports", "modules/forms/TextF
         };
         NumericField.defaultInputTemplate = "ui-field-numeric-template";
         return NumericField;
-    }(TextField_3.TextField));
+    }(TextField_2.TextField));
     exports.NumericField = NumericField;
 });
 define("modules/forms/CurrencyField", ["require", "exports", "modules/forms/NumericField"], function (require, exports, NumericField_1) {
@@ -6669,7 +6547,7 @@ define("modules/forms/CurrencyField", ["require", "exports", "modules/forms/Nume
     }(NumericField_1.NumericField));
     exports.CurrencyField = CurrencyField;
 });
-define("modules/forms/DateField", ["require", "exports", "modules/forms/TextField"], function (require, exports, TextField_4) {
+define("modules/forms/DateField", ["require", "exports", "modules/forms/TextField"], function (require, exports, TextField_3) {
     "use strict";
     exports.__esModule = true;
     var DateField = /** @class */ (function (_super) {
@@ -6728,7 +6606,7 @@ define("modules/forms/DateField", ["require", "exports", "modules/forms/TextFiel
             return bValid_;
         };
         return DateField;
-    }(TextField_4.TextField));
+    }(TextField_3.TextField));
     exports.DateField = DateField;
 });
 define("modules/forms/DateTextField", ["require", "exports", "modules/forms/NumericField", "modules/forms/DateField"], function (require, exports, NumericField_2, DateField_1) {
@@ -6917,7 +6795,7 @@ define("modules/forms/DateTextField", ["require", "exports", "modules/forms/Nume
     }(DateField_1.DateField));
     exports.DateMultiFieldField = DateMultiFieldField;
 });
-define("modules/forms/EmailField", ["require", "exports", "modules/forms/TextField"], function (require, exports, TextField_5) {
+define("modules/forms/EmailField", ["require", "exports", "modules/forms/TextField"], function (require, exports, TextField_4) {
     "use strict";
     exports.__esModule = true;
     var EmailField = /** @class */ (function (_super) {
@@ -6967,10 +6845,10 @@ define("modules/forms/EmailField", ["require", "exports", "modules/forms/TextFie
         };
         EmailField.EMAIL_LIST_DELIMITER = ";";
         return EmailField;
-    }(TextField_5.TextField));
+    }(TextField_4.TextField));
     exports.EmailField = EmailField;
 });
-define("modules/forms/GridPasswordField", ["require", "exports", "modules/forms/InputField"], function (require, exports, InputField_8) {
+define("modules/forms/GridPasswordField", ["require", "exports", "modules/forms/InputField"], function (require, exports, InputField_6) {
     "use strict";
     exports.__esModule = true;
     var GridPasswordField = /** @class */ (function (_super) {
@@ -7035,10 +6913,26 @@ define("modules/forms/GridPasswordField", ["require", "exports", "modules/forms/
             this.value(s_.left(s_.length - 1));
         };
         return GridPasswordField;
-    }(InputField_8.InputField));
+    }(InputField_6.InputField));
     exports.GridPasswordField = GridPasswordField;
 });
-define("modules/forms/PasswordField", ["require", "exports", "modules/forms/TextField"], function (require, exports, TextField_6) {
+define("modules/forms/LabelField", ["require", "exports", "modules/forms/InputField"], function (require, exports, InputField_7) {
+    "use strict";
+    exports.__esModule = true;
+    var LabelField = /** @class */ (function (_super) {
+        __extends(LabelField, _super);
+        function LabelField(id, value, required) {
+            if (required === void 0) { required = false; }
+            var _this = _super.call(this, id, value, required, true) || this;
+            _this.className = ko.observable(null);
+            _this.inputTemplate = "labelInputTemplate";
+            return _this;
+        }
+        return LabelField;
+    }(InputField_7.InputField));
+    exports.LabelField = LabelField;
+});
+define("modules/forms/PasswordField", ["require", "exports", "modules/forms/TextField"], function (require, exports, TextField_5) {
     "use strict";
     exports.__esModule = true;
     var PasswordField = /** @class */ (function (_super) {
@@ -7049,7 +6943,7 @@ define("modules/forms/PasswordField", ["require", "exports", "modules/forms/Text
             return _this;
         }
         return PasswordField;
-    }(TextField_6.TextField));
+    }(TextField_5.TextField));
     exports.PasswordField = PasswordField;
 });
 define("modules/forms/RateField", ["require", "exports", "modules/forms/NumericField"], function (require, exports, NumericField_3) {
@@ -7068,7 +6962,7 @@ define("modules/forms/RateField", ["require", "exports", "modules/forms/NumericF
     }(NumericField_3.NumericField));
     exports.RateField = RateField;
 });
-define("modules/forms/TextAreaField", ["require", "exports", "modules/forms/TextField"], function (require, exports, TextField_7) {
+define("modules/forms/TextAreaField", ["require", "exports", "modules/forms/TextField"], function (require, exports, TextField_6) {
     "use strict";
     exports.__esModule = true;
     var TextAreaField = /** @class */ (function (_super) {
@@ -7122,10 +7016,10 @@ define("modules/forms/TextAreaField", ["require", "exports", "modules/forms/Text
             return ($element[0].scrollHeight - $element[0].scrollTop) == $element.innerHeight();
         };
         return TextAreaField;
-    }(TextField_7.TextField));
+    }(TextField_6.TextField));
     exports.TextAreaField = TextAreaField;
 });
-define("modules/forms/TextSearchField", ["require", "exports", "modules/forms/TextField"], function (require, exports, TextField_8) {
+define("modules/forms/TextSearchField", ["require", "exports", "modules/forms/TextField"], function (require, exports, TextField_7) {
     "use strict";
     exports.__esModule = true;
     var TextSearchField = /** @class */ (function (_super) {
@@ -7153,10 +7047,10 @@ define("modules/forms/TextSearchField", ["require", "exports", "modules/forms/Te
             }
         };
         return TextSearchField;
-    }(TextField_8.TextField));
+    }(TextField_7.TextField));
     exports.TextSearchField = TextSearchField;
 });
-define("modules/forms/ToggleField", ["require", "exports", "modules/forms/InputField"], function (require, exports, InputField_9) {
+define("modules/forms/ToggleField", ["require", "exports", "modules/forms/InputField"], function (require, exports, InputField_8) {
     "use strict";
     exports.__esModule = true;
     var ToggleField = /** @class */ (function (_super) {
@@ -7190,7 +7084,7 @@ define("modules/forms/ToggleField", ["require", "exports", "modules/forms/InputF
             return isValid;
         };
         return ToggleField;
-    }(InputField_9.InputField));
+    }(InputField_8.InputField));
     exports.ToggleField = ToggleField;
 });
 define("modules/helpers/xml", ["require", "exports"], function (require, exports) {

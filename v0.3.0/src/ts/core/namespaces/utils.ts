@@ -1,12 +1,10 @@
-import { Locale } from '@webkit/core/Locale.class';
-
 namespace utils {
 
-	var _flattenObject = function(result, object, prefix: string): any {
+	let _flattenObject = function(result, object, prefix: string): any {
 
-		for ( var prop in object) {
-			var key: any = prop
-			var value: any = object[key]
+		for ( let prop in object) {
+			let key: any = prop
+			let value: any = object[key]
 			if (typeof value == "object") {
 				// Continue with sub object
 			    _flattenObject(result, value, key + ".")
@@ -37,9 +35,9 @@ namespace utils {
 			return srcInstance
 		}
 
-		var newInstance = new srcInstance.constructor()
+		let newInstance = new srcInstance.constructor()
 
-		for (var i in srcInstance) {
+		for (let i in srcInstance) {
 			newInstance[i] = clone(srcInstance[i])
 		}
 
@@ -48,7 +46,7 @@ namespace utils {
 
 	export function getElementText(element: any): string {
         if(!element) return null
-		var text: string = element.text
+		let text: string = element.text
 		if (text !== undefined) {
 			return text
 		}
@@ -60,7 +58,7 @@ namespace utils {
 	}
 		
     export function formatEmail(email: string): string {
-        var t = email.split('@')
+        let t = email.split('@')
         return t[0].substr(0, 64).replace(/[^.a-zA-Z0-9!#$%&'*_+-/=?^`{|}~]/g, '_') + (t[1] ? '@' + t[1] : '')
     }
 
@@ -70,7 +68,7 @@ namespace utils {
      * @return a formatted string
      */
     export function formatString(str: string, parameters: any): string {
-        var formatted: string, match: RegExpExecArray, re: RegExp, remaining: string, needToTraduce: boolean
+        let formatted: string, match: RegExpExecArray, re: RegExp, remaining: string, needToTraduce: boolean
 
         formatted = str
         needToTraduce = false
@@ -80,7 +78,7 @@ namespace utils {
         match = re.exec(remaining)
         while (match) {
             // Append the beginning of the match
-            var param = match[1]
+            let param = match[1]
 
             if(param && param.startsWith('!')) {
                 param = param.substring(1)
@@ -88,7 +86,7 @@ namespace utils {
             }
 
             // Search param the parameters
-            var value = ko.unwrap(parameters[param])
+            let value = ko.unwrap(parameters[param])
             if (isset(value)) {
 
                 if(needToTraduce) {
@@ -111,7 +109,7 @@ namespace utils {
 		
 	// Flatten an object. e.g. {"a" :"1", "b": {"c" : "2"} becomes {"a": "1", "b.c" : "2"}
 	export function flattenObject(object): any {
-		var result = {}
+		let result = {}
 		_flattenObject(result, object, "")
 		return result
 	}
@@ -120,7 +118,7 @@ namespace utils {
 	 * Parse a given log message
 	 * log message MUST respect the following format 
 	 * 			
-	 * 			var log_message = "log_id {param1:value1}{param2:value2}{param3:value3}"
+	 * 			let log_message = "log_id {param1:value1}{param2:value2}{param3:value3}"
 	 * 
 	 * @param a log message as described above
 	 * 
@@ -128,13 +126,13 @@ namespace utils {
 	 * that contains for each param id, its associated value. 
 	 */
 	export function parseLogMessage(logMessage: any): any {
-		var obj: any = {
+		let obj: any = {
             id: null,
             parameters: {}
         }
-		var parameters: any = {}
-		var indexFirstBraket: number
-		var indexSecondBraket: number
+		let parameters: any = {}
+		let indexFirstBraket: number
+		let indexSecondBraket: number
 
 		// Get the position of the first parameters if it exists
 		indexFirstBraket = logMessage.indexOf("{")
@@ -145,14 +143,14 @@ namespace utils {
 			obj.id = logMessage.substr(0, indexFirstBraket).trim()
 
 			// Then, retrieve the parameters
-			var current = logMessage
+			let current = logMessage
 
 			while ((indexFirstBraket >= 0) && (indexSecondBraket > 0) && (indexFirstBraket < indexSecondBraket)) {
 				// Is there any parameters between curly brackets ?
 				if (indexSecondBraket - indexFirstBraket > 1) {
 					// Yes, there is a parameter.... extract it !
-					var parameter = current.substr(indexFirstBraket + 1, (indexSecondBraket - indexFirstBraket - 1)).trim()
-					var temp = parameter.split(":", 2)		
+					let parameter = current.substr(indexFirstBraket + 1, (indexSecondBraket - indexFirstBraket - 1)).trim()
+					let temp = parameter.split(":", 2)		
 					parameters[temp[0]] = temp[1]
 				}
 
@@ -189,13 +187,13 @@ namespace utils {
 	 * in the logMessage string.
 	 */
 	export function getInternationalizedLogMessage(logMessage: any): string {
-		var message: string
-		var jsonObject: any
+		let message: string
+		let jsonObject: any
 		
 		try {
 			jsonObject = JSON.parse(logMessage)
-			var log = parseLogMessage(jsonObject.errorMessage)
-			var translated_message = app.i18n.getString(log.id)
+			let log = parseLogMessage(jsonObject.errorMessage)
+			let translated_message = app.i18n.getString(log.id)
 			
 			if (translated_message) {
 				message = formatString(translated_message, log.parameters)
@@ -210,19 +208,19 @@ namespace utils {
 	}
 	
 	export function getParamValue(param: string, url?: string): string {
-		var u = url == undefined ? document.location.href : url
-		var reg = new RegExp('(\\?|&|^)'+param+'=(.*?)(&|$)')
-		var matches = u.match(reg)
+		let u = url == undefined ? document.location.href : url
+		let reg = new RegExp('(\\?|&|^)'+param+'=(.*?)(&|$)')
+		let matches = u.match(reg)
 		if(matches) {
 			return matches[2] != undefined ? decodeURIComponent(matches[2]).replace(/\+/g,' ') : '';
 		}
         return ''
 	}
     
-    export function formatMonthToYear(PE_nbMonth: number, strict: boolean = true): string {
+    export function formatMonthToYear(month: number, strict: boolean = true): string {
     
-        var sRetour_: string = "";
-        var iNbMois12_: number = parseInt("" + (PE_nbMonth / 12));
+        let sRetour_: string = "";
+        let iNbMois12_: number = parseInt("" + (month / 12));
             
         if (iNbMois12_ <= 1) {
             sRetour_ = iNbMois12_ + " " + app.i18n.getString('year');
@@ -230,8 +228,8 @@ namespace utils {
             sRetour_ = iNbMois12_ + " " + app.i18n.getString('years');
         }
         
-        if (!strict && PE_nbMonth % 12 != 0){
-            sRetour_ += " " + app.i18n.getString('and') + " " + (PE_nbMonth % 12) + " " + app.i18n.getString('month');
+        if (!strict && month % 12 != 0){
+            sRetour_ += " " + app.i18n.getString('and') + " " + (month % 12) + " " + app.i18n.getString('month');
         }
         
         return sRetour_ ;
@@ -250,27 +248,28 @@ namespace utils {
             d = new Date(d);    
         }
         
-        var get2digits: Function = (num: number): string => {
+        let get2digits: Function = (num: number): string => {
             return num.toString().lPad('0', 2)
         }
 
-        var getLiteralMonth = function(monthNumber) {
-            var months: string[] = [ 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december' ]
+        let getLiteralMonth = function(monthNumber) {
+            let months: string[] = [ 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december' ]
             return app.i18n.getString(months[monthNumber])
         };
 
-        var getLiteralDay = function(dayNumber) {
-            var days = [ 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' ]
+        let getLiteralDay = function(dayNumber) {
+            let days = [ 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' ]
             return app.i18n.getString(days[dayNumber])
         };
 
-        var iFullYear_: number
-        var iMonth_: number
-        var iDay_: number
-        var iDate_: number
-        var iHours_: number
-        var iMinutes_: number
-        var iSeconds_: number
+        let iFullYear_: number
+        let iMonth_: number
+        let iDay_: number
+        let iDate_: number
+        let iHours_: number
+        let iMinutes_: number
+        let iSeconds_: number
+        let iMilliseconds_: number
         
         if(utc) {
             iFullYear_ = d.getUTCFullYear();
@@ -280,6 +279,7 @@ namespace utils {
             iHours_ = d.getUTCHours();
             iMinutes_ = d.getUTCMinutes();
             iSeconds_ = d.getUTCSeconds();
+            iMilliseconds_ = d.getUTCMilliseconds();
         } else {
             iFullYear_ = d.getFullYear();
             iMonth_ = d.getMonth();
@@ -288,12 +288,13 @@ namespace utils {
             iHours_ = d.getHours();
             iMinutes_ = d.getMinutes();
             iSeconds_ = d.getSeconds();
+            iMilliseconds_ = d.getMilliseconds();
         }
 
         dateFormat = dateFormat.toLowerCase()
         dateFormat = dateFormat.replace('yyyy', iFullYear_.toString())
 
-        var monthType = null, dayType = null
+        let monthType = null, dayType = null
 
         if (dateFormat.indexOf('month') != -1) {
             monthType = 'month'
@@ -333,20 +334,10 @@ namespace utils {
             dateFormat = dateFormat.replace('{1}', String(iDate_))
         }
 
-        if (dateFormat.indexOf('hh') > -1) {
-            dateFormat = dateFormat.replace('hh', get2digits(iHours_))
-        }
-        if (dateFormat.indexOf('mm') > -1) {
-            dateFormat = dateFormat.replace('mm', get2digits(iMinutes_))
-        }
-        if (dateFormat.indexOf('ss') > -1) {
-            dateFormat = dateFormat.replace('ss', get2digits(iSeconds_))
-        }
-
-        var hours: string = ''
+        let hours: string = ''
 
         if (hourFormat.toLowerCase() == 'h12') {
-            var suffix = ' AM'
+            let suffix = ' AM'
             hours = get2digits(iHours_)
 
             if (iHours_ >= 12) {
@@ -365,13 +356,30 @@ namespace utils {
 
         } else if (hourFormat.toLowerCase() == 'h24') {
             hours = get2digits(iHours_) + ':' + get2digits(iMinutes_) + ':' + get2digits(iSeconds_)
+        } else {
+
+            if (hourFormat.indexOf('hh') > -1) {
+                hourFormat = hourFormat.replace('hh', get2digits(iHours_))
+            }
+            if (hourFormat.indexOf('mm') > -1) {
+                hourFormat = hourFormat.replace('mm', get2digits(iMinutes_))
+            }
+            if (hourFormat.indexOf('ss') > -1) {
+                hourFormat = hourFormat.replace('ss', get2digits(iSeconds_))
+            }
+            if (hourFormat.indexOf('t') > -1) {
+                hourFormat = hourFormat.replace('t', String(iMilliseconds_))
+            }
+            
+            hours = hourFormat;
         }
         
         if (hours) {
             return dateFormat + ' ' + hours
-        } else {
-            return dateFormat
         }
+
+        return dateFormat
+        
     }
     
     /**
@@ -381,17 +389,17 @@ namespace utils {
     * @param string	La chaine
     * @param locale 	La locale utilisée
     */
-    export function parseLiteralDate(str: string, locale: Locale) {
+    export function parseLiteralDate(str: string, locale: any) {
     
     	 if(!str) return null;
              
-    	 var sValue_ = str;
-    	 var iJour_  = 0;
-    	 var iMois_  = 1;
-    	 var iAnnee_ = 2;
-    	 var iMarge_ = 50;
+    	 let sValue_ = str;
+    	 let iJour_  = 0;
+    	 let iMois_  = 1;
+    	 let iAnnee_ = 2;
+    	 let iMarge_ = 50;
     	
-    	var tsDate_ = sValue_.split(locale.dateSeparator);
+    	let tsDate_ = sValue_.split(locale.dateSeparator);
     	if(tsDate_.length == 1)
     	{
             if([4, 6, 8].contains(sValue_.length)) 
@@ -399,10 +407,10 @@ namespace utils {
             
                 tsDate_ = [,,];
                 
-                var sPosDay_: number = locale.dateLiteralFormat.indexOf('D');
-                var sPosMonth_: number = locale.dateLiteralFormat.indexOf('M');
-                var sPosYear_: number = locale.dateLiteralFormat.indexOf('Y');
-                var sLengthYear_: number = Math.abs(8 - sValue_.length - 4);
+                let sPosDay_: number = locale.dateLiteralFormat.indexOf('D');
+                let sPosMonth_: number = locale.dateLiteralFormat.indexOf('M');
+                let sPosYear_: number = locale.dateLiteralFormat.indexOf('Y');
+                let sLengthYear_: number = Math.abs(8 - sValue_.length - 4);
 
                 if(sLengthYear_ > 0) {
                     if(sPosYear_ == 0) {
@@ -444,9 +452,9 @@ namespace utils {
     		return null;
     	}
     	
-    	var sJour_;
-    	var sMois_;
-    	var sAnnee_;
+    	let sJour_;
+    	let sMois_;
+    	let sAnnee_;
     
     	switch(tsDate_.length)
     	{
@@ -467,7 +475,7 @@ namespace utils {
     		return null;
     	}
     	
-        var iMois_: number = parseInt(sMois_, 10);
+        iMois_ = parseInt(sMois_, 10);
         
     	if(iMois_ == 0)
     	{
@@ -476,7 +484,7 @@ namespace utils {
     	}
     	
     	if (iMois_ > 0 && iMois_ < 13){
-    		var iJourMax_ = 31;
+    		let iJourMax_ = 31;
     		switch(iMois_)
     		{
     			case 2:
@@ -498,9 +506,9 @@ namespace utils {
     	}
     	
     	sAnnee_ = sAnnee_.lPad("0", 2);
-    	var iAnCour_ = new Date().getFullYear();
-    	var iAnTemp_ = iAnCour_ - iMarge_;
-    	var sAnTemp_ = sAnnee_.lPad(CString(iAnTemp_).substr(0, 2), 4);
+    	let iAnCour_ = new Date().getFullYear();
+    	let iAnTemp_ = iAnCour_ - iMarge_;
+    	let sAnTemp_ = sAnnee_.lPad(CString(iAnTemp_).substr(0, 2), 4);
     	if(parseInt(sAnTemp_, 10) < (iAnCour_ - iMarge_))
     	{
     		sAnnee_ = sAnnee_.lPad(CString(iAnCour_).substr(0, 2), 4);	
@@ -516,7 +524,7 @@ namespace utils {
     	
     };
     
-    export function formatDecimal(str: any, digits?: number, locale?: Locale): string {
+    export function formatDecimal(str: any, digits?: number, locale?: any): string {
 		if(is_numeric(str))
 		{
 		
@@ -524,34 +532,34 @@ namespace utils {
 				locale = app.i18n.getCurrentLocale();
 			}
 		
-			var sign = "";
+			let sign = "";
 			if(Number(str) < 0)
 			{
 				sign = "-";
 			}
-			var fvalue_: number = Math.abs(Number(str));
+			let fvalue_: number = Math.abs(Number(str));
 			if(isset(digits)) {
 				fvalue_ = fvalue_.round(digits);
 			}
-			var sVal_: string = String(fvalue_);
+			let sVal_: string = String(fvalue_);
 	
-			var sGroupSeparator_: string = locale.decimalGroupSeparator;
-			var sSeparator_: string = locale.decimalSeparator;
-			var iGroupDigits_: number = locale.decimalGroupDigits;
+			let sGroupSeparator_: string = locale.decimalGroupSeparator;
+			let sSeparator_: string = locale.decimalSeparator;
+			let iGroupDigits_: number = locale.decimalGroupDigits;
 						
 			sVal_ = sVal_.replace(".", sSeparator_);
 		
-			var tsVal_ = sVal_.split(sSeparator_);
+			let tsVal_ = sVal_.split(sSeparator_);
 			
-			var sEnt_: string = tsVal_[0];
-			var sDec_: string = tsVal_[1] || '';
+			let sEnt_: string = tsVal_[0];
+			let sDec_: string = tsVal_[1] || '';
 	
 			if (sEnt_.length > iGroupDigits_) 
 			{
-				var iNbPart_ = Math.round(sEnt_.length / iGroupDigits_);
+				let iNbPart_ = Math.round(sEnt_.length / iGroupDigits_);
 				if (iNbPart_ < sEnt_.length / iGroupDigits_) iNbPart_++;
-				var tsPart_ = [];
-				for (var i_=0; i_< iNbPart_; i_++) {
+				let tsPart_ = [];
+				for (let i_=0; i_< iNbPart_; i_++) {
 					tsPart_[iNbPart_-i_-1]= String(sEnt_).substring(sEnt_.length-iGroupDigits_*(i_+1),sEnt_.length-iGroupDigits_*i_);
 				}
 				sEnt_=tsPart_.join(sGroupSeparator_);

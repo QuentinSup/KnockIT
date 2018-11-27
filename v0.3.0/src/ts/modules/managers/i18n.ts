@@ -3,59 +3,106 @@ import { Query } from '@webkit/helper/query';
 import { Storage } from '@webkit/helper/storage';
 import { BaseManager } from '@webkit/core/Manager.class';
 import { Locale } from '@webkit/core/Locale.class';
-
-export enum TSupportedLanguages {
-    fr_FR
-}
+import { Locale_en } from '@webkit/core/locale/en';
 
 export let SUPPORTED_LANGUAGES: { [key: string]: string } = {}
-
+export let DEFAULT_LANGUAGE: string
 
 let logger: Logger = Logger.getLogger('i18n');
 
-/**
- * The default localization file.
- * @type {Object.<string, ko.observable(string)>}
- */
-let DEFAULT_LANGUAGE: string = TSupportedLanguages[TSupportedLanguages.fr_FR]
+export interface ILocaleConfiguration {
+	localeName :string
+	isoCode: string
+	format: {
+		decimal: {
+			groupSeparator: string
+			groupDigits: number
+			separator: string
+		},
+		date: {
+			format: string
+			separator: string
+			literalFormat: string
+		},
+		currency: {
+			symbol: string
+		}
+	}
+}
 
 export class I18n extends BaseManager {
 
     public uri: string = "/i18n/";
-    
-	public locales: { string?: Locale } = {};
-
+    public useRemoteUrl: boolean = false;
 	public isStringsReady: KnockoutObservable<boolean> = ko.observable(false)
-
 	public localizedStrings: { [key: string]: string } = {}
 	public localizedObservableStrings: { [key: string]: KnockoutObservable<string>} = {}
-    
-        
+    public locales: { string: Locale } = <any>{};
     /**
 	 * The current resources language.
 	 * @type {ko.observable(string)}
 	 */
 	public language: KnockoutObservable<string> = ko.observable<string>()
 
-	constructor(browserLanguageInfos: any) {
+	constructor(defaultLanguage: string = "en") {
 		super()
-	    $.each(browserLanguageInfos, (id: string, value: any): void => {
-	        SUPPORTED_LANGUAGES[value.isoCode] = value.localeName
-	        if (value.defaultLanguage == "true") {
-	            DEFAULT_LANGUAGE = value.isoCode
-	        }
-	        let locale: Locale = new Locale(id, value.isoCode)
-	        locale.displayName = value.localeName
-	        locale.decimalGroupSeparator = value.format.decimal.groupSeparator
-	        locale.decimalGroupDigits = value.format.decimal.groupDigits
-	        locale.decimalSeparator = value.format.decimal.separator
-	        locale.currencySymbol = value.format.currency.symbol
-	        locale.dateFormat = value.format.date.format;
-	        locale.dateSeparator = value.format.date.separator;
-	        locale.dateLiteralFormat = value.format.date.literalFormat;
-	        this.locales[value.isoCode] = locale;
+		DEFAULT_LANGUAGE = defaultLanguage;
+
+		window['i18n'] = this;
+
+	}
+
+	private initLocales() {
+
+		// Default locale
+		this.addLocale(new Locale_en());
+
+		// Load from autoloaded locales instances
+		$.each(Locale.autoloadedLocales, (i: number, locale: Locale): void => {
+
+			if(logger.isDebugEnabled()) {
+				logger.debug("Add locale from autoloader", locale);
+			}
+
+			this.addLocale(locale);
+		});
+		// Load from configuration locales global var
+		$.each(window['locales_def'] || {}, (id: string, localeConf: ILocaleConfiguration): void => {
+	        let locale: Locale = new Locale(id, localeConf.isoCode)
+	        locale.displayName = localeConf.localeName
+	        locale.decimalGroupSeparator = localeConf.format.decimal.groupSeparator
+	        locale.decimalGroupDigits = localeConf.format.decimal.groupDigits
+	        locale.decimalSeparator = localeConf.format.decimal.separator
+	        locale.currencySymbol = localeConf.format.currency.symbol
+	        locale.dateFormat = localeConf.format.date.format;
+	        locale.dateSeparator = localeConf.format.date.separator;
+	        locale.dateLiteralFormat = localeConf.format.date.literalFormat;
+
+	        if(logger.isDebugEnabled()) {
+				logger.debug("Add locale from global configuration", locale);
+			}
+
+	    	this.addLocale(locale);
 	    })
 	}
+
+	private initLanguage(defaultLanguage?: string) {
+		let locale: Locale		
+		if(defaultLanguage) {
+			locale = this.getLocaleByLang(defaultLanguage);
+		}
+		if(!locale) {
+			locale = this.getLocaleByLang(this.getBrowserLanguage());
+		}
+
+        if (locale) {
+    		this.language(locale.getLang());        
+    		return;
+        }
+        
+        logger.error("Error loading language '%s'".format(defaultLanguage));
+        this.emit('initError', defaultLanguage);
+	} 
 	
 	public getCurrentLocale(): Locale {
 		return this.getLocale(this.language());
@@ -65,57 +112,70 @@ export class I18n extends BaseManager {
 		return this.locales[isoCode];
 	}
 
+	public getLocaleByLang(lang: string): Locale {
+		return Object.findBy(this.locales, 'getLang', lang);
+	}
+
 	public getSupportedLanguages(): any {
 		return SUPPORTED_LANGUAGES
 	}
 
-	public loadStrings(lang?: string): void {
-		let context, url: string
-		let self = this
+	public addLocale(locale) {
+		SUPPORTED_LANGUAGES[locale.getIsoCode()] = locale.getLang();
+		this.locales[locale.getIsoCode()] = locale;
+	}
 
-	    let stringsLoaded = function(json, status: string) {
-		    if (this.requestedLanguage != self.language()) {
-			    // The user changed the language between the request and the response
-			    return
-		    }
-		    if (status == Query.Status.SUCCESS) {
+	public loadJsonStrings(json: any) {
+	    // Update the cache for each
+	    $.each(json, (k: string, v: string): void => {
+		    this.localizedStrings[k] = v
+	    })
+	    // Update the observables strings
+	    this.updateObservableStrings();
+	    this.isStringsReady(true);
+	}
+
+	public loadLanguageAsJson(lang: string, json: any) {
+		this.loadJsonStrings(json);
+	    // Update the current resources language
+	    this.language(lang)
+	}
+
+	public loadLanguage(lang: string): void {
+		
+		// Load i18n from js global var i18n
+		let globalI18n: any = window['i18n_def'];
+		if(globalI18n && globalI18n[lang]) {
+			this.loadLanguageAsJson(lang, globalI18n[lang]);
+			return;
+		}
+
+		if(this.useRemoteUrl) {
+			// Get the url
+			let url: string = this.getRemoteUrl(lang)
+
+			// Load the strings
+		    Query.GETasJson(url, (json, status: string): void => {
+			    if (lang != this.language()) {
+				    // The user changed the language between the request and the response
+				    return
+			    }
+		    	if (status == Query.Status.SUCCESS) {
             
-			    // Update the cache for each application
-			    $.each(json, function(k: string, v: string) {
-				    self.localizedStrings[k] = v
-			    })
-
-			    // Update the current resources language
-			    self.language(this.requestedLanguage)
-                // Update the observable strings
-                self.updateObservableStrings()
-			    self.isStringsReady(true)
-			    
-			    self.emit('change', self.language());
-
-		    } else {
-			    logger.fatal('Erreur lors du chargement des libellés %s: %s'.format(url, status));
-                self.emit('initError');
-                throw 'Erreur lors du chargement des libellés %s: %s'.format(url, status);
-		    }
-	    }
-
-		// Set the language
-		lang = lang || this.language() || DEFAULT_LANGUAGE
-
-        if(SUPPORTED_LANGUAGES[lang]) {
-
-		    // Get the url of the strings
-		    url = this.getStringsUrl(lang)
-
-		    // Set the context
-		    context = {
-			    requestedLanguage : lang
-		    }
-
-		    // Load the strings
-		    Query.GETasJson(url, stringsLoaded, context, { upToDate: false });
+	            	// Update the current language
+				    this.loadLanguageAsJson(lang, json);
+				} else {
+				    logger.fatal('Erreur lors du chargement des libellés %s: %s'.format(url, status));
+	                this.emit('initError', lang);
+	                throw 'Erreur lors du chargement des libellés %s: %s'.format(url, status);
+	            }
+		    }, null, { upToDate: false });
+		    return;
+  
         }
+
+        logger.warn('No internationalized message found (lang: %s)'.format(lang))
+
 	}
 
     private updateObservableStrings(): void {
@@ -154,28 +214,31 @@ export class I18n extends BaseManager {
 	 * @return {string} The localized string.
 	 */
 	public getString(key: string, defaultValue?: string): string {
-	  return I18n.getStringOrKey(this.localizedStrings[key], isset(defaultValue)?defaultValue:key)
+	  	return I18n.getStringOrKey(this.localizedStrings[key], isset(defaultValue)?defaultValue:key)
+	}
+
+	/**
+	 * Gets the localized string for the given key.
+	 * @param {string} key The key of the desired label.
+	 * @return {string} The localized string.
+	 * @see getString
+	 */
+	public _(key: string, defaultValue?: string): string {
+		return this.getString(key, defaultValue);
 	}
 
 	public getCurrentLanguage(): string {
-		let locale: string = this.language()
-		if(SUPPORTED_LANGUAGES[locale]) {
-			return locale
+		let lang: string = this.language()
+		if(SUPPORTED_LANGUAGES[lang]) {
+			return lang
 		}
-		return DEFAULT_LANGUAGE
+		return null
 	}
 
     // return the browser language if this language is one of the supported ones
     // else it returns the default language set in the browserLanguageInfos.js file 
-   public getLanguageFromBrowser(): string {
-        let language: string = app.browser.getCurrentBrowserInfos().countryCode
-        if(language) {
-        	let locale: Locale = Object.findBy(this.locales, 'getLang', language);
-            if (locale) {
-                return locale.getIsoCode()
-            }
-        }
-        return DEFAULT_LANGUAGE
+   public getBrowserLanguage(): string {
+        return app.browser.getCurrentBrowserInfos().countryCode
     }
 
 
@@ -183,25 +246,24 @@ export class I18n extends BaseManager {
         return (str === null || str === undefined) ? key : str;
     }
 
-    public getStringsUrl(language: string): string {
+    public getRemoteUrl(language: string): string {
         return app.servicesPath + this.uri + app.context.page + "/" + language;
     }
     
 	public init(): void {
-        
+
+		this.initLocales();
+
         this.language.subscribe((lang: string): void => {
-        	if(SUPPORTED_LANGUAGES[lang]) {
-            	this.loadStrings(lang)
-            }
+			this.loadLanguage(lang)
+			this.emit('change', lang);
         })
 
-        this.language(this.getLanguageFromBrowser());
+		this.isStringsReady.subscribe((): void => {
+	        this.isReady(true)
+        })
 
-	    ko.computed((): void => {
-            if (this.isStringsReady()) {
-		        this.isReady(true)
-            }
-	    }, this)
+        this.initLanguage(DEFAULT_LANGUAGE);
 
 	}
 

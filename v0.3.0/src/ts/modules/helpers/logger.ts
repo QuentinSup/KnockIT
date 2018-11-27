@@ -19,14 +19,12 @@ export interface ILogAppender {
     log(className: string, level: TLogLevel, text: string, e?: any, date?: Date): void
 }
     
-export class Appender {
+export abstract class Appender {
     
     public level: TLogLevel
 
-    public formatMessage(className: string, date: Date, level: TLogLevel, message: string): string {
-        return TLogLevel[level] + ' - ' + className + ' - ' + date.toString() + ': ' + message;
-    }
-    
+    abstract log(className: string, level: TLogLevel, message: string, exception?: any, date?: Date): void
+
     public constructor(level: TLogLevel = TLogLevel.TRACE) {
         this.level = level;
     }
@@ -35,8 +33,15 @@ export class Appender {
     
 export class ConsoleAppender extends Appender implements ILogAppender {
     
+    public static useFormat: boolean = true;
+    public static formatCSS: string = "padding: .1em .5em; color: #000; border: 1px solid #ddd; background-color: #93e458; border-radius: 3px";
+
     public constructor() {
         super();
+    }
+
+    public formatMessage(level: TLogLevel, date: Date, message: string): string {
+        return TLogLevel[level].rPad(' ', 5) + ' - ' + utils.formatDate(date, "dd/mm/yyyy", "hh:mm:ss.t") + ': ' + message;
     }
 
     public log(className: string, level: TLogLevel, message: string, exception?: any, date: Date = new Date()): void {
@@ -50,32 +55,39 @@ export class ConsoleAppender extends Appender implements ILogAppender {
         
         if(isset(console)) {
         
-            let text: string = this.formatMessage(className, date, level, message);
+            let fn;
             
             if(level == TLogLevel.DEBUG && typeof(console.debug) != 'undefined') {
-                console.debug(text, e);
-                return;
+                fn = console.debug;
             }
             if(level == TLogLevel.INFO && typeof(console.info) != 'undefined') {
-                console.info(text, e);
-                return;
+                fn = console.info;
             }
             if(level == TLogLevel.WARN && typeof(console.warn) != 'undefined') {
-                console.warn(text, e);
-                return;
+                fn = console.warn;
             }
             if(level == TLogLevel.ERROR && typeof(console.error) != 'undefined') {
-                console.error(text, e);
-                return;
+                fn = console.error;
             }    
             if(level == TLogLevel.FATAL && typeof(console.error) != 'undefined') {
-                console.error(text, e);
-                return;
+                fn = console.error;
             }    
-            if(typeof(console.log) != 'undefined') {
-                console.log(text, e);
+
+            if(!fn && typeof(console.log) != 'undefined') {
+                fn = console.log;
+            }
+
+            if(!fn) {
                 return;
             }
+
+            let text: string = this.formatMessage(level, date, message);
+            if(ConsoleAppender.useFormat) {
+                fn("%c" + className, ConsoleAppender.formatCSS, text, e);
+            } else {
+                fn(className, text, e);
+            }
+
         }
     } 
 
@@ -88,6 +100,10 @@ export class RemoteAppender extends Appender implements ILogAppender {
     public constructor(url: string) {
         super();
         this.url = url;
+    }
+
+    public formatMessage(className: string, date: Date, level: TLogLevel, message: string): string {
+        return TLogLevel[level] + ' - ' + className + ' - ' + date.toString() + ': ' + message;
     }
     
     public log(className: string, level: TLogLevel, message: string, exception?: any, date: Date = new Date()): void {
@@ -182,16 +198,16 @@ export class Logger {
      */
     static getLogger(className: string): Logger {
         if(!Logger.loggers[className]) {
-            let oLogger_: Logger = new Logger(className);
+            let log: Logger = new Logger(className);
             if(className != 'default') {
-                oLogger_.log = function(className: string, level: TLogLevel, text: string, e?: any) {
-                    let oLogger: Logger = Logger.getDefaultLogger();
-                    if(oLogger) {
-                        oLogger.log(className, level, text, e);   
+                log.log = function(className: string, level: TLogLevel, text: string, e?: any) {
+                    let logger: Logger = Logger.getDefaultLogger();
+                    if(logger) {
+                        logger.log(className, level, text, e);   
                     }
                 }
             }
-            Logger.loggers[className] = oLogger_;
+            Logger.loggers[className] = log;
         }
         return Logger.loggers[className];
     }

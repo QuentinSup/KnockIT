@@ -57,10 +57,20 @@ Object.findManyBy = function (o: Object, field: string, value: any, maxCount?: n
         id: string = null
     
     for (id in o) {
-        if (o.hasOwnProperty(id) && o[id][field] == value) {
-            result.push(o[id])
-            if(isset(maxCount) && maxCount >= result.length) {
-                return result
+        if (o.hasOwnProperty(id)) {
+            let prop: any = o[id][field];
+            let propValue: any;
+            if(typeof(prop) == 'function') {
+                propValue = o[id][field]()
+            } else {
+                propValue = prop
+            }
+
+            if(propValue == value) {
+                result.push(o[id])
+                if(isset(maxCount) && maxCount >= result.length) {
+                    return result
+                }
             }
         }
     }
