@@ -7,5 +7,13 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Quentin Supernant",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "requirejs": "^2.3.6"
+  },
+  "devDependencies": {
+    "@types/jquery": "^3.3.22",
+    "@types/jqueryui": "^1.12.6",
+    "@types/knockout": "^3.4.60"
+  }
 }

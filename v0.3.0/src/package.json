@@ -3,9 +3,27 @@
   "description": "KnockitJS",
   "version": "0.3.0",
   "date": "2017-04-18",
+  "build": {
+    "version": "0.0.1",
+    "outDir": "./dist/",
+    "targetBaseDir": "./target/",
+    "webappDir": "./dist/",
+    "webappArchiveName": "app.zip"
+  },
   "devDependencies": {
     "@types/jquery": "^3.3.22",
     "@types/jqueryui": "^1.12.6",
-    "@types/knockout": "^3.4.60"
+    "@types/knockout": "^3.4.60",
+    "grunt": "^1.0.1",
+    "grunt-contrib-clean": "~1.1.0",
+    "grunt-contrib-compress": "~1.4.1",
+    "grunt-contrib-concat": "~1.0.0",
+    "grunt-include-replace": "~5.0.0",
+    "grunt-contrib-less": "~1.4.1",
+    "grunt-contrib-uglify": "~2.3.0",
+    "grunt-contrib-htmlmin": "~2.3.0",
+    "grunt-shell": "~2.1.0",
+    "grunt-typescript": "~0.8.0",
+    "grunt-copy-to": "~0.0.12"
   }
 }

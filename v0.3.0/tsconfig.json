@@ -1,0 +1,11 @@
+{
+  "extends": "./node_modules/src/tsconfig",
+  "compilerOptions": {
+    "outDir": "dist/",
+    "outFile": "index.js"
+  },
+  "files": [
+    "./node_modules/src/index.ts",
+    "index.ts"
+  ]
+}

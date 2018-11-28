@@ -1285,203 +1285,8 @@ var regexp;
 /// <reference path="./namespaces/utils.ts"/>
 /// <reference path="./namespaces/regexp.ts"/>
 /// <reference path="./core.ts"/>
-/// <reference path="./core/index.ts"/>
-define("modules/classes/AbstractBinding.class", ["require", "exports"], function (require, exports) {
-    "use strict";
-    exports.__esModule = true;
-    var AbstractBinding = /** @class */ (function () {
-        function AbstractBinding(name) {
-            this.options = {};
-            this._name = name;
-        }
-        AbstractBinding.prototype.getName = function () {
-            return this._name;
-        };
-        return AbstractBinding;
-    }());
-    exports.AbstractBinding = AbstractBinding;
-});
-define("modules/bindings/accordion", ["require", "exports", "modules/classes/AbstractBinding.class"], function (require, exports, AbstractBinding_class_1) {
-    "use strict";
-    exports.__esModule = true;
-    var AccordionBinding = /** @class */ (function (_super) {
-        __extends(AccordionBinding, _super);
-        function AccordionBinding() {
-            return _super.call(this, 'accordion') || this;
-        }
-        AccordionBinding.prototype.init = function (element, valueAccessor) {
-            // handle disposal (if KO removes by the template binding)
-            ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
-                $(element).accordion("destroy");
-            });
-        };
-        AccordionBinding.prototype.update = function (element, valueAccessor) {
-            var options = valueAccessor() || {};
-            var $element = $(element);
-            if (options.openState) {
-                var state_1 = options.openState;
-                delete (options.openState);
-                options.beforeActivate = function (event, ui) {
-                    state_1(ui.newPanel && ui.newPanel.length > 0 ? "opening" : "closing");
-                };
-                options.activate = function (event, ui) {
-                    state_1(ui.newPanel && ui.newPanel.length > 0 ? "opened" : "closed");
-                };
-                state_1.subscribe(function (b) {
-                    if (b === true || b === false) {
-                        $element.accordion("option", "active", b ? 0 : false);
-                    }
-                });
-            }
-            $element.accordion(options).accordion("option", "icons", {
-                "header": "ui-icon-expand",
-                "activeHeader": "ui-icon-collapse"
-            });
-        };
-        return AccordionBinding;
-    }(AbstractBinding_class_1.AbstractBinding));
-    exports.AccordionBinding = AccordionBinding;
-});
-define("modules/bindings/animate", ["require", "exports", "modules/classes/AbstractBinding.class"], function (require, exports, AbstractBinding_class_2) {
-    "use strict";
-    exports.__esModule = true;
-    function css_time_to_milliseconds(time_string) {
-        var num = CFloat(time_string);
-        var unit = (time_string + "").match(/m?s/);
-        var milliseconds;
-        if (unit) {
-            unit = unit[0];
-        }
-        switch (unit) {
-            case "s": // seconds
-                milliseconds = num * 1000;
-                break;
-            case "ms": // milliseconds
-                milliseconds = num;
-                break;
-            default:
-                milliseconds = num;
-                break;
-        }
-        return milliseconds;
-    }
-    var AnimateBinding = /** @class */ (function (_super) {
-        __extends(AnimateBinding, _super);
-        function AnimateBinding() {
-            return _super.call(this, 'animate') || this;
-        }
-        AnimateBinding.prototype.init = function (element, valueAccessor) {
-            var $this = $(element);
-        };
-        AnimateBinding.prototype.update = function (element, valueAccessor) {
-            var value = ko.unwrap(valueAccessor());
-            if (!value)
-                return;
-            var $this = $(element);
-            $this.addClass('animated');
-            if (typeof (value) == "string") {
-                value = { 'animation': value };
-            }
-            var animationValue = isset(value.animation) ? ko.unwrap(value.animation) : null;
-            if (animationValue) {
-                $this.data('animation', animationValue);
-            }
-            var delay = value.delay ? ko.unwrap(value.delay) : null;
-            if (delay) {
-                $this.data('delay', delay);
-            }
-            var duration = isset(value.duration) ? ko.unwrap(value.duration) : null;
-            if (duration) {
-                $this.data('duration', duration);
-            }
-            var currentAnimation = $this.data('current-animation');
-            var currentAnimationId = $this.data('current-animationId');
-            if (currentAnimationId) {
-                clearTimeout(currentAnimationId);
-            }
-            if (currentAnimation) {
-                $this.removeClass(currentAnimation).removeClass('animate-start-' + currentAnimation).removeClass('animate-end-' + currentAnimation);
-            }
-            // Set first animation start class
-            var dataAnimation = $this.data('animation') || 'fadeIn';
-            var animations = dataAnimation.split(',');
-            var animation = animations.shift();
-            $this.addClass('animate-start-' + animation);
-            var fnAppear = function () {
-                var $element = $(this);
-                var dataAnimation = $element.data('animation') || 'fadeIn';
-                var animations = dataAnimation.split(',');
-                var dataDelay = $element.data('delay') || 0;
-                var dataDuration = $element.data('duration') || '.3s';
-                //  set animation duration value
-                $element.css('-webkit-animation-duration', dataDuration);
-                $element.css('animation-duration', dataDuration);
-                $element.data('current-animationId', setTimeout(function () {
-                    var fn = function (animations, duration) {
-                        if (animations.length == 0)
-                            return;
-                        var currentAnimation = $element.data('current-animation');
-                        if (currentAnimation) {
-                            $element.removeClass(currentAnimation);
-                            $element.removeClass('animate-end-' + currentAnimation);
-                        }
-                        var animation = animations.shift();
-                        $element.removeClass('animate-start-' + animation);
-                        $element.data('current-animation', animation).addClass(animation);
-                        if (animations.length > 0) {
-                            // Set next animation start class
-                            $element.addClass('animate-start-' + animations[0]);
-                        }
-                        $element.data('current-animationId', setTimeout(function () { $element.addClass('animate-end-' + animation); fn(animations, duration); }, duration));
-                    };
-                    fn(animations, css_time_to_milliseconds(dataDuration));
-                }, css_time_to_milliseconds(dataDelay)));
-            };
-            var whenAppear = isset(value.whenAppear) ? ko.unwrap(value.whenAppear) : true;
-            whenAppear = whenAppear && isset($this.appear);
-            if (whenAppear) {
-                $this.appear(fnAppear);
-            }
-            else {
-                fnAppear.call(element);
-            }
-        };
-        return AnimateBinding;
-    }(AbstractBinding_class_2.AbstractBinding));
-    exports.AnimateBinding = AnimateBinding;
-});
-define("modules/bindings/autocomplete", ["require", "exports", "modules/classes/AbstractBinding.class"], function (require, exports, AbstractBinding_class_3) {
-    "use strict";
-    exports.__esModule = true;
-    var AutoCompleteBinding = /** @class */ (function (_super) {
-        __extends(AutoCompleteBinding, _super);
-        function AutoCompleteBinding() {
-            return _super.call(this, 'autocomplete') || this;
-        }
-        AutoCompleteBinding.prototype.init = function (element, valueAccessor, allBindingsAccessor) {
-            var $element = $(element);
-            var value = allBindingsAccessor().value;
-            $element.autocomplete(valueAccessor());
-            if (value) {
-                $element.autocomplete("option", "select", function (event, ui) {
-                    value(ui.item.value);
-                    return false;
-                });
-            }
-            $element.focus(function () {
-                $element.autocomplete("search");
-            });
-        };
-        AutoCompleteBinding.prototype.update = function (element, valueAccessor) {
-            var $element = $(element);
-            var src = valueAccessor();
-            $element.autocomplete("option", "source", src);
-        };
-        return AutoCompleteBinding;
-    }(AbstractBinding_class_3.AbstractBinding));
-    exports.AutoCompleteBinding = AutoCompleteBinding;
-});
-define("modules/helpers/query", ["require", "exports", "modules/helpers/logger"], function (require, exports, logger_1) {
+/// <reference path="./ts/core/index.ts"/>
+define("node_modules/src/ts/modules/helpers/query", ["require", "exports", "node_modules/src/ts/modules/helpers/logger"], function (require, exports, logger_1) {
     "use strict";
     exports.__esModule = true;
     /**
@@ -1899,7 +1704,7 @@ define("modules/helpers/query", ["require", "exports", "modules/helpers/logger"]
     }());
     exports.Query = Query;
 });
-define("modules/helpers/logger", ["require", "exports", "modules/helpers/query"], function (require, exports, query_1) {
+define("node_modules/src/ts/modules/helpers/logger", ["require", "exports", "node_modules/src/ts/modules/helpers/query"], function (require, exports, query_1) {
     "use strict";
     exports.__esModule = true;
     /**
@@ -1930,7 +1735,7 @@ define("modules/helpers/logger", ["require", "exports", "modules/helpers/query"]
             return _super.call(this) || this;
         }
         ConsoleAppender.prototype.formatMessage = function (level, date, message) {
-            return TLogLevel[level].rPad(' ', 5) + ' - ' + utils.formatDate(date, "dd/mm/yyyy", "hh:mm:ss.t") + ': ' + message;
+            return utils.formatDate(date, "dd/mm/yyyy", "hh:mm:ss.t") + ': ' + message;
         };
         ConsoleAppender.prototype.log = function (className, level, message, exception, date) {
             if (date === void 0) { date = new Date(); }
@@ -1941,22 +1746,32 @@ define("modules/helpers/logger", ["require", "exports", "modules/helpers/query"]
             var console = isset(window.console) ? window.console : null;
             if (isset(console)) {
                 var fn = void 0;
-                if (level == TLogLevel.DEBUG && typeof (console.debug) != 'undefined') {
-                    fn = console.debug;
+                var levelFormatCSS = ConsoleAppender.formatLevelDefaultCSS;
+                if (level == TLogLevel.TRACE) {
+                    fn = console.log;
+                    levelFormatCSS = ConsoleAppender.formatLevelTraceCSS;
                 }
-                if (level == TLogLevel.INFO && typeof (console.info) != 'undefined') {
+                if (level == TLogLevel.DEBUG) {
+                    fn = console.log;
+                    levelFormatCSS = ConsoleAppender.formatLevelDebugCSS;
+                }
+                if (level == TLogLevel.INFO) {
                     fn = console.info;
+                    levelFormatCSS = ConsoleAppender.formatLevelInfoCSS;
                 }
-                if (level == TLogLevel.WARN && typeof (console.warn) != 'undefined') {
+                if (level == TLogLevel.WARN) {
                     fn = console.warn;
+                    levelFormatCSS = ConsoleAppender.formatLevelWarnCSS;
                 }
-                if (level == TLogLevel.ERROR && typeof (console.error) != 'undefined') {
+                if (level == TLogLevel.ERROR) {
                     fn = console.error;
+                    levelFormatCSS = ConsoleAppender.formatLevelErrorCSS;
                 }
-                if (level == TLogLevel.FATAL && typeof (console.error) != 'undefined') {
+                if (level == TLogLevel.FATAL) {
                     fn = console.error;
+                    levelFormatCSS = ConsoleAppender.formatLevelFatalCSS;
                 }
-                if (!fn && typeof (console.log) != 'undefined') {
+                if (!fn) {
                     fn = console.log;
                 }
                 if (!fn) {
@@ -1964,7 +1779,7 @@ define("modules/helpers/logger", ["require", "exports", "modules/helpers/query"]
                 }
                 var text = this.formatMessage(level, date, message);
                 if (ConsoleAppender.useFormat) {
-                    fn("%c" + className, ConsoleAppender.formatCSS, text, e);
+                    fn("%c" + TLogLevel[level].toLowerCase() + "%c" + className, levelFormatCSS, ConsoleAppender.formatClassNameCSS, text, e);
                 }
                 else {
                     fn(className, text, e);
@@ -1972,7 +1787,14 @@ define("modules/helpers/logger", ["require", "exports", "modules/helpers/query"]
             }
         };
         ConsoleAppender.useFormat = true;
-        ConsoleAppender.formatCSS = "padding: .1em .5em; color: #000; border: 1px solid #ddd; background-color: #93e458; border-radius: 3px";
+        ConsoleAppender.formatClassNameCSS = "padding: .1em .5em; color: #000; border: 1px solid #ddd; background-color: #93e458; border-radius: 3px";
+        ConsoleAppender.formatLevelInfoCSS = "margin: 0em .5em; padding: .1em .5em; color: #fff; background-color: #4aa3c5; border-radius: 3px";
+        ConsoleAppender.formatLevelTraceCSS = "margin: 0em .5em; padding: .1em .5em; color: #444; background-color: white; border-radius: 3px; border: 1px solid #ddd";
+        ConsoleAppender.formatLevelDebugCSS = "margin: 0em .5em; padding: .1em .5em; color: #444; background-color: white; border-radius: 3px; border: 1px solid gray";
+        ConsoleAppender.formatLevelWarnCSS = "margin: 0em .5em; padding: .1em .5em; color: #444; background-color: #e8dd77; border-radius: 3px; border: 1px solid #ddd";
+        ConsoleAppender.formatLevelErrorCSS = "margin: 0em .5em; padding: .1em .5em; color: #fff; background-color: #ff5722; border-radius: 3px;";
+        ConsoleAppender.formatLevelFatalCSS = "margin: 0em .5em; padding: .1em .5em; color: #fff; background-color: #d6290d; border-radius: 3px;";
+        ConsoleAppender.formatLevelDefaultCSS = "margin: 0em .5em; padding: .1em .5em; color: #444;";
         return ConsoleAppender;
     }(Appender));
     exports.ConsoleAppender = ConsoleAppender;
@@ -2085,1221 +1907,7 @@ define("modules/helpers/logger", ["require", "exports", "modules/helpers/query"]
     }());
     exports.Logger = Logger;
 });
-define("modules/helpers/storage", ["require", "exports"], function (require, exports) {
-    "use strict";
-    exports.__esModule = true;
-    var checkLocalStorage = function () {
-        if (window.localStorage) {
-            return true;
-        }
-        if (console && console.warn) {
-            console.warn('LocaleStorage is not defined. Update your browser to fix this issue');
-        }
-        return false;
-    };
-    var Storage = /** @class */ (function () {
-        function Storage() {
-        }
-        Storage.put = function (name, value, opts) {
-            if (!checkLocalStorage()) {
-                return false;
-            }
-            if (value == null) {
-                Storage.remove(name);
-                return false;
-            }
-            opts = $.extend({}, opts);
-            if (opts.crypt) {
-                value = $().crypt({
-                    method: 'b64enc',
-                    source: value
-                });
-            }
-            localStorage[name] = String(value);
-            return true;
-        };
-        Storage.putObject = function (name, json, opts) {
-            return Storage.put(name, JSON.stringify(Object.toJson(json)), opts);
-        };
-        Storage.read = function (name, opts) {
-            if (!checkLocalStorage()) {
-                return;
-            }
-            opts = $.extend({}, opts);
-            var value = localStorage[name];
-            if (value && opts.crypt) {
-                value = $().crypt({
-                    method: 'b64dec',
-                    source: value
-                });
-            }
-            return value;
-        };
-        Storage.remove = function (name) {
-            if (!checkLocalStorage()) {
-                return false;
-            }
-            if ($.isArray(name)) {
-                $.each(name, function (index, id) {
-                    localStorage.removeItem(id);
-                });
-            }
-            else {
-                localStorage.removeItem(name);
-            }
-            return true;
-        };
-        Storage.readAsObject = function (name, opts) {
-            var json = Storage.read(name, opts);
-            try {
-                return JSON.parse(json);
-            }
-            catch (e) {
-                return {};
-            }
-        };
-        Storage.readAsNumber = function (name, opts) {
-            var num = Storage.read(name, opts);
-            return Number(num);
-        };
-        return Storage;
-    }());
-    exports.Storage = Storage;
-});
-define("modules/classes/EventsBinder.class", ["require", "exports"], function (require, exports) {
-    "use strict";
-    exports.__esModule = true;
-    var EventsBinder = /** @class */ (function () {
-        function EventsBinder() {
-            this.__event__ = ko.observable();
-            this.__subscriptions__ = [];
-        }
-        EventsBinder.prototype.on = function (eventId, callback, context) {
-            var _this = this;
-            if (typeof (callback) != 'function') {
-                throw "No callback specified or callback is not a valid function : " + callback;
-                return;
-            }
-            if ($.isArray(eventId)) {
-                $.each(eventId, function (k, eventId) {
-                    _this.on(eventId, callback, context);
-                });
-                return;
-            }
-            this.__subscriptions__.push(this.__event__.subscribe(function (event) {
-                if (event.id == this.eventId) {
-                    this.callback.apply(this.context || this.owner, event.arguments);
-                }
-            }, { eventId: eventId, callback: callback, context: context, owner: this }));
-        };
-        EventsBinder.prototype.emit = function () {
-            var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i] = arguments[_i];
-            }
-            this.__event__({
-                id: args[0],
-                arguments: args.slice(1)
-            });
-        };
-        EventsBinder.prototype.clearSubscriptions = function () {
-            dispose(this.__subscriptions__);
-        };
-        EventsBinder.prototype.dispose = function () {
-            this.clearSubscriptions();
-        };
-        return EventsBinder;
-    }());
-    exports.EventsBinder = EventsBinder;
-});
-define("modules/classes/Manager.class", ["require", "exports", "modules/classes/EventsBinder.class"], function (require, exports, EventsBinder_class_1) {
-    "use strict";
-    exports.__esModule = true;
-    exports.inherits = function (prototype, id, opts) {
-        var OverloadClass = function (prototype, id, opts) {
-            opts._id = id;
-            this.executionContext = opts;
-            this.__proto__ = prototype;
-        };
-        OverloadClass.prototype = prototype;
-        return new OverloadClass(prototype, id, opts);
-    };
-    /**
-     * A module.
-     */
-    var BaseManager = /** @class */ (function (_super) {
-        __extends(BaseManager, _super);
-        function BaseManager() {
-            var _this = _super.call(this) || this;
-            _this._domains = {};
-            _this._domainCounter = 0;
-            /**
-            * A value that indicates whether this module is ready.
-            * @type {ko.observable(boolean)}
-            */
-            _this.isReady = ko.observable(false);
-            _this.isReady.subscribeOnce(function (b) {
-                if (b) {
-                    _this.emit('ready');
-                }
-            }, _this);
-            return _this;
-        }
-        BaseManager.prototype.init = function () { };
-        /**
-         * Executes the given callback when this module is ready.
-         * @param callback The function to execute when this module is ready.
-         * @param context The context for the given callback.
-         */
-        BaseManager.prototype.ready = function (callback, context) {
-            if (!callback)
-                return;
-            this.on('ready', callback, context);
-            if (this.isReady()) {
-                callback.call(context || this);
-                return true;
-            }
-            return false;
-        };
-        return BaseManager;
-    }(EventsBinder_class_1.EventsBinder));
-    exports.BaseManager = BaseManager;
-});
-define("modules/classes/Locale.class", ["require", "exports"], function (require, exports) {
-    "use strict";
-    exports.__esModule = true;
-    var Locale = /** @class */ (function () {
-        function Locale(language, isoCode) {
-            this._language = language;
-            this._isoCode = isoCode;
-        }
-        Locale.prototype.getLang = function () {
-            return this._language;
-        };
-        Locale.prototype.getIsoCode = function () {
-            return this._isoCode;
-        };
-        Locale.autoLoadClass = true;
-        Locale.autoloadedLocales = [];
-        return Locale;
-    }());
-    exports.Locale = Locale;
-});
-define("modules/classes/locale/en", ["require", "exports", "modules/classes/Locale.class"], function (require, exports, Locale_class_1) {
-    "use strict";
-    exports.__esModule = true;
-    var Locale_en = /** @class */ (function (_super) {
-        __extends(Locale_en, _super);
-        function Locale_en() {
-            var _this = _super.call(this, 'en', 'en_US') || this;
-            _this.displayName = "English";
-            _this.decimalSeparator = ".";
-            _this.decimalGroupSeparator = ",";
-            _this.decimalGroupDigits = 3;
-            _this.dateFormat = "yyyy-mm-dd";
-            _this.dateSeparator = "-";
-            _this.dateLiteralFormat = "YMD";
-            _this.currencySymbol = "€";
-            return _this;
-        }
-        return Locale_en;
-    }(Locale_class_1.Locale));
-    exports.Locale_en = Locale_en;
-});
-define("modules/managers/i18n", ["require", "exports", "modules/helpers/logger", "modules/helpers/query", "modules/classes/Manager.class", "modules/classes/Locale.class", "modules/classes/locale/en"], function (require, exports, logger_2, query_2, Manager_class_1, Locale_class_2, en_1) {
-    "use strict";
-    exports.__esModule = true;
-    exports.SUPPORTED_LANGUAGES = {};
-    var logger = logger_2.Logger.getLogger('i18n');
-    var I18n = /** @class */ (function (_super) {
-        __extends(I18n, _super);
-        function I18n(defaultLanguage) {
-            if (defaultLanguage === void 0) { defaultLanguage = "en"; }
-            var _this = _super.call(this) || this;
-            _this.uri = "/i18n/";
-            _this.useRemoteUrl = false;
-            _this.isStringsReady = ko.observable(false);
-            _this.localizedStrings = {};
-            _this.localizedObservableStrings = {};
-            _this.locales = {};
-            /**
-             * The current resources language.
-             * @type {ko.observable(string)}
-             */
-            _this.language = ko.observable();
-            exports.DEFAULT_LANGUAGE = defaultLanguage;
-            window['i18n'] = _this;
-            return _this;
-        }
-        I18n.prototype.initLocales = function () {
-            var _this = this;
-            // Default locale
-            this.addLocale(new en_1.Locale_en());
-            // Load from autoloaded locales instances
-            $.each(Locale_class_2.Locale.autoloadedLocales, function (i, locale) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Add locale from autoloader", locale);
-                }
-                _this.addLocale(locale);
-            });
-            // Load from configuration locales global var
-            $.each(window['locales_def'] || {}, function (id, localeConf) {
-                var locale = new Locale_class_2.Locale(id, localeConf.isoCode);
-                locale.displayName = localeConf.localeName;
-                locale.decimalGroupSeparator = localeConf.format.decimal.groupSeparator;
-                locale.decimalGroupDigits = localeConf.format.decimal.groupDigits;
-                locale.decimalSeparator = localeConf.format.decimal.separator;
-                locale.currencySymbol = localeConf.format.currency.symbol;
-                locale.dateFormat = localeConf.format.date.format;
-                locale.dateSeparator = localeConf.format.date.separator;
-                locale.dateLiteralFormat = localeConf.format.date.literalFormat;
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Add locale from global configuration", locale);
-                }
-                _this.addLocale(locale);
-            });
-        };
-        I18n.prototype.initLanguage = function (defaultLanguage) {
-            var locale;
-            if (defaultLanguage) {
-                locale = this.getLocaleByLang(defaultLanguage);
-            }
-            if (!locale) {
-                locale = this.getLocaleByLang(this.getBrowserLanguage());
-            }
-            if (locale) {
-                this.language(locale.getLang());
-                return;
-            }
-            logger.error("Error loading language '%s'".format(defaultLanguage));
-            this.emit('initError', defaultLanguage);
-        };
-        I18n.prototype.getCurrentLocale = function () {
-            return this.getLocale(this.language());
-        };
-        I18n.prototype.getLocale = function (isoCode) {
-            return this.locales[isoCode];
-        };
-        I18n.prototype.getLocaleByLang = function (lang) {
-            return Object.findBy(this.locales, 'getLang', lang);
-        };
-        I18n.prototype.getSupportedLanguages = function () {
-            return exports.SUPPORTED_LANGUAGES;
-        };
-        I18n.prototype.addLocale = function (locale) {
-            exports.SUPPORTED_LANGUAGES[locale.getIsoCode()] = locale.getLang();
-            this.locales[locale.getIsoCode()] = locale;
-        };
-        I18n.prototype.loadJsonStrings = function (json) {
-            var _this = this;
-            // Update the cache for each
-            $.each(json, function (k, v) {
-                _this.localizedStrings[k] = v;
-            });
-            // Update the observables strings
-            this.updateObservableStrings();
-            this.isStringsReady(true);
-        };
-        I18n.prototype.loadLanguageAsJson = function (lang, json) {
-            this.loadJsonStrings(json);
-            // Update the current resources language
-            this.language(lang);
-        };
-        I18n.prototype.loadLanguage = function (lang) {
-            var _this = this;
-            // Load i18n from js global var i18n
-            var globalI18n = window['i18n_def'];
-            if (globalI18n && globalI18n[lang]) {
-                this.loadLanguageAsJson(lang, globalI18n[lang]);
-                return;
-            }
-            if (this.useRemoteUrl) {
-                // Get the url
-                var url_1 = this.getRemoteUrl(lang);
-                // Load the strings
-                query_2.Query.GETasJson(url_1, function (json, status) {
-                    if (lang != _this.language()) {
-                        // The user changed the language between the request and the response
-                        return;
-                    }
-                    if (status == query_2.Query.Status.SUCCESS) {
-                        // Update the current language
-                        _this.loadLanguageAsJson(lang, json);
-                    }
-                    else {
-                        logger.fatal('Erreur lors du chargement des libellés %s: %s'.format(url_1, status));
-                        _this.emit('initError', lang);
-                        throw 'Erreur lors du chargement des libellés %s: %s'.format(url_1, status);
-                    }
-                }, null, { upToDate: false });
-                return;
-            }
-            logger.warn('No internationalized message found (lang: %s)'.format(lang));
-        };
-        I18n.prototype.updateObservableStrings = function () {
-            var _this = this;
-            $.each(this.localizedStrings, function (k, v) {
-                var observableString = _this.getObservableString(k);
-                observableString(v);
-            });
-        };
-        I18n.prototype.getObservableString = function (key, defaultValue) {
-            // Get the observable string with the given id
-            var observableString = this.localizedObservableStrings[key];
-            if (!observableString) {
-                if (isset(defaultValue)) {
-                    observableString = this.localizedObservableStrings[defaultValue];
-                    if (!observableString) {
-                        observableString = ko.observable(defaultValue);
-                    }
-                }
-                else {
-                    // Create a new observable string with the localized string
-                    observableString = this.localizedObservableStrings[key] = ko.observable();
-                    observableString(this.getString(key, key));
-                }
-            }
-            return observableString;
-        };
-        /**
-         * Gets the localized string for the given key.
-         * @param {string} key The key of the desired label.
-         * @return {string} The localized string.
-         */
-        I18n.prototype.getString = function (key, defaultValue) {
-            return I18n.getStringOrKey(this.localizedStrings[key], isset(defaultValue) ? defaultValue : key);
-        };
-        /**
-         * Gets the localized string for the given key.
-         * @param {string} key The key of the desired label.
-         * @return {string} The localized string.
-         * @see getString
-         */
-        I18n.prototype._ = function (key, defaultValue) {
-            return this.getString(key, defaultValue);
-        };
-        I18n.prototype.getCurrentLanguage = function () {
-            var lang = this.language();
-            if (exports.SUPPORTED_LANGUAGES[lang]) {
-                return lang;
-            }
-            return null;
-        };
-        // return the browser language if this language is one of the supported ones
-        // else it returns the default language set in the browserLanguageInfos.js file 
-        I18n.prototype.getBrowserLanguage = function () {
-            return app.browser.getCurrentBrowserInfos().countryCode;
-        };
-        I18n.getStringOrKey = function (str, key) {
-            return (str === null || str === undefined) ? key : str;
-        };
-        I18n.prototype.getRemoteUrl = function (language) {
-            return app.servicesPath + this.uri + app.context.page + "/" + language;
-        };
-        I18n.prototype.init = function () {
-            var _this = this;
-            this.initLocales();
-            this.language.subscribe(function (lang) {
-                _this.loadLanguage(lang);
-                _this.emit('change', lang);
-            });
-            this.isStringsReady.subscribe(function () {
-                _this.isReady(true);
-            });
-            this.initLanguage(exports.DEFAULT_LANGUAGE);
-        };
-        return I18n;
-    }(Manager_class_1.BaseManager));
-    exports.I18n = I18n;
-});
-define("modules/bindings/datepicker", ["require", "exports", "modules/classes/AbstractBinding.class"], function (require, exports, AbstractBinding_class_4) {
-    "use strict";
-    exports.__esModule = true;
-    var getDateTimePickerOptions = function (i18n) {
-        var _strings = {
-            // JQuery date and time picker labels
-            january: i18n.getObservableString('january'),
-            february: i18n.getObservableString('february'),
-            march: i18n.getObservableString('march'),
-            april: i18n.getObservableString('april'),
-            may: i18n.getObservableString('may'),
-            june: i18n.getObservableString('june'),
-            july: i18n.getObservableString('july'),
-            august: i18n.getObservableString('august'),
-            september: i18n.getObservableString('september'),
-            october: i18n.getObservableString('october'),
-            november: i18n.getObservableString('november'),
-            december: i18n.getObservableString('december'),
-            januaryAbbr: i18n.getObservableString('januaryAbbr'),
-            februaryAbbr: i18n.getObservableString('februaryAbbr'),
-            marchAbbr: i18n.getObservableString('marchAbbr'),
-            aprilAbbr: i18n.getObservableString('aprilAbbr'),
-            mayAbbr: i18n.getObservableString('mayAbbr'),
-            juneAbbr: i18n.getObservableString('juneAbbr'),
-            julyAbbr: i18n.getObservableString('julyAbbr'),
-            augustAbbr: i18n.getObservableString('augustAbbr'),
-            septemberAbbr: i18n.getObservableString('septemberAbbr'),
-            octoberAbbr: i18n.getObservableString('octoberAbbr'),
-            novemberAbbr: i18n.getObservableString('novemberAbbr'),
-            decemberAbbr: i18n.getObservableString('decemberAbbr'),
-            monday: i18n.getObservableString('monday'),
-            tuesday: i18n.getObservableString('tuesday'),
-            wednesday: i18n.getObservableString('wednesday'),
-            thursday: i18n.getObservableString('thursday'),
-            friday: i18n.getObservableString('friday'),
-            saturday: i18n.getObservableString('saturday'),
-            sunday: i18n.getObservableString('sunday'),
-            mondayAbbr: i18n.getObservableString('mondayAbbr'),
-            tuesdayAbbr: i18n.getObservableString('tuesdayAbbr'),
-            wednesdayAbbr: i18n.getObservableString('wednesdayAbbr'),
-            thursdayAbbr: i18n.getObservableString('thursdayAbbr'),
-            fridayAbbr: i18n.getObservableString('fridayAbbr'),
-            saturdayAbbr: i18n.getObservableString('saturdayAbbr'),
-            sundayAbbr: i18n.getObservableString('sundayAbbr'),
-            firstDayOfTheWeek: i18n.getObservableString('firstDayOfTheWeek'),
-            today: i18n.getObservableString('today'),
-            previous: i18n.getObservableString('previous'),
-            next: i18n.getObservableString('next'),
-            close: i18n.getObservableString('close')
-        };
-        var options = {
-            onClose: function () { },
-            dateFormat: getDateFormat(i18n),
-            onSelect: null,
-            closeText: _strings.close(),
-            prevText: _strings.previous(),
-            changeYear: true,
-            showOn: "none",
-            nextText: _strings.next(),
-            currentText: _strings.today(),
-            showButtonPanel: false,
-            firstDay: getFirstDayOfTheWeek(_strings),
-            monthNames: [
-                _strings.january(), _strings.february(), _strings.march(), _strings.april(), _strings.may(), _strings.june(),
-                _strings.july(), _strings.august(), _strings.september(), _strings.october(), _strings.november(), _strings.december()
-            ],
-            monthNamesShort: [
-                _strings.januaryAbbr(), _strings.februaryAbbr(), _strings.marchAbbr(), _strings.aprilAbbr(), _strings.mayAbbr(), _strings.juneAbbr(),
-                _strings.julyAbbr(), _strings.augustAbbr(), _strings.septemberAbbr(), _strings.octoberAbbr(), _strings.novemberAbbr(), _strings.decemberAbbr()
-            ],
-            dayNames: [
-                _strings.sunday(), _strings.monday(), _strings.tuesday(), _strings.wednesday(), _strings.thursday(), _strings.friday(), _strings.saturday()
-            ],
-            dayNamesMin: [
-                _strings.sundayAbbr(), _strings.mondayAbbr(), _strings.tuesdayAbbr(), _strings.wednesdayAbbr(), _strings.thursdayAbbr(), _strings.fridayAbbr(), _strings.saturdayAbbr()
-            ]
-            //minDate: new Date(1970, 0, 1)
-        };
-        return options;
-    };
-    var getDateFormat = function (i18n) {
-        var dateFormat = i18n.getCurrentLocale().dateFormat;
-        return dateFormat.replace("yyyy", "yy");
-    };
-    var getFirstDayOfTheWeek = function (_strings) {
-        var firstDayOfTheWeek = _strings.firstDayOfTheWeek();
-        switch (firstDayOfTheWeek) {
-            case _strings.monday():
-                return 1;
-            case _strings.tuesday():
-                return 2;
-            case _strings.wednesday():
-                return 3;
-            case _strings.thursday():
-                return 4;
-            case _strings.friday():
-                return 5;
-            case _strings.saturday():
-                return 6;
-            default: // i.e. (firstDayOfTheWeek == _strings.sunday())
-                return 0;
-        }
-        return firstDayOfTheWeek;
-    };
-    var getFirstVisibleInput = function (id) {
-        var $elements = $('[id=' + id + ']');
-        for (var i = 0; i < $elements.length; i++) {
-            var $this = $($elements[i]);
-            if ($this.is(':visible')) {
-                return $this;
-            }
-        }
-        return $('#' + id);
-    };
-    var DatePickerBinding = /** @class */ (function (_super) {
-        __extends(DatePickerBinding, _super);
-        function DatePickerBinding() {
-            return _super.call(this, 'datepicker') || this;
-        }
-        DatePickerBinding.prototype.init = function (element, valueAccessor, allBindingsAccessor) {
-            var value = valueAccessor();
-            app.manager.ready(['i18n'], function (i18n) {
-                var o = $.extend(value.options || {}, getDateTimePickerOptions(i18n));
-                o['yearRange'] = (o.minDate ? o.minDate.getFullYear() : "c-100") + ":" + (o.maxDate ? o.maxDate.getFullYear() : "c+100");
-                $(element).bind('click.datepicker', function () {
-                    getFirstVisibleInput(value.id).datepicker('show');
-                });
-                defer(function () {
-                    getFirstVisibleInput(value.id).datepicker(o);
-                });
-            });
-        };
-        DatePickerBinding.prototype.update = function (element, valueAccessor) {
-            var value = valueAccessor();
-            app.manager.ready(['i18n'], function (i18n) {
-                var o = $.extend(value.options || {}, getDateTimePickerOptions(i18n));
-                o['yearRange'] = (o.minDate ? o.minDate.getFullYear() : "c-100") + ":" + (o.maxDate ? o.maxDate.getFullYear() : "c+100");
-                getFirstVisibleInput(value.id).datepicker('destroy');
-                getFirstVisibleInput(value.id).datepicker(o);
-            });
-        };
-        return DatePickerBinding;
-    }(AbstractBinding_class_4.AbstractBinding));
-    exports.DatePickerBinding = DatePickerBinding;
-});
-define("modules/bindings/format", ["require", "exports", "modules/classes/AbstractBinding.class"], function (require, exports, AbstractBinding_class_5) {
-    "use strict";
-    exports.__esModule = true;
-    var format = function (content) {
-        var locale = app.i18n.getCurrentLocale();
-        var digits = isNaN(content.digit) ? 2 : content.digit;
-        if (content.name == "percent") {
-            return "%s &#37;".format(utils.formatDecimal(content.value, digits, locale));
-        }
-        if (content.name == "currency") {
-            return "%s %s".format(utils.formatDecimal(content.value, digits, locale), locale.currencySymbol);
-        }
-        if (content.name == "currencyPerMonth") {
-            return "%s %s%s".format(utils.formatDecimal(content.value, digits, locale), locale.currencySymbol, app.i18n.getString('perMonth'));
-        }
-        if (content.name == "replace") {
-            return utils.formatString(content.value, content.data);
-        }
-        if (content.name == "month") {
-            return "%s %s".format(content.value, app.i18n.getString('month'));
-        }
-        if (content.name == "date") {
-            return utils.formatDate(content.value, content.dateFormat || locale.dateFormat);
-        }
-        if (content.name == "datetime") {
-            return utils.formatDate(content.value, content.dateFormat || locale.dateFormat, content.hourFormat || "hh:mm");
-        }
-    };
-    var getValueAccessor = function (content, name) {
-        if (typeof (content) == "object") {
-            return function () {
-                return {
-                    value: content.value,
-                    digit: content.digit,
-                    name: name,
-                    data: content.data
-                };
-            };
-        }
-        return function () {
-            return {
-                value: content,
-                name: name
-            };
-        };
-    };
-    var FormatBinding = /** @class */ (function (_super) {
-        __extends(FormatBinding, _super);
-        function FormatBinding(name) {
-            if (name === void 0) { name = 'format'; }
-            return _super.call(this, name) || this;
-        }
-        FormatBinding.prototype.init = function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-            var $this = $(element);
-            $this.data("koformat", { value: $this.html() });
-        };
-        FormatBinding.prototype.update = function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-            var content = valueAccessor();
-            var $this = $(element);
-            var oldContent = $this.data("koformat");
-            if (typeof (content) == "object") {
-                content = {
-                    value: ko.unwrap(content.value),
-                    name: ko.unwrap(content.name),
-                    digit: ko.unwrap(content.digit),
-                    data: ko.unwrap(content.data || viewModel),
-                    dateFormat: ko.unwrap(content.dateFormat),
-                    hourFormat: ko.unwrap(content.dateFormat)
-                };
-            }
-            else {
-                content = {
-                    value: oldContent.value,
-                    name: ko.unwrap(content),
-                    data: ko.unwrap(viewModel)
-                };
-            }
-            if (content != oldContent) {
-                $this.data("koformat", content);
-                $this.html(format(content));
-            }
-        };
-        return FormatBinding;
-    }(AbstractBinding_class_5.AbstractBinding));
-    exports.FormatBinding = FormatBinding;
-    var AbstractFormat = /** @class */ (function (_super) {
-        __extends(AbstractFormat, _super);
-        function AbstractFormat(name, format) {
-            var _this = _super.call(this, name) || this;
-            _this.format = format;
-            return _this;
-        }
-        AbstractFormat.prototype.update = function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-            var content = valueAccessor();
-            var $this = $(element);
-            valueAccessor = getValueAccessor(content, this.format);
-            _super.prototype.update.call(this, element, valueAccessor, allBindings, viewModel, bindingContext);
-        };
-        return AbstractFormat;
-    }(FormatBinding));
-    exports.AbstractFormat = AbstractFormat;
-    var FormatCurrencyBinding = /** @class */ (function (_super) {
-        __extends(FormatCurrencyBinding, _super);
-        function FormatCurrencyBinding() {
-            return _super.call(this, 'formatCurrency', 'currency') || this;
-        }
-        return FormatCurrencyBinding;
-    }(AbstractFormat));
-    exports.FormatCurrencyBinding = FormatCurrencyBinding;
-    var FormatCurrencyPerMonthBinding = /** @class */ (function (_super) {
-        __extends(FormatCurrencyPerMonthBinding, _super);
-        function FormatCurrencyPerMonthBinding() {
-            return _super.call(this, 'formatCurrencyPerMonth', 'currencyPerMonth') || this;
-        }
-        return FormatCurrencyPerMonthBinding;
-    }(AbstractFormat));
-    exports.FormatCurrencyPerMonthBinding = FormatCurrencyPerMonthBinding;
-    var FormatPercentBinding = /** @class */ (function (_super) {
-        __extends(FormatPercentBinding, _super);
-        function FormatPercentBinding() {
-            return _super.call(this, 'formatPercent', 'percent') || this;
-        }
-        return FormatPercentBinding;
-    }(AbstractFormat));
-    exports.FormatPercentBinding = FormatPercentBinding;
-    var FormatDateBinding = /** @class */ (function (_super) {
-        __extends(FormatDateBinding, _super);
-        function FormatDateBinding() {
-            return _super.call(this, 'formatDate', 'date') || this;
-        }
-        return FormatDateBinding;
-    }(AbstractFormat));
-    exports.FormatDateBinding = FormatDateBinding;
-    var FormatDateTimeBinding = /** @class */ (function (_super) {
-        __extends(FormatDateTimeBinding, _super);
-        function FormatDateTimeBinding() {
-            return _super.call(this, 'formatDateTime', 'datetime') || this;
-        }
-        return FormatDateTimeBinding;
-    }(AbstractFormat));
-    exports.FormatDateTimeBinding = FormatDateTimeBinding;
-    var FormatMonthBinding = /** @class */ (function (_super) {
-        __extends(FormatMonthBinding, _super);
-        function FormatMonthBinding() {
-            return _super.call(this, 'formatMonth', 'month') || this;
-        }
-        return FormatMonthBinding;
-    }(AbstractFormat));
-    exports.FormatMonthBinding = FormatMonthBinding;
-});
-define("modules/bindings/i18n", ["require", "exports", "modules/classes/AbstractBinding.class"], function (require, exports, AbstractBinding_class_6) {
-    "use strict";
-    exports.__esModule = true;
-    var getValueAccessor = function (content, viewModel) {
-        if (typeof (content) == "object") {
-            if (content.sdata) {
-                return function () { return app.i18n.getObservableString(content.prop)().format(content.sdata); };
-            }
-            return function () { return utils.formatString(app.i18n.getObservableString(content.prop)(), content.data || viewModel); };
-        }
-        return function () { return utils.formatString(app.i18n.getObservableString(content)(), viewModel); };
-    };
-    var setTitle = function (element, valueAccessor) {
-        var inputType = valueAccessor();
-        if (inputType) {
-            try {
-                $(element).attr('title', inputType);
-            }
-            catch (e) { }
-        }
-    };
-    var i18nBinding = /** @class */ (function (_super) {
-        __extends(i18nBinding, _super);
-        function i18nBinding() {
-            return _super.call(this, 'i18n') || this;
-        }
-        i18nBinding.prototype.init = function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-            var content = valueAccessor();
-            var $this = $(element);
-            valueAccessor = getValueAccessor(content, viewModel);
-            ko.bindingHandlers['html'].init(element, valueAccessor, allBindings, viewModel, bindingContext);
-        };
-        i18nBinding.prototype.update = function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-            var content = valueAccessor();
-            var $this = $(element);
-            valueAccessor = getValueAccessor(content, viewModel);
-            ko.bindingHandlers['html'].update(element, valueAccessor, allBindings, viewModel, bindingContext);
-        };
-        return i18nBinding;
-    }(AbstractBinding_class_6.AbstractBinding));
-    exports.i18nBinding = i18nBinding;
-    var i18nTitleBinding = /** @class */ (function (_super) {
-        __extends(i18nTitleBinding, _super);
-        function i18nTitleBinding() {
-            return _super.call(this, 'i18nTitle') || this;
-        }
-        i18nTitleBinding.prototype.init = function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-            var content = valueAccessor();
-            var $this = $(element);
-            valueAccessor = getValueAccessor(content, viewModel);
-            setTitle(element, valueAccessor);
-        };
-        i18nTitleBinding.prototype.update = function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-            var content = valueAccessor();
-            var $this = $(element);
-            valueAccessor = getValueAccessor(content, viewModel);
-            setTitle(element, valueAccessor);
-        };
-        return i18nTitleBinding;
-    }(AbstractBinding_class_6.AbstractBinding));
-    exports.i18nTitleBinding = i18nTitleBinding;
-});
-define("modules/bindings/inputType", ["require", "exports", "modules/classes/AbstractBinding.class"], function (require, exports, AbstractBinding_class_7) {
-    "use strict";
-    exports.__esModule = true;
-    var setInputType = function (element, valueAccessor) {
-        var inputType_ = ko.unwrap(valueAccessor());
-        if (inputType_) {
-            try {
-                $(element).attr('type', inputType_);
-            }
-            catch (e) { }
-        }
-    };
-    var InputTypeBinding = /** @class */ (function (_super) {
-        __extends(InputTypeBinding, _super);
-        function InputTypeBinding() {
-            return _super.call(this, 'inputType') || this;
-        }
-        InputTypeBinding.prototype.init = function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-            setInputType(element, valueAccessor);
-        };
-        InputTypeBinding.prototype.update = function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-            setInputType(element, valueAccessor);
-        };
-        return InputTypeBinding;
-    }(AbstractBinding_class_7.AbstractBinding));
-    exports.InputTypeBinding = InputTypeBinding;
-});
-define("modules/bindings/load", ["require", "exports", "modules/classes/AbstractBinding.class"], function (require, exports, AbstractBinding_class_8) {
-    "use strict";
-    exports.__esModule = true;
-    var LoadBinding = /** @class */ (function (_super) {
-        __extends(LoadBinding, _super);
-        function LoadBinding() {
-            return _super.call(this, 'load') || this;
-        }
-        LoadBinding.prototype.init = function (element, valueAccessor, allBindings, viewModel, bindingContext) { };
-        LoadBinding.prototype.update = function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-            var url = valueAccessor();
-            var $element = $(element);
-            $element.load(url);
-        };
-        return LoadBinding;
-    }(AbstractBinding_class_8.AbstractBinding));
-    exports.LoadBinding = LoadBinding;
-});
-define("modules/bindings/nanoScroll", ["require", "exports", "modules/classes/AbstractBinding.class"], function (require, exports, AbstractBinding_class_9) {
-    "use strict";
-    exports.__esModule = true;
-    var NanoScrollBinding = /** @class */ (function (_super) {
-        __extends(NanoScrollBinding, _super);
-        function NanoScrollBinding() {
-            return _super.call(this, 'nanoScroll') || this;
-        }
-        NanoScrollBinding.prototype.init = function (element, valueAccessor) { };
-        NanoScrollBinding.prototype.update = function (element, valueAccessor) {
-            var nanoClassName = 'nano-field-select';
-            var value = ko.unwrap(valueAccessor);
-            var $this = $(element);
-            var isInitialized = $this.data('nanoScrollInitialized');
-            if (value === false) {
-                $this.nanoScroller({ destroy: true });
-                if (isInitialized === true) {
-                    $this.removeClass(nanoClassName);
-                    $($this.children()[0]).removeClass('nano-content');
-                    $this.unbind('.nanoScrollerBinding');
-                }
-            }
-            else {
-                if (!isInitialized) {
-                    $this.data('nanoScrollInitialized', true);
-                    $this.addClass(nanoClassName);
-                    $($this.children()[0]).addClass('nano-content');
-                    $this.on('mouseenter.nanoScrollerBinding', function () {
-                        var $this = $(this);
-                        $this.nanoScroller();
-                    });
-                }
-                $this.nanoScroller();
-            }
-        };
-        return NanoScrollBinding;
-    }(AbstractBinding_class_9.AbstractBinding));
-    exports.NanoScrollBinding = NanoScrollBinding;
-});
-define("modules/bindings/post", ["require", "exports", "modules/classes/AbstractBinding.class"], function (require, exports, AbstractBinding_class_10) {
-    "use strict";
-    exports.__esModule = true;
-    var openWithPostData = function (url, data_get, data_post, target) {
-        app.postRedirect(url, data_post, target, data_get);
-    };
-    var PostBinding = /** @class */ (function (_super) {
-        __extends(PostBinding, _super);
-        function PostBinding() {
-            return _super.call(this, 'post') || this;
-        }
-        PostBinding.prototype.init = function (element, valueAccessor, allBindings, viewModel, bindingContext) { };
-        PostBinding.prototype.update = function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-            var data = valueAccessor();
-            if (data) {
-                $(element).off('click.kopost');
-                $(element).on('click.kopost', function () {
-                    openWithPostData(ko.unwrap(data.url), ko.unwrap(data.params), ko.unwrap(data.data), ko.unwrap(data.target));
-                });
-            }
-        };
-        return PostBinding;
-    }(AbstractBinding_class_10.AbstractBinding));
-    exports.PostBinding = PostBinding;
-});
-define("modules/bindings/readonly", ["require", "exports", "modules/classes/AbstractBinding.class"], function (require, exports, AbstractBinding_class_11) {
-    "use strict";
-    exports.__esModule = true;
-    var doReadOnly = function (element, valueAccessor) {
-        var readonly = ko.utils.unwrapObservable(valueAccessor());
-        var $element = $(element);
-        if (element.type == "checkbox" || element.tagName == "SELECT" || element.tagName == "BUTTON" || element.tagName == "DIV" || element.tagName == "A") {
-            if (readonly) {
-                $element.attr('disabled', 'disabled');
-            }
-            else {
-                $element.removeAttr('disabled');
-            }
-        }
-        else {
-            if (readonly) {
-                $element.attr('readonly', 'readonly');
-            }
-            else {
-                $element.removeAttr('readonly');
-            }
-        }
-        if (readonly) {
-            $element.bind('mousedown.readOnlyBinding', function (e) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                return false;
-            });
-        }
-        else {
-            $element.unbind('mousedown.readOnlyBinding');
-        }
-    };
-    var ReadOnlyBinding = /** @class */ (function (_super) {
-        __extends(ReadOnlyBinding, _super);
-        function ReadOnlyBinding() {
-            return _super.call(this, 'readonly') || this;
-        }
-        ReadOnlyBinding.prototype.init = function (element, valueAccessor) {
-            doReadOnly(element, valueAccessor);
-        };
-        ReadOnlyBinding.prototype.update = function (element, valueAccessor) {
-            doReadOnly(element, valueAccessor);
-        };
-        return ReadOnlyBinding;
-    }(AbstractBinding_class_11.AbstractBinding));
-    exports.ReadOnlyBinding = ReadOnlyBinding;
-});
-define("modules/bindings/tooltipster", ["require", "exports", "modules/classes/AbstractBinding.class"], function (require, exports, AbstractBinding_class_12) {
-    "use strict";
-    exports.__esModule = true;
-    var TooltipterBinding = /** @class */ (function (_super) {
-        __extends(TooltipterBinding, _super);
-        function TooltipterBinding() {
-            return _super.call(this, 'tooltip') || this;
-        }
-        TooltipterBinding.prototype.init = function (element, valueAccessor) {
-            // handle disposal (if KO removes by the template binding)
-            ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
-                var $this = $(element);
-                if ($this.tooltipster) {
-                    try {
-                        $this.tooltipster('destroy').off('.tooltipster');
-                    }
-                    catch (e) { }
-                }
-            });
-        };
-        TooltipterBinding.prototype.update = function (element, valueAccessor) {
-            var content = ko.unwrap(valueAccessor());
-            var $this = $(element);
-            if (content != null && typeof (content) == "object") {
-                content = {
-                    text: ko.unwrap(content.text),
-                    animation: ko.unwrap(content.animation),
-                    position: ko.unwrap(content.position),
-                    permanent: ko.unwrap(content.permanent)
-                };
-            }
-            else {
-                content = {
-                    text: ko.unwrap(content)
-                };
-            }
-            var oldContent = $this.data("kotooltipster");
-            if (content != oldContent) {
-                if (oldContent) {
-                    $this.attr("title", null);
-                    if ($this.tooltipster) {
-                        try {
-                            $this.tooltipster('destroy');
-                        }
-                        catch (e) { }
-                    }
-                }
-                if (content && content.text) {
-                    var position = content.position || $this.attr('data-ttposition');
-                    var animation = content.animation || $this.attr('data-ttanimation');
-                    var title = content.text.text().replaceAll("&nbsp;", " ");
-                    var permanent = content.permanent || $this.attr('data-ttpermanent');
-                    var autoClose = !permanent;
-                    var hideOnClick = true;
-                    $this.data("kotooltipster", content);
-                    if ($this.tooltipster) {
-                        $this.attr("title", content.text);
-                        $this.tooltipster({
-                            animation: animation,
-                            updateAnimation: false,
-                            contentAsHTML: true,
-                            delay: 100,
-                            position: position,
-                            hideOnClick: hideOnClick,
-                            autoClose: autoClose,
-                            onlyOne: true,
-                            touchDevices: true,
-                            trigger: (app.context.device == 'computer' ? 'hover' : 'click')
-                        });
-                        if (permanent) {
-                            $this.tooltipster('show');
-                        }
-                    }
-                    else {
-                        $this.attr("title", title);
-                    }
-                }
-                else {
-                    $this.attr("title", null);
-                }
-            }
-        };
-        return TooltipterBinding;
-    }(AbstractBinding_class_12.AbstractBinding));
-    exports.TooltipterBinding = TooltipterBinding;
-});
-define("modules/classes/API.class", ["require", "exports", "modules/helpers/query"], function (require, exports, query_3) {
-    "use strict";
-    exports.__esModule = true;
-    /**
-     * Use this class to simplify REST request
-     */
-    var API = /** @class */ (function () {
-        function API(uri) {
-            this.uri = uri;
-        }
-        /**
-         * Returne API uri
-         */
-        API.prototype.getUri = function () {
-            return this.uri;
-        };
-        /**
-         * Execute a POST request
-         */
-        API.prototype.create = function (fnDone, fnFail, opts) {
-            query_3.Query.POST(this.uri, this.toJson(), { success: fnDone, fail: fnFail }, this, opts);
-        };
-        /**
-         * Execute a PUT request
-         */
-        API.prototype.update = function (fnDone, fnFail, opts) {
-            query_3.Query.PUT(this.uri + "/" + this.id, this.toJson(), { success: fnDone, fail: fnFail }, this, opts);
-        };
-        /**
-         * Execute a PATCH request
-         */
-        API.prototype.patch = function (fnDone, fnFail, opts) {
-            query_3.Query.PATCH(this.uri + "/" + this.id, this.toJson(), { success: fnDone, fail: fnFail }, this, opts);
-        };
-        /**
-         * Execute a DELETE request
-         */
-        API.prototype.remove = function (fnDone, fnFail, opts) {
-            query_3.Query.DELETE(this.uri + "/" + this.id, { success: fnDone, fail: fnFail }, this, opts);
-        };
-        /**
-         * Execute a GET request
-         */
-        API.prototype.load = function (fnDone, fnFail, opts) {
-            query_3.Query.GET(this.uri + "/" + this.id, { success: fnDone, fail: fnFail }, this, opts);
-        };
-        /**
-         * Execute a GET request and fill data
-         * @see fromJson
-         */
-        API.prototype.synchronize = function (fnDone, fnFail, opts) {
-            var _this = this;
-            this.load(function (data) {
-                _this.fromJson(data);
-                if (typeof (fnDone) == "function") {
-                    fnDone.call(_this, data);
-                }
-            }, fnFail, opts);
-        };
-        /**
-         * Execute a GET request
-         */
-        API.prototype.list = function (fnDone, fnFail, opts) {
-            query_3.Query.GET(this.uri, { success: fnDone, fail: fnFail }, this, opts);
-        };
-        /**
-         * Save data depending on id
-         * No id => create
-         * id => update
-         * id = -1 => remove
-         */
-        API.prototype.save = function (fnDone, fnFail, opts) {
-            if (!this.id) {
-                // Create
-                this.create(fnDone, fnFail, opts);
-            }
-            else if (this.id == -1) {
-                // Delete
-                this.remove(fnDone, fnFail, opts);
-            }
-            else {
-                // Update
-                this.update(fnDone, fnFail, opts);
-            }
-        };
-        // Return waypoint data as Json
-        API.prototype.toJson = function () {
-            return JSON.stringify(this.data());
-        };
-        return API;
-    }());
-    exports.API = API;
-});
-define("modules/classes/AppManager.class", ["require", "exports"], function (require, exports) {
-    "use strict";
-    exports.__esModule = true;
-    var AppManager = /** @class */ (function () {
-        function AppManager() {
-            this._managers = {};
-            this._binders = [];
-            this._isRunningLock = false;
-            this._unsynchronized = false;
-        }
-        AppManager.prototype.checkBinders = function () {
-            var _this = this;
-            if (this._isRunningLock) {
-                this._unsynchronized = true;
-                return;
-            }
-            this._unsynchronized = false;
-            this._isRunningLock = true;
-            var i = 0;
-            do {
-                var binder = this._binders[i];
-                if (binder) {
-                    var j = 0;
-                    do {
-                        var manager = this.exists(binder.managers[j]);
-                        if (manager && (!binder.ifReady || manager.isReady())) {
-                            binder.arguments[binder.indexes.indexOf(binder.managers[j])] = manager;
-                            binder.managers.remove(binder.managers[j]);
-                        }
-                        else {
-                            j++;
-                        }
-                    } while (j < binder.managers.length);
-                    if (binder.managers.length == 0) {
-                        binder.fn.apply(binder.context, binder.arguments);
-                        this._binders.splice(i, 1);
-                    }
-                    else {
-                        i++;
-                    }
-                }
-            } while (i < this._binders.length);
-            this._isRunningLock = false;
-            if (this._unsynchronized) {
-                defer(function () { _this.checkBinders(); });
-            }
-        };
-        AppManager.prototype.register = function (managerId, manager) {
-            var _this = this;
-            this._managers[managerId] = manager;
-            manager.on('ready', function () {
-                _this.checkBinders();
-            }, manager);
-            this.checkBinders();
-            return manager;
-        };
-        AppManager.prototype.exists = function (managerId) {
-            var m = this._managers[managerId];
-            return m;
-        };
-        AppManager.prototype.get = function (managerId) {
-            var m = this.exists(managerId);
-            if (!m) {
-                throw 'Manager not found : ' + managerId;
-            }
-            return m;
-        };
-        AppManager.prototype.getManagers = function () {
-            return this._managers;
-        };
-        AppManager.prototype.addBinder = function (managerId, fn, context, ifReady) {
-            if (!$.isArray(managerId)) {
-                managerId = [managerId];
-            }
-            this._binders.push({
-                managers: [].concat(managerId),
-                indexes: managerId,
-                arguments: [],
-                fn: fn,
-                context: context,
-                ifReady: ifReady
-            });
-            this.checkBinders();
-        };
-        AppManager.prototype.ready = function (managerId, fn, context) {
-            this.addBinder(managerId, fn, context, true);
-        };
-        AppManager.prototype.require = function (managerId, fn, context) {
-            this.addBinder(managerId, fn, context, false);
-        };
-        return AppManager;
-    }());
-    exports.AppManager = AppManager;
-});
-define("modules/helpers/classes/BrowserInfo.class", ["require", "exports"], function (require, exports) {
+define("node_modules/src/ts/modules/helpers/classes/BrowserInfo.class", ["require", "exports"], function (require, exports) {
     "use strict";
     exports.__esModule = true;
     var UNKNOWN = "Unknown";
@@ -3447,7 +2055,7 @@ define("modules/helpers/classes/BrowserInfo.class", ["require", "exports"], func
     }());
     exports.BrowserInfo = BrowserInfo;
 });
-define("modules/helpers/browser", ["require", "exports", "modules/helpers/classes/BrowserInfo.class"], function (require, exports, BrowserInfo_class_1) {
+define("node_modules/src/ts/modules/helpers/browser", ["require", "exports", "node_modules/src/ts/modules/helpers/classes/BrowserInfo.class"], function (require, exports, BrowserInfo_class_1) {
     "use strict";
     exports.__esModule = true;
     var Browser = /** @class */ (function () {
@@ -3505,7 +2113,433 @@ define("modules/helpers/browser", ["require", "exports", "modules/helpers/classe
     }());
     exports.Browser = Browser;
 });
-define("modules/forms/classes/Tooltip.class", ["require", "exports"], function (require, exports) {
+define("node_modules/src/ts/modules/helpers/storage", ["require", "exports"], function (require, exports) {
+    "use strict";
+    exports.__esModule = true;
+    var checkLocalStorage = function () {
+        if (window.localStorage) {
+            return true;
+        }
+        if (console && console.warn) {
+            console.warn('LocaleStorage is not defined. Update your browser to fix this issue');
+        }
+        return false;
+    };
+    var Storage = /** @class */ (function () {
+        function Storage() {
+        }
+        Storage.put = function (name, value, opts) {
+            if (!checkLocalStorage()) {
+                return false;
+            }
+            if (value == null) {
+                Storage.remove(name);
+                return false;
+            }
+            opts = $.extend({}, opts);
+            if (opts.crypt) {
+                value = $().crypt({
+                    method: 'b64enc',
+                    source: value
+                });
+            }
+            localStorage[name] = String(value);
+            return true;
+        };
+        Storage.putObject = function (name, json, opts) {
+            return Storage.put(name, JSON.stringify(Object.toJson(json)), opts);
+        };
+        Storage.read = function (name, opts) {
+            if (!checkLocalStorage()) {
+                return;
+            }
+            opts = $.extend({}, opts);
+            var value = localStorage[name];
+            if (value && opts.crypt) {
+                value = $().crypt({
+                    method: 'b64dec',
+                    source: value
+                });
+            }
+            return value;
+        };
+        Storage.remove = function (name) {
+            if (!checkLocalStorage()) {
+                return false;
+            }
+            if ($.isArray(name)) {
+                $.each(name, function (index, id) {
+                    localStorage.removeItem(id);
+                });
+            }
+            else {
+                localStorage.removeItem(name);
+            }
+            return true;
+        };
+        Storage.readAsObject = function (name, opts) {
+            var json = Storage.read(name, opts);
+            try {
+                return JSON.parse(json);
+            }
+            catch (e) {
+                return {};
+            }
+        };
+        Storage.readAsNumber = function (name, opts) {
+            var num = Storage.read(name, opts);
+            return Number(num);
+        };
+        return Storage;
+    }());
+    exports.Storage = Storage;
+});
+define("node_modules/src/ts/modules/classes/EventsBinder.class", ["require", "exports"], function (require, exports) {
+    "use strict";
+    exports.__esModule = true;
+    var EventsBinder = /** @class */ (function () {
+        function EventsBinder() {
+            this.__event__ = ko.observable();
+            this.__subscriptions__ = [];
+        }
+        EventsBinder.prototype.on = function (eventId, callback, context) {
+            var _this = this;
+            if (typeof (callback) != 'function') {
+                throw "No callback specified or callback is not a valid function : " + callback;
+                return;
+            }
+            if ($.isArray(eventId)) {
+                $.each(eventId, function (k, eventId) {
+                    _this.on(eventId, callback, context);
+                });
+                return;
+            }
+            this.__subscriptions__.push(this.__event__.subscribe(function (event) {
+                if (event.id == this.eventId) {
+                    this.callback.apply(this.context || this.owner, event.arguments);
+                }
+            }, { eventId: eventId, callback: callback, context: context, owner: this }));
+        };
+        EventsBinder.prototype.emit = function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            this.__event__({
+                id: args[0],
+                arguments: args.slice(1)
+            });
+        };
+        EventsBinder.prototype.clearSubscriptions = function () {
+            dispose(this.__subscriptions__);
+        };
+        EventsBinder.prototype.dispose = function () {
+            this.clearSubscriptions();
+        };
+        return EventsBinder;
+    }());
+    exports.EventsBinder = EventsBinder;
+});
+define("node_modules/src/ts/modules/classes/Manager.class", ["require", "exports", "node_modules/src/ts/modules/classes/EventsBinder.class"], function (require, exports, EventsBinder_class_1) {
+    "use strict";
+    exports.__esModule = true;
+    exports.inherits = function (prototype, id, opts) {
+        var OverloadClass = function (prototype, id, opts) {
+            opts._id = id;
+            this.executionContext = opts;
+            this.__proto__ = prototype;
+        };
+        OverloadClass.prototype = prototype;
+        return new OverloadClass(prototype, id, opts);
+    };
+    /**
+     * A module.
+     */
+    var BaseManager = /** @class */ (function (_super) {
+        __extends(BaseManager, _super);
+        function BaseManager() {
+            var _this = _super.call(this) || this;
+            _this._domains = {};
+            _this._domainCounter = 0;
+            /**
+            * A value that indicates whether this module is ready.
+            * @type {ko.observable(boolean)}
+            */
+            _this.isReady = ko.observable(false);
+            _this.isReady.subscribeOnce(function (b) {
+                if (b) {
+                    _this.emit('ready');
+                }
+            }, _this);
+            return _this;
+        }
+        BaseManager.prototype.init = function () { };
+        /**
+         * Executes the given callback when this module is ready.
+         * @param callback The function to execute when this module is ready.
+         * @param context The context for the given callback.
+         */
+        BaseManager.prototype.ready = function (callback, context) {
+            if (!callback)
+                return;
+            this.on('ready', callback, context);
+            if (this.isReady()) {
+                callback.call(context || this);
+                return true;
+            }
+            return false;
+        };
+        return BaseManager;
+    }(EventsBinder_class_1.EventsBinder));
+    exports.BaseManager = BaseManager;
+});
+define("node_modules/src/ts/modules/classes/Locale.class", ["require", "exports"], function (require, exports) {
+    "use strict";
+    exports.__esModule = true;
+    var Locale = /** @class */ (function () {
+        function Locale(language, isoCode) {
+            this._language = language;
+            this._isoCode = isoCode;
+        }
+        Locale.prototype.getLang = function () {
+            return this._language;
+        };
+        Locale.prototype.getIsoCode = function () {
+            return this._isoCode;
+        };
+        Locale.autoLoadClass = true;
+        Locale.autoloadedLocales = [];
+        return Locale;
+    }());
+    exports.Locale = Locale;
+});
+define("node_modules/src/ts/modules/classes/locale/en", ["require", "exports", "node_modules/src/ts/modules/classes/Locale.class"], function (require, exports, Locale_class_1) {
+    "use strict";
+    exports.__esModule = true;
+    var Locale_en = /** @class */ (function (_super) {
+        __extends(Locale_en, _super);
+        function Locale_en() {
+            var _this = _super.call(this, 'en', 'en_US') || this;
+            _this.displayName = "English";
+            _this.decimalSeparator = ".";
+            _this.decimalGroupSeparator = ",";
+            _this.decimalGroupDigits = 3;
+            _this.dateFormat = "yyyy-mm-dd";
+            _this.dateSeparator = "-";
+            _this.dateLiteralFormat = "YMD";
+            _this.currencySymbol = "€";
+            return _this;
+        }
+        return Locale_en;
+    }(Locale_class_1.Locale));
+    exports.Locale_en = Locale_en;
+});
+define("node_modules/src/ts/modules/managers/i18n", ["require", "exports", "node_modules/src/ts/modules/helpers/logger", "node_modules/src/ts/modules/helpers/query", "node_modules/src/ts/modules/classes/Manager.class", "node_modules/src/ts/modules/classes/Locale.class", "node_modules/src/ts/modules/classes/locale/en"], function (require, exports, logger_2, query_2, Manager_class_1, Locale_class_2, en_1) {
+    "use strict";
+    exports.__esModule = true;
+    exports.SUPPORTED_LANGUAGES = {};
+    var logger = logger_2.Logger.getLogger('i18n');
+    var I18n = /** @class */ (function (_super) {
+        __extends(I18n, _super);
+        function I18n(defaultLanguage) {
+            if (defaultLanguage === void 0) { defaultLanguage = "en"; }
+            var _this = _super.call(this) || this;
+            _this.uri = "/i18n/";
+            _this.useRemoteUrl = false;
+            _this.isStringsReady = ko.observable(false);
+            _this.localizedStrings = {};
+            _this.localizedObservableStrings = {};
+            _this.locales = {};
+            /**
+             * The current resources language.
+             * @type {ko.observable(string)}
+             */
+            _this.language = ko.observable();
+            exports.DEFAULT_LANGUAGE = defaultLanguage;
+            window['i18n'] = _this;
+            return _this;
+        }
+        I18n.prototype.initLocales = function () {
+            var _this = this;
+            // Default locale
+            this.addLocale(new en_1.Locale_en());
+            // Load from autoloaded locales instances
+            $.each(Locale_class_2.Locale.autoloadedLocales, function (i, locale) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Add locale from autoloader", locale);
+                }
+                _this.addLocale(locale);
+            });
+            // Load from configuration locales global var
+            $.each(window['locales_def'] || {}, function (id, localeConf) {
+                var locale = new Locale_class_2.Locale(id, localeConf.isoCode);
+                locale.displayName = localeConf.localeName;
+                locale.decimalGroupSeparator = localeConf.format.decimal.groupSeparator;
+                locale.decimalGroupDigits = localeConf.format.decimal.groupDigits;
+                locale.decimalSeparator = localeConf.format.decimal.separator;
+                locale.currencySymbol = localeConf.format.currency.symbol;
+                locale.dateFormat = localeConf.format.date.format;
+                locale.dateSeparator = localeConf.format.date.separator;
+                locale.dateLiteralFormat = localeConf.format.date.literalFormat;
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Add locale from global configuration", locale);
+                }
+                _this.addLocale(locale);
+            });
+        };
+        I18n.prototype.initLanguage = function (defaultLanguage) {
+            var locale;
+            if (defaultLanguage) {
+                locale = this.getLocaleByLang(defaultLanguage);
+            }
+            if (!locale) {
+                locale = this.getLocaleByLang(this.getBrowserLanguage());
+            }
+            if (locale) {
+                this.language(locale.getLang());
+                this.isReady(true);
+                return;
+            }
+            logger.error("Error loading language '%s'".format(defaultLanguage));
+            this.emit('initError', defaultLanguage);
+        };
+        I18n.prototype.getCurrentLocale = function () {
+            return this.getLocale(this.language());
+        };
+        I18n.prototype.getLocale = function (isoCode) {
+            return this.locales[isoCode];
+        };
+        I18n.prototype.getLocaleByLang = function (lang) {
+            return Object.findBy(this.locales, 'getLang', lang);
+        };
+        I18n.prototype.getSupportedLanguages = function () {
+            return exports.SUPPORTED_LANGUAGES;
+        };
+        I18n.prototype.addLocale = function (locale) {
+            exports.SUPPORTED_LANGUAGES[locale.getIsoCode()] = locale.getLang();
+            this.locales[locale.getIsoCode()] = locale;
+        };
+        I18n.prototype.loadJsonStrings = function (json) {
+            var _this = this;
+            // Update the cache for each
+            $.each(json, function (k, v) {
+                _this.localizedStrings[k] = v;
+            });
+            // Update the observables strings
+            this.updateObservableStrings();
+            this.isStringsReady(true);
+        };
+        I18n.prototype.loadLanguageAsJson = function (lang, json) {
+            this.loadJsonStrings(json);
+            // Update the current resources language
+            this.language(lang);
+        };
+        I18n.prototype.loadLanguage = function (lang) {
+            var _this = this;
+            // Load i18n from js global var i18n
+            var globalI18n = window['i18n_def'];
+            if (globalI18n && globalI18n[lang]) {
+                this.loadLanguageAsJson(lang, globalI18n[lang]);
+                return;
+            }
+            if (this.useRemoteUrl) {
+                // Get the url
+                var url_1 = this.getRemoteUrl(lang);
+                // Load the strings
+                query_2.Query.GETasJson(url_1, function (json, status) {
+                    if (lang != _this.language()) {
+                        // The user changed the language between the request and the response
+                        return;
+                    }
+                    if (status == query_2.Query.Status.SUCCESS) {
+                        // Update the current language
+                        _this.loadLanguageAsJson(lang, json);
+                    }
+                    else {
+                        logger.fatal('Erreur lors du chargement des libellés %s: %s'.format(url_1, status));
+                        _this.emit('initError', lang);
+                        throw 'Erreur lors du chargement des libellés %s: %s'.format(url_1, status);
+                    }
+                }, null, { upToDate: false });
+                return;
+            }
+            logger.warn('No internationalized message found (lang: %s)'.format(lang));
+        };
+        I18n.prototype.updateObservableStrings = function () {
+            var _this = this;
+            $.each(this.localizedStrings, function (k, v) {
+                var observableString = _this.getObservableString(k);
+                observableString(v);
+            });
+        };
+        I18n.prototype.getObservableString = function (key, defaultValue) {
+            // Get the observable string with the given id
+            var observableString = this.localizedObservableStrings[key];
+            if (!observableString) {
+                if (isset(defaultValue)) {
+                    observableString = this.localizedObservableStrings[defaultValue];
+                    if (!observableString) {
+                        observableString = ko.observable(defaultValue);
+                    }
+                }
+                else {
+                    // Create a new observable string with the localized string
+                    observableString = this.localizedObservableStrings[key] = ko.observable();
+                    observableString(this.getString(key, key));
+                }
+            }
+            return observableString;
+        };
+        /**
+         * Gets the localized string for the given key.
+         * @param {string} key The key of the desired label.
+         * @return {string} The localized string.
+         */
+        I18n.prototype.getString = function (key, defaultValue) {
+            return I18n.getStringOrKey(this.localizedStrings[key], isset(defaultValue) ? defaultValue : key);
+        };
+        /**
+         * Gets the localized string for the given key.
+         * @param {string} key The key of the desired label.
+         * @return {string} The localized string.
+         * @see getString
+         */
+        I18n.prototype._ = function (key, defaultValue) {
+            return this.getString(key, defaultValue);
+        };
+        I18n.prototype.getCurrentLanguage = function () {
+            var lang = this.language();
+            if (exports.SUPPORTED_LANGUAGES[lang]) {
+                return lang;
+            }
+            return null;
+        };
+        // return the browser language if this language is one of the supported ones
+        // else it returns the default language set in the browserLanguageInfos.js file 
+        I18n.prototype.getBrowserLanguage = function () {
+            return app.browser.getCurrentBrowserInfos().countryCode;
+        };
+        I18n.getStringOrKey = function (str, key) {
+            return (str === null || str === undefined) ? key : str;
+        };
+        I18n.prototype.getRemoteUrl = function (language) {
+            return app.servicesPath + this.uri + app.context.page + "/" + language;
+        };
+        I18n.prototype.init = function () {
+            var _this = this;
+            this.initLocales();
+            this.language.subscribe(function (lang) {
+                _this.loadLanguage(lang);
+                _this.emit('change', lang);
+                _this.isReady(true);
+            });
+            this.initLanguage(exports.DEFAULT_LANGUAGE);
+        };
+        return I18n;
+    }(Manager_class_1.BaseManager));
+    exports.I18n = I18n;
+});
+define("node_modules/src/ts/modules/forms/classes/Tooltip.class", ["require", "exports"], function (require, exports) {
     "use strict";
     exports.__esModule = true;
     var Tooltip = /** @class */ (function () {
@@ -3532,7 +2566,7 @@ define("modules/forms/classes/Tooltip.class", ["require", "exports"], function (
     }());
     exports.Tooltip = Tooltip;
 });
-define("modules/forms/classes/Option.class", ["require", "exports", "modules/forms/classes/Tooltip.class"], function (require, exports, Tooltip_class_1) {
+define("node_modules/src/ts/modules/forms/classes/Option.class", ["require", "exports", "node_modules/src/ts/modules/forms/classes/Tooltip.class"], function (require, exports, Tooltip_class_1) {
     "use strict";
     exports.__esModule = true;
     var Option = /** @class */ (function () {
@@ -3565,7 +2599,7 @@ define("modules/forms/classes/Option.class", ["require", "exports", "modules/for
     }());
     exports.Option = Option;
 });
-define("modules/forms/index", ["require", "exports"], function (require, exports) {
+define("node_modules/src/ts/modules/forms/index", ["require", "exports"], function (require, exports) {
     "use strict";
     exports.__esModule = true;
     var RegExpValidationRule = /** @class */ (function () {
@@ -3589,7 +2623,7 @@ define("modules/forms/index", ["require", "exports"], function (require, exports
     }());
     exports.RegExpValidationRule = RegExpValidationRule;
 });
-define("modules/forms/InputField", ["require", "exports", "modules/forms/classes/Tooltip.class", "modules/classes/EventsBinder.class", "modules/forms/index"], function (require, exports, Tooltip_class_2, EventsBinder_class_2, index_1) {
+define("node_modules/src/ts/modules/forms/InputField", ["require", "exports", "node_modules/src/ts/modules/forms/classes/Tooltip.class", "node_modules/src/ts/modules/classes/EventsBinder.class", "node_modules/src/ts/modules/forms/index"], function (require, exports, Tooltip_class_2, EventsBinder_class_2, index_1) {
     "use strict";
     exports.__esModule = true;
     var uids = [];
@@ -3954,7 +2988,7 @@ define("modules/forms/InputField", ["require", "exports", "modules/forms/classes
     }(BaseField));
     exports.InputField = InputField;
 });
-define("modules/forms/SelectField", ["require", "exports", "modules/forms/classes/Option.class", "modules/forms/InputField"], function (require, exports, Option_class_1, InputField_1) {
+define("node_modules/src/ts/modules/forms/SelectField", ["require", "exports", "node_modules/src/ts/modules/forms/classes/Option.class", "node_modules/src/ts/modules/forms/InputField"], function (require, exports, Option_class_1, InputField_1) {
     "use strict";
     exports.__esModule = true;
     var SelectField = /** @class */ (function (_super) {
@@ -4388,7 +3422,101 @@ define("modules/forms/SelectField", ["require", "exports", "modules/forms/classe
         }
     });
 });
-define("modules/classes/ViewModel.class", ["require", "exports", "modules/classes/EventsBinder.class"], function (require, exports, EventsBinder_class_3) {
+define("node_modules/src/ts/modules/classes/AppManager.class", ["require", "exports"], function (require, exports) {
+    "use strict";
+    exports.__esModule = true;
+    var AppManager = /** @class */ (function () {
+        function AppManager() {
+            this._managers = {};
+            this._binders = [];
+            this._isRunningLock = false;
+            this._unsynchronized = false;
+        }
+        AppManager.prototype.checkBinders = function () {
+            var _this = this;
+            if (this._isRunningLock) {
+                this._unsynchronized = true;
+                return;
+            }
+            this._unsynchronized = false;
+            this._isRunningLock = true;
+            var i = 0;
+            do {
+                var binder = this._binders[i];
+                if (binder) {
+                    var j = 0;
+                    do {
+                        var manager = this.exists(binder.managers[j]);
+                        if (manager && (!binder.ifReady || manager.isReady())) {
+                            binder.arguments[binder.indexes.indexOf(binder.managers[j])] = manager;
+                            binder.managers.remove(binder.managers[j]);
+                        }
+                        else {
+                            j++;
+                        }
+                    } while (j < binder.managers.length);
+                    if (binder.managers.length == 0) {
+                        binder.fn.apply(binder.context, binder.arguments);
+                        this._binders.splice(i, 1);
+                    }
+                    else {
+                        i++;
+                    }
+                }
+            } while (i < this._binders.length);
+            this._isRunningLock = false;
+            if (this._unsynchronized) {
+                defer(function () { _this.checkBinders(); });
+            }
+        };
+        AppManager.prototype.register = function (managerId, manager) {
+            var _this = this;
+            this._managers[managerId] = manager;
+            manager.on('ready', function () {
+                _this.checkBinders();
+            }, manager);
+            this.checkBinders();
+            return manager;
+        };
+        AppManager.prototype.exists = function (managerId) {
+            var m = this._managers[managerId];
+            return m;
+        };
+        AppManager.prototype.get = function (managerId) {
+            var m = this.exists(managerId);
+            if (!m) {
+                throw 'Manager not found : ' + managerId;
+            }
+            return m;
+        };
+        AppManager.prototype.getManagers = function () {
+            return this._managers;
+        };
+        AppManager.prototype.addBinder = function (managerId, fn, context, ifReady) {
+            if (!$.isArray(managerId)) {
+                managerId = [managerId];
+            }
+            this._binders.push({
+                managers: [].concat(managerId),
+                indexes: managerId,
+                arguments: [],
+                fn: fn,
+                context: context,
+                ifReady: ifReady
+            });
+            this.checkBinders();
+        };
+        AppManager.prototype.ready = function (managerId, fn, context) {
+            this.addBinder(managerId, fn, context, true);
+        };
+        AppManager.prototype.require = function (managerId, fn, context) {
+            this.addBinder(managerId, fn, context, false);
+        };
+        return AppManager;
+    }());
+    exports.AppManager = AppManager;
+});
+define("node_modules/src/ts/modules/classes/ViewModel.class", ["require", "exports", "node_modules/src/ts/modules/classes/EventsBinder.class"], function (require, exports, EventsBinder_class_3) {
     "use strict";
     exports.__esModule = true;
     var ViewModel = /** @class */ (function (_super) {
@@ -4439,7 +3567,7 @@ define("modules/classes/ViewModel.class", ["require", "exports", "modules/classe
     }(EventsBinder_class_3.EventsBinder));
     exports.ViewModel = ViewModel;
 });
-define("modules/helpers/files", ["require", "exports", "modules/helpers/logger", "modules/helpers/query"], function (require, exports, logger_3, query_4) {
+define("node_modules/src/ts/modules/helpers/files", ["require", "exports", "node_modules/src/ts/modules/helpers/logger", "node_modules/src/ts/modules/helpers/query"], function (require, exports, logger_3, query_3) {
     "use strict";
     exports.__esModule = true;
     var logger = logger_3.Logger.getLogger('files');
@@ -4463,11 +3591,11 @@ define("modules/helpers/files", ["require", "exports", "modules/helpers/logger",
         if (!((resource || "").toLowerCase().startsWith('http'))) {
             resource = app.servicesPath + resource;
         }
-        query_4.Query.GET(resource, callback, context, { silent: true, upToDate: false });
+        query_3.Query.GET(resource, callback, context, { silent: true, upToDate: false });
     }
     exports.loadResource = loadResource;
 });
-define("modules/classes/MVVM.class", ["require", "exports", "modules/helpers/logger", "modules/classes/ViewModel.class", "modules/helpers/files"], function (require, exports, logger_4, ViewModel_class_1, file) {
+define("node_modules/src/ts/modules/classes/MVVM.class", ["require", "exports", "node_modules/src/ts/modules/helpers/logger", "node_modules/src/ts/modules/classes/ViewModel.class", "node_modules/src/ts/modules/helpers/files"], function (require, exports, logger_4, ViewModel_class_1, file) {
     "use strict";
     exports.__esModule = true;
     var logger = logger_4.Logger.getLogger('MVVM');
@@ -4585,7 +3713,7 @@ define("modules/classes/MVVM.class", ["require", "exports", "modules/helpers/log
     }(ViewModel_class_1.ViewModel));
     exports.MVVM = MVVM;
 });
-define("modules/classes/MVVMDialog.class", ["require", "exports", "modules/helpers/logger", "modules/classes/MVVM.class"], function (require, exports, logger_5, MVVM_class_1) {
+define("node_modules/src/ts/modules/classes/MVVMDialog.class", ["require", "exports", "node_modules/src/ts/modules/helpers/logger", "node_modules/src/ts/modules/classes/MVVM.class"], function (require, exports, logger_5, MVVM_class_1) {
     "use strict";
     exports.__esModule = true;
     var logger = logger_5.Logger.getLogger('fr.ca.cat.MVVM');
@@ -4855,7 +3983,7 @@ define("modules/classes/MVVMDialog.class", ["require", "exports", "modules/helpe
     }(MVVM_class_1.MVVM));
     exports.MVVMDialog = MVVMDialog;
 });
-define("modules/ui/messageBox", ["require", "exports", "modules/classes/MVVMDialog.class"], function (require, exports, MVVMDialog_class_1) {
+define("node_modules/src/ts/modules/ui/messageBox", ["require", "exports", "node_modules/src/ts/modules/classes/MVVMDialog.class"], function (require, exports, MVVMDialog_class_1) {
     "use strict";
     exports.__esModule = true;
     // Count of box generated
@@ -5032,7 +4160,7 @@ define("modules/ui/messageBox", ["require", "exports", "modules/classes/MVVMDial
     }(MVVMDialog_class_1.MVVMDialog));
     exports.MessageBox = MessageBox;
 });
-define("modules/classes/Application.class", ["require", "exports", "modules/helpers/logger", "modules/helpers/browser", "modules/managers/i18n", "modules/forms/SelectField", "modules/classes/EventsBinder.class", "modules/classes/AppManager.class", "modules/ui/messageBox", "modules/classes/MVVMDialog.class", "modules/helpers/query"], function (require, exports, logger_6, browser_1, i18n_1, SelectField_1, EventsBinder_class_4, AppManager_class_1, messageBox_1, MVVMDialog_class_2, query_5) {
+define("node_modules/src/ts/modules/classes/Application.class", ["require", "exports", "node_modules/src/ts/modules/helpers/logger", "node_modules/src/ts/modules/helpers/browser", "node_modules/src/ts/modules/managers/i18n", "node_modules/src/ts/modules/forms/SelectField", "node_modules/src/ts/modules/classes/EventsBinder.class", "node_modules/src/ts/modules/classes/AppManager.class", "node_modules/src/ts/modules/ui/messageBox", "node_modules/src/ts/modules/classes/MVVMDialog.class", "node_modules/src/ts/modules/helpers/query"], function (require, exports, logger_6, browser_1, i18n_1, SelectField_1, EventsBinder_class_4, AppManager_class_1, messageBox_1, MVVMDialog_class_2, query_4) {
     "use strict";
     exports.__esModule = true;
     var logger = logger_6.Logger.getLogger('Application');
@@ -5233,7 +4361,7 @@ define("modules/classes/Application.class", ["require", "exports", "modules/help
             }
             this.emit('init');
             logger.info("Initialize app");
-            query_5.Query.defaultOptions.upToDate = true;
+            query_4.Query.defaultOptions.upToDate = true;
             if (!window.location.origin) {
                 var location_1 = window.location;
                 location_1.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
@@ -5350,2057 +4478,18 @@ define("modules/classes/Application.class", ["require", "exports", "modules/help
     }
     exports.confirm = confirm;
 });
-define("modules/classes/GroupFields.class", ["require", "exports", "modules/forms/InputField"], function (require, exports, InputField_2) {
+define("index", ["require", "exports", "node_modules/src/ts/modules/classes/Application.class", "node_modules/src/ts/modules/helpers/logger"], function (require, exports, Application_class_1, logger_7) {
     "use strict";
     exports.__esModule = true;
-    var GroupFields = /** @class */ (function (_super) {
-        __extends(GroupFields, _super);
-        function GroupFields(id, fields, showLabel) {
-            if (fields === void 0) { fields = []; }
-            if (showLabel === void 0) { showLabel = true; }
-            var _this = _super.call(this, id, showLabel) || this;
-            _this.fields = ko.observableArray();
-            _this.hasBeenVisited = ko.observable(false);
-            _this.hasBeenVisitedTrigger = false;
-            _this.isRequired = _this.createComputedBoolean('isRequired', true);
-            _this.isReadOnly = _this.createComputedBoolean('isReadOnly', true, true);
-            _this.isDisabled = _this.createComputedBoolean('isDisabled', true, true);
-            _this.isVisible = _this.createComputedBoolean('isVisible', true);
-            _this.isEditable = _this.createComputedBoolean('isEditable', true);
-            _this.isFocused = _this.createComputedBoolean('isFocused', true, false, 50);
-            _this.hasChanged = _this.createComputedBoolean('hasChanged', true);
-            _this.hasWarns = _this.createComputedBoolean('hasWarns', true);
-            //this.hasBeenVisited = this.createComputedBoolean('hasBeenVisited', true);
-            _this.computedMessages = _this.createComputedMessages();
-            _this.isLastInputValid = ko.computed(function () {
-                return _this.readBoolean('isLastInputValid', true, true);
-            });
-            _this.isFormValid = ko.computed(function () {
-                return _this.readBoolean('isFormValid', true, true) && _this.isConstraintsValid();
-            });
-            _this.isEmpty = ko.computed(function () {
-                return _this.readBoolean('isEmpty', true, true);
-            });
-            _this.isFocused.subscribe(function (v) {
-                if (!v) {
-                    defer(function () {
-                        _this.hasBeenVisited(true);
-                    });
-                }
-            });
-            _this.fields(fields || []);
-            _this.enableNVisibleFields = ko.computed(function () {
-                return _this.fields().filter(function (val) {
-                    return val.isVisible();
-                });
-            });
-            _this.lengthOfEnableNVisibleFields = ko.computed(function () {
-                return _this.enableNVisibleFields().length;
-            });
-            return _this;
-        }
-        GroupFields.prototype.addField = function (PE_oField) {
-            this.fields.push(PE_oField);
-        };
-        GroupFields.prototype.removeAll = function () {
-            this.fields.removeAll();
-        };
-        GroupFields.prototype.createComputedBoolean = function (subscribableName, testValue, allCombined, throttle) {
-            var _this = this;
-            if (allCombined === void 0) { allCombined = false; }
-            if (throttle === void 0) { throttle = null; }
-            return ko.computed({
-                read: function () {
-                    return _this.readBoolean(subscribableName, testValue, allCombined);
-                },
-                write: function (b) {
-                    _this.writeBoolean(subscribableName, b);
-                }
-            }).extend({ throttle: throttle });
-        };
-        GroupFields.prototype.createComputedMessages = function () {
-            var _this = this;
-            return ko.computed(function () {
-                var fields = _this.fields();
-                var len = fields.length;
-                var ary = [];
-                for (var i = 0; i < len; i++) {
-                    var field = fields[i];
-                    ary = ary.concat(field.messages());
-                }
-                ary = ary.concat(_this.messages());
-                return ary;
-            }, this);
-        };
-        GroupFields.prototype.readBoolean = function (subscribableName, testValue, allCombined) {
-            if (testValue === void 0) { testValue = false; }
-            if (allCombined === void 0) { allCombined = false; }
-            var fields = this.fields();
-            var len = fields.length;
-            var isValid = !testValue;
-            for (var i = 0; i < len; i++) {
-                var field = fields[i];
-                if (field[subscribableName].call(field) == testValue) {
-                    isValid = true;
-                    if (!allCombined) {
-                        break;
-                    }
-                }
-                else {
-                    if (allCombined) {
-                        isValid = false;
-                        break;
-                    }
-                }
-            }
-            return isValid;
-        };
-        GroupFields.prototype.writeBoolean = function (subscribableName, v) {
-            this.runFunction(subscribableName, v);
-        };
-        GroupFields.prototype.runFunction = function (functionName, args) {
-            if (args === void 0) { args = null; }
-            var fields = this.fields();
-            var len = fields.length;
-            for (var i = 0; i < len; i++) {
-                var field = fields[i];
-                field[functionName].call(field, args);
-            }
-        };
-        GroupFields.prototype.applyChanges = function () {
-            this.runFunction('applyChanges');
-        };
-        GroupFields.prototype.cancelChanges = function () {
-            this.runFunction('cancelChanges');
-        };
-        /**
-         * Libère correctement la mémoire
-         */
-        GroupFields.prototype.dispose = function () {
-            dispose(this.isLastInputValid);
-            dispose(this.isRequired);
-            dispose(this.isReadOnly);
-            dispose(this.hasChanged);
-            dispose(this.isVisible);
-            dispose(this.isDisabled);
-            dispose(this.isEditable);
-            dispose(this.isEmpty);
-            dispose(this.isFormValid);
-            dispose(this.isFocused);
-            dispose(this.computedMessages);
-        };
-        return GroupFields;
-    }(InputField_2.BaseField));
-    exports.GroupFields = GroupFields;
-});
-define("modules/classes/FieldsValidatorDigest.class", ["require", "exports", "modules/forms/InputField", "modules/classes/GroupFields.class"], function (require, exports, InputField_3, GroupFields_class_1) {
-    "use strict";
-    exports.__esModule = true;
-    var FieldsValidatorDigest = /** @class */ (function (_super) {
-        __extends(FieldsValidatorDigest, _super);
-        function FieldsValidatorDigest(fields, messagesArgs, inspectChilds) {
-            if (fields === void 0) { fields = []; }
-            if (messagesArgs === void 0) { messagesArgs = {}; }
-            if (inspectChilds === void 0) { inspectChilds = true; }
-            var _this = _super.call(this, null, fields) || this;
-            _this.messagesArgs = ko.observable();
-            _this.inspectChilds = ko.observable(true);
-            _this.messagesArgs(messagesArgs);
-            _this.inspectChilds(inspectChilds);
-            _this._computed = ko.computed(function () {
-                var fields = _this.fields();
-                var messagesArgs = _this.messagesArgs();
-                var isRecursive = _this.inspectChilds();
-                _this.treatListOfFields(fields, messagesArgs, isRecursive);
-            }).extend({ throttle: 0 });
-            return _this;
-        }
-        /**
-         * Ajoute un champ au validateur
-         */
-        FieldsValidatorDigest.prototype.addField = function (field) {
-            this.fields.push(field);
-        };
-        FieldsValidatorDigest.prototype.addFields = function (fields) {
-            if (fields === void 0) { fields = []; }
-            var oListOfIFieldArray_ = this.fields() || [];
-            this.fields(oListOfIFieldArray_.concat(fields));
-        };
-        FieldsValidatorDigest.prototype.treatListOfFields = function (oListOfIFieldArray, messagesArgs, bRecursive) {
-            var len = oListOfIFieldArray.length;
-            for (var i = 0; i < len; i++) {
-                var field = oListOfIFieldArray[i];
-                var observable = null;
-                field.messages.removeAll();
-                var input = field;
-                var isContraintsTriggered = false;
-                if (input.unvalidatedConstraints) {
-                    var oUnvalidatedConstraintsList_ = input.unvalidatedConstraints();
-                    for (var j = 0, len2 = oUnvalidatedConstraintsList_.length; j < len2; j++) {
-                        var validationConstraint = oUnvalidatedConstraintsList_[j];
-                        if (!validationConstraint.isWarn) {
-                            isContraintsTriggered = true;
-                        }
-                        if (validationConstraint.name) {
-                            var str = "";
-                            var strId = field.id + '.constraints.' + validationConstraint.name;
-                            if (typeof (validationConstraint.messageFn) == 'function') {
-                                str = validationConstraint.messageFn.call(input, strId);
-                            }
-                            else {
-                                observable = app.i18n.getObservableString(strId);
-                                str = observable();
-                            }
-                            var message = utils.formatString(str, messagesArgs);
-                            field.messages.push(new InputField_3.InputFieldMessage(message, validationConstraint.isWarn));
-                        }
-                    }
-                }
-                if (!field.isFormValid() && !isContraintsTriggered) {
-                    if (field.isEmpty() && field.isRequired()) {
-                        observable = app.i18n.getObservableString(field.id + '.required', 'form.field.required');
-                    }
-                    else {
-                        observable = app.i18n.getObservableString(field.id + '.invalid', 'form.field.invalid');
-                    }
-                    var message = utils.formatString(observable(), messagesArgs);
-                    field.messages.push(new InputField_3.InputFieldMessage(message));
-                }
-                if (field.oListOfField && bRecursive) {
-                    // Traitement récursifs des enfants
-                    this.treatListOfFields(field.oListOfField(), messagesArgs, bRecursive);
-                }
-            }
-        };
-        FieldsValidatorDigest.prototype.dispose = function () {
-            _super.prototype.dispose.call(this);
-            dispose(this.messagesArgs);
-            dispose(this._computed);
-        };
-        return FieldsValidatorDigest;
-    }(GroupFields_class_1.GroupFields));
-    exports.FieldsValidatorDigest = FieldsValidatorDigest;
-});
-define("modules/classes/ResponsiveViewModel.class", ["require", "exports", "modules/helpers/logger", "modules/classes/ViewModel.class"], function (require, exports, logger_7, ViewModel_class_2) {
-    "use strict";
-    exports.__esModule = true;
-    var logger = logger_7.Logger.getLogger('MVVM');
-    var ResponsiveViewModel = /** @class */ (function (_super) {
-        __extends(ResponsiveViewModel, _super);
-        function ResponsiveViewModel(stringsToRegister) {
-            var _this = _super.call(this, stringsToRegister) || this;
-            _this.normalWidth = 1200;
-            _this.tabletWidth = 768;
-            _this.bigTabletWidth = 992;
-            _this.isMobile = ko.observable(false);
-            _this.isTablet = ko.observable(false);
-            _this.isNormal = ko.observable(true);
-            _this.isBigTablet = ko.observable(false);
-            $(document).ready(function () {
-                var resizeFn_ = function () {
-                    var innerWidth = window.innerWidth;
-                    if (!innerWidth) {
-                        if (document.body && document.body.offsetWidth) {
-                            innerWidth = document.body.offsetWidth;
-                        }
-                        if (document.compatMode == 'CSS1Compat' &&
-                            document.documentElement &&
-                            document.documentElement.offsetWidth) {
-                            innerWidth = document.documentElement.offsetWidth;
-                        }
-                    }
-                    if (innerWidth >= _this.normalWidth) {
-                        _this.isTablet(false);
-                        _this.isMobile(false);
-                        _this.isNormal(true);
-                        _this.isBigTablet(false);
-                    }
-                    else if (innerWidth < _this.normalWidth && innerWidth >= _this.bigTabletWidth) {
-                        _this.isMobile(false);
-                        _this.isNormal(false);
-                        _this.isTablet(true);
-                        _this.isBigTablet(true);
-                    }
-                    else if (innerWidth < _this.normalWidth && innerWidth >= _this.tabletWidth) {
-                        _this.isMobile(false);
-                        _this.isNormal(false);
-                        _this.isTablet(true);
-                        _this.isBigTablet(false);
-                    }
-                    else if (innerWidth < _this.tabletWidth) {
-                        _this.isTablet(false);
-                        _this.isNormal(false);
-                        _this.isMobile(true);
-                        _this.isBigTablet(false);
-                    }
-                };
-                resizeFn_();
-                $(window).bind('resize', function (e) {
-                    resizeFn_();
-                    _this.emit('resize');
-                });
-            });
-            return _this;
-        }
-        return ResponsiveViewModel;
-    }(ViewModel_class_2.ViewModel));
-    exports.ResponsiveViewModel = ResponsiveViewModel;
-});
-define("modules/classes/ScreenSequence.class", ["require", "exports", "modules/classes/GroupFields.class"], function (require, exports, GroupFields_class_2) {
-    "use strict";
-    exports.__esModule = true;
-    var ScreenSequence = /** @class */ (function (_super) {
-        __extends(ScreenSequence, _super);
-        function ScreenSequence(id, templateName, fields, data, animationIn, animationOut, animationError) {
-            if (data === void 0) { data = {}; }
-            if (animationIn === void 0) { animationIn = ScreenSequence.defaultAnimationIn; }
-            if (animationOut === void 0) { animationOut = ScreenSequence.defaultAnimationOut; }
-            if (animationError === void 0) { animationError = ScreenSequence.defaultAnimationError; }
-            var _this = _super.call(this, null, fields) || this;
-            _this.templateName = ko.observable();
-            _this.isSubmited = ko.observable(false);
-            _this.id = id;
-            _this.data = data;
-            _this.animationIn = animationIn;
-            _this.animationOut = animationOut;
-            _this.animationError = animationError;
-            _this.templateName(templateName);
-            return _this;
-        }
-        ScreenSequence.prototype.show = function () {
-            this.emit('show');
-            return true;
-        };
-        ScreenSequence.prototype.hide = function () {
-            this.emit('hide');
-            return true;
-        };
-        ScreenSequence.prototype.beforeSubmit = function () {
-            return true;
-        };
-        ScreenSequence.prototype.submit = function () {
-            this.isSubmited(true);
-            this.emit('validate');
-            if (this.isFormValid()) {
-                this.emit('submit');
-                return true;
-            }
-            return false;
-        };
-        ScreenSequence.prototype.afterRender = function () {
-            this.emit('afterRender');
-        };
-        ScreenSequence.defaultAnimationIn = 'appear';
-        ScreenSequence.defaultAnimationOut = 'disappear';
-        ScreenSequence.defaultAnimationError = { animation: 'shake', whenAppear: false };
-        return ScreenSequence;
-    }(GroupFields_class_2.GroupFields));
-    exports.ScreenSequence = ScreenSequence;
-    var ScreenSequenceView = /** @class */ (function (_super) {
-        __extends(ScreenSequenceView, _super);
-        function ScreenSequenceView(id, templateName, data, animationIn, animationOut, animationError) {
-            if (data === void 0) { data = {}; }
-            if (animationIn === void 0) { animationIn = ScreenSequence.defaultAnimationIn; }
-            if (animationOut === void 0) { animationOut = ScreenSequence.defaultAnimationOut; }
-            if (animationError === void 0) { animationError = ScreenSequence.defaultAnimationError; }
-            var _this = _super.call(this, id, templateName, null, data, animationIn, animationOut, animationError) || this;
-            // @Override
-            _this.isVisible = ko.observable(true);
-            return _this;
-        }
-        return ScreenSequenceView;
-    }(ScreenSequence));
-    exports.ScreenSequenceView = ScreenSequenceView;
-});
-define("modules/classes/Sequence.class", ["require", "exports", "modules/classes/EventsBinder.class"], function (require, exports, EventsBinder_class_5) {
-    "use strict";
-    exports.__esModule = true;
-    var Sequence = /** @class */ (function (_super) {
-        __extends(Sequence, _super);
-        function Sequence(screens, transitionDelay) {
-            if (transitionDelay === void 0) { transitionDelay = 0; }
-            var _this = _super.call(this) || this;
-            _this.hashScreen = ko.observable();
-            _this.screens = ko.observableArray();
-            _this.transitionDelay = 0;
-            _this.currentScreen = ko.observable();
-            _this.currentAnimation = ko.observable();
-            _this.hasNext = ko.observable();
-            _this.hasPrevious = ko.observable();
-            _this.nextScreen = ko.observable();
-            _this.previousScreen = ko.observable();
-            _this.transitionDelay = transitionDelay;
-            _this.schema = ko.computed(function () {
-                var tScreens = _this.screens();
-                var rScreens = [];
-                for (var i = 0; i < tScreens.length; i++) {
-                    var oScreen_ = tScreens[i];
-                    if (oScreen_.isVisible()) {
-                        rScreens.push(oScreen_);
-                    }
-                }
-                return rScreens;
-            });
-            _this.currentScreenId = ko.computed(function () {
-                return _this.currentScreen() ? _this.currentScreen().id : null;
-            });
-            _this.currentScreen.immediateSubscribe(function (screen) {
-                _this.updateDependencies(screen);
-                if (screen) {
-                    screen.show();
-                    _this.emit('show', screen);
-                }
-            });
-            _this.schema.subscribe(function (v) {
-                _this.updateDependencies();
-            });
-            _this.hashScreen.subscribe(function (screenId) {
-                if (screenId) {
-                    var tScreens = _this.schema();
-                    var screen_1;
-                    if (screenId == "first") {
-                        screen_1 = tScreens.first();
-                    }
-                    else if (screenId == "last") {
-                        screen_1 = tScreens.last();
-                    }
-                    else {
-                        screen_1 = tScreens.findBy('id', screenId);
-                    }
-                    if (!screen_1) {
-                        screen_1 = _this.getFirstScreenToComplete();
-                    }
-                    var oCurrentScreen_ = _this.currentScreen();
-                    if (oCurrentScreen_) {
-                        _this.hide();
-                    }
-                    if (screen_1) {
-                        defer(function () {
-                            _this.currentAnimation(screen_1.animationIn);
-                            _this.currentAnimation.valueHasMutated();
-                            _this.currentScreen(screen_1);
-                        }, oCurrentScreen_ ? _this.transitionDelay : 0);
-                    }
-                    else {
-                        _this.emit('404', screenId);
-                    }
-                }
-            });
-            if (screens) {
-                _this.screens(screens);
-            }
-            return _this;
-        }
-        /**
-         * Hide current screen
-         */
-        Sequence.prototype.hide = function () {
-            var currentScreen = this.currentScreen();
-            if (currentScreen) {
-                if (currentScreen.hide()) {
-                    this.currentAnimation(currentScreen.animationOut);
-                    this.currentAnimation.valueHasMutated();
-                    this.emit('hide', currentScreen);
-                    return true;
-                }
-            }
-            return false;
-        };
-        Sequence.prototype.end = function () {
-            this.hide();
-            this.hashScreen('');
-            this.currentScreen(null);
-        };
-        Sequence.prototype.getScreenById = function (id) {
-            return this.screens().findBy('id', id);
-        };
-        Sequence.prototype.updateDependencies = function (screen) {
-            var indexOfScreen = this.getCurrentIndexOfScreen(screen);
-            var tScreens = this.schema();
-            this.hasPrevious(indexOfScreen > 0);
-            this.hasNext(indexOfScreen < tScreens.length - 1);
-            if (this.hasPrevious()) {
-                this.previousScreen(tScreens[indexOfScreen - 1]);
-            }
-            else {
-                this.previousScreen(null);
-            }
-            if (this.hasNext()) {
-                this.nextScreen(tScreens[indexOfScreen + 1]);
-            }
-            else {
-                this.nextScreen(null);
-            }
-        };
-        Sequence.prototype.getFirstScreenToComplete = function () {
-            var tScreens = this.schema();
-            return this.getFirstDependentScreenTo(tScreens.last());
-        };
-        Sequence.prototype.link = function (pname, updateUri, defaultScreenId) {
-            if (updateUri === void 0) { updateUri = true; }
-            ko.linkObservableToUrl(this.hashScreen, pname);
-            if (updateUri) {
-                $.address.update();
-            }
-            if (!this.hashScreen() && defaultScreenId !== false) {
-                return this.show(defaultScreenId);
-            }
-            return this.hashScreen();
-        };
-        /**
-         * Start sequence
-         */
-        Sequence.prototype.start = function () {
-            var tScreens = this.schema();
-            if (tScreens.length > 0) {
-                this.show(tScreens[0]);
-                return true;
-            }
-            return false;
-        };
-        Sequence.prototype.refresh = function () {
-            this.hashScreen.valueHasMutated();
-        };
-        Sequence.prototype.getFirstDependentScreenTo = function (screen) {
-            var tScreens = this.schema();
-            var indexOfScreen = -1;
-            if (screen) {
-                indexOfScreen = tScreens.indexOf(screen);
-            }
-            for (var i = 0; i < indexOfScreen; i++) {
-                var screenRel = tScreens[i];
-                if (!screenRel.isFormValid()) {
-                    return screenRel;
-                }
-            }
-            return screen;
-        };
-        Sequence.prototype.getCurrentIndexOfScreen = function (screen) {
-            if (screen === void 0) { screen = this.currentScreen(); }
-            var tScreens = this.schema();
-            var indexOfScreen = -1;
-            if (screen) {
-                indexOfScreen = tScreens.indexOf(screen);
-            }
-            return indexOfScreen;
-        };
-        Sequence.prototype.afterRender = function () {
-            var screen = this.currentScreen();
-            if (screen) {
-                screen.afterRender();
-                this.emit('afterRender', screen);
-            }
-        };
-        Sequence.prototype.submit = function () {
-            var screen = this.currentScreen();
-            if (!screen) {
-                return false;
-            }
-            if (screen && !screen.beforeSubmit()) {
-                return false;
-            }
-            if (screen.submit()) {
-                this.emit('submit', screen);
-                return true;
-            }
-            else {
-                this.emit('submitFailed', screen);
-                if (screen.animationError) {
-                    this.currentAnimation(screen.animationError);
-                    this.currentAnimation.valueHasMutated();
-                }
-                return false;
-            }
-        };
-        Sequence.prototype.beforeNext = function (screen, next) {
-            return true;
-        };
-        Sequence.prototype.next = function () {
-            var screen = this.currentScreen();
-            var nextScreen = this.nextScreen();
-            if (screen && !this.beforeNext(screen, nextScreen)) {
-                return false;
-            }
-            if (nextScreen) {
-                this.emit('next', nextScreen);
-                this.show(nextScreen);
-                return true;
-            }
-            else {
-                this.emit('end');
-            }
-            return false;
-        };
-        Sequence.prototype.beforePrevious = function (screen, prev) {
-            return true;
-        };
-        Sequence.prototype.previous = function () {
-            var screen = this.currentScreen();
-            var previousScreen = this.previousScreen();
-            if (screen && !this.beforePrevious(screen, previousScreen)) {
-                return false;
-            }
-            if (previousScreen) {
-                this.emit('previous', previousScreen);
-                this.show(previousScreen);
-                return true;
-            }
-            return false;
-        };
-        Sequence.prototype.findById = function (id) {
-            var tScreens = this.schema();
-            return tScreens.findBy('id', id);
-        };
-        Sequence.prototype.show = function (screen) {
-            if (!screen) {
-                this.start();
-                return;
-            }
-            if (typeof (screen) == "string") {
-                screen = this.findById(screen);
-            }
-            if (this.hashScreen.peek() == screen.id) {
-                this.hashScreen.valueHasMutated();
-            }
-            else {
-                this.hashScreen(screen.id);
-            }
-            return this.hashScreen();
-        };
-        return Sequence;
-    }(EventsBinder_class_5.EventsBinder));
-    exports.Sequence = Sequence;
-});
-define("modules/classes/Template.class", ["require", "exports", "modules/classes/EventsBinder.class"], function (require, exports, EventsBinder_class_6) {
-    "use strict";
-    exports.__esModule = true;
-    var Template = /** @class */ (function (_super) {
-        __extends(Template, _super);
-        function Template(templateName) {
-            var _this = _super.call(this) || this;
-            _this.templateName = ko.observable();
-            _this.templateName(templateName);
-            return _this;
-        }
-        Template.prototype.dispose = function () {
-            dispose(this.templateName);
-        };
-        return Template;
-    }(EventsBinder_class_6.EventsBinder));
-    exports.Template = Template;
-});
-define("modules/classes/_QueryPolling.class", ["require", "exports", "modules/helpers/query", "modules/classes/EventsBinder.class"], function (require, exports, query_6, EventsBinder_class_7) {
-    "use strict";
-    exports.__esModule = true;
-    var QueryPolling = /** @class */ (function (_super) {
-        __extends(QueryPolling, _super);
-        function QueryPolling(interval, retryInterval) {
-            if (interval === void 0) { interval = QueryPolling.DEFAULT_INTERVAL; }
-            if (retryInterval === void 0) { retryInterval = QueryPolling.DEFAULT_INTERVAL; }
-            var _this = _super.call(this) || this;
-            _this.dataType = "json";
-            _this.interval = QueryPolling.DEFAULT_INTERVAL;
-            _this.retryInterval = QueryPolling.DEFAULT_INTERVAL;
-            _this.__jqxhr = null;
-            _this.__interrupt = false;
-            _this.__hdlTimeout = null;
-            _this.interval = interval;
-            _this.retryInterval = retryInterval;
-            return _this;
-        }
-        QueryPolling.prototype.run = function (query, domain, callback, context) {
-            this._query = query;
-            this._domain = domain;
-            this._callback = callback;
-            this._context = context;
-            this.reload();
-        };
-        QueryPolling.prototype.poll = function (interval) {
-            var _this = this;
-            this.__hdlTimeout = setTimeout(function () {
-                _this.__hdlTimeout = null;
-                _this.execute();
-            }, isset(interval) ? interval : this.interval);
-        };
-        QueryPolling.prototype.stop = function () {
-            this.__interrupt = true;
-            this.abort();
-        };
-        QueryPolling.prototype.reload = function () {
-            this.stop();
-            this.__interrupt = false;
-            this.execute();
-        };
-        QueryPolling.prototype.abort = function () {
-            if (this.__jqxhr) {
-                this.__jqxhr.abort();
-            }
-            if (this.__hdlTimeout) {
-                clearTimeout(this.__hdlTimeout);
-                this.__hdlTimeout = null;
-                if (!this.__interrupt) {
-                    this.reload();
-                }
-            }
-        };
-        QueryPolling.prototype.execute = function () {
-            var _this = this;
-            var request = {
-                query: this._query,
-                callback: this._callback,
-                context: this._context,
-                domain: this._domain,
-                timeout: this.interval,
-                silent: true,
-                cache: false,
-                dataType: this.dataType
-            };
-            this.emit('query', request);
-            this.__jqxhr = query_6.Query.GET(request.query, request.callback, request.context, { dataType: request.dataType, silent: request.silent, cache: request.cache, domain: request.domain, timeout: request.timeout });
-            if (this.__jqxhr) {
-                this.__jqxhr.always(function (result, status) {
-                    _this.__jqxhr = null;
-                    if (!_this.__interrupt) {
-                        if ((status != query_6.Query.Status.SUCCESS) && (status != query_6.Query.Status.NOCONTENT)) {
-                            if (status == query_6.Query.Status.TIMEOUT || status == query_6.Query.Status.ABORT) {
-                                _this.execute();
-                            }
-                            else {
-                                _this.poll(_this.retryInterval);
-                            }
-                        }
-                        else {
-                            _this.poll();
-                        }
-                    }
-                });
-            }
-        };
-        QueryPolling.prototype.dispose = function () {
-            this.stop();
-            _super.prototype.dispose.call(this);
-        };
-        QueryPolling.DEFAULT_INTERVAL = 100;
-        return QueryPolling;
-    }(EventsBinder_class_7.EventsBinder));
-    exports.QueryPolling = QueryPolling;
-});
-define("modules/classes/locale/fr", ["require", "exports", "modules/classes/Locale.class"], function (require, exports, Locale_class_3) {
-    "use strict";
-    exports.__esModule = true;
-    var Locale_fr = /** @class */ (function (_super) {
-        __extends(Locale_fr, _super);
-        function Locale_fr() {
-            var _this = _super.call(this, 'fr', 'fr_FR') || this;
-            _this.displayName = "Français";
-            _this.decimalSeparator = ",";
-            _this.decimalGroupSeparator = " ";
-            _this.decimalGroupDigits = 3;
-            _this.dateFormat = "dd/mm/yyyy";
-            _this.dateSeparator = "/";
-            _this.dateLiteralFormat = "DMY";
-            _this.currencySymbol = "€";
-            return _this;
-        }
-        return Locale_fr;
-    }(Locale_class_3.Locale));
-    exports.Locale_fr = Locale_fr;
-});
-define("modules/forms/TextField", ["require", "exports", "modules/forms/InputField"], function (require, exports, InputField_4) {
-    "use strict";
-    exports.__esModule = true;
-    var TTextCase;
-    (function (TTextCase) {
-        TTextCase[TTextCase["none"] = 0] = "none";
-        TTextCase[TTextCase["upper"] = 1] = "upper";
-        TTextCase[TTextCase["lower"] = 2] = "lower";
-        TTextCase[TTextCase["proper"] = 3] = "proper";
-    })(TTextCase = exports.TTextCase || (exports.TTextCase = {}));
-    var TextField = /** @class */ (function (_super) {
-        __extends(TextField, _super);
-        function TextField(id, value, required, readOnly) {
-            var _this = _super.call(this, id, value, required, readOnly) || this;
-            _this.maxLength = 1000;
-            _this.minLength = 0;
-            _this.pattern = ko.observable();
-            _this.useFormat = ko.observable(true);
-            _this.formatFunction = null;
-            _this.unformatFunction = null;
-            _this.defaultAutoValidationDelay = 2000;
-            _this._autoValidationCoeff = 1.50;
-            _this.autoTrim = ko.observable(true);
-            _this.textCase = ko.observable(TTextCase.none);
-            _this.inputType = ko.observable('text'); //=> Disabled because of bug on IE8 when settings 'type' attribute
-            _this.valueUpdateOn = ko.observable('change');
-            _this.autoValidationDelay = "auto";
-            _this.inputTemplate = "ui-field-text-template";
-            _this.hasTextChanged = ko.computed(_this.computeHasTextChanged, _this);
-            _this.formattedValue = ko.computed({
-                read: function () {
-                    if (_this.isFocused()) {
-                        return _this.value();
-                    }
-                    return _this.useFormat() ? _this.formatValue(_this.dataValue()) : _this.dataValue();
-                },
-                write: function (v) {
-                    _this.value(v);
-                }
-            }, _this);
-            _this.value.subscribe(function (v) {
-                _this._updateValue(v);
-                if (!_this.hasBeenVisited() && _this.isFocused()) {
-                    defer(function () {
-                        _this.hasBeenVisited(true);
-                    });
-                }
-            });
-            _this.isFocused.subscribe(function (v) {
-                if (!v) {
-                    _this.validateValue();
-                }
-            });
-            _this.textCase.immediateSubscribe(function (v) {
-                _this._updateValue();
-            });
-            _this.autoTrim.subscribe(function (b) {
-                _this._updateValue();
-            });
-            return _this;
-        }
-        TextField.prototype._updateValue = function (v) {
-            var sCurrentValue_ = v || this.value();
-            var sNewValue_ = this.transform(sCurrentValue_);
-            if (sNewValue_ != sCurrentValue_) {
-                this.value(sNewValue_);
-            }
-        };
-        TextField.prototype.transform = function (value) {
-            if (!value || typeof (value) != "string") {
-                return value;
-            }
-            if (this.autoTrim()) {
-                value = value.trim();
-            }
-            switch (this.textCase()) {
-                case TTextCase.upper:
-                case TTextCase[TTextCase.upper]: return value.toUpperCase();
-                case TTextCase.lower:
-                case TTextCase[TTextCase.lower]: return value.toLowerCase();
-                case TTextCase.proper:
-                case TTextCase[TTextCase.proper]: return value.toProperCase();
-            }
-            return value;
-        };
-        TextField.prototype.formatValue = function (value) {
-            return typeof (this.formatFunction) == "function" ? this.formatFunction.call(this, value) : value;
-        };
-        TextField.prototype.cleanFormatValue = function (value) {
-            return typeof (this.unformatFunction) == "function" ? this.unformatFunction.call(this, value) : value;
-        };
-        TextField.prototype.getDataValue = function () {
-            var v = _super.prototype.getDataValue.call(this);
-            if (isset(v)) {
-                return CString(this.cleanFormatValue(v));
-            }
-            return null;
-        };
-        TextField.prototype.isValidateValue = function (value) {
-            var b = _super.prototype.isValidateValue.call(this, value);
-            if (b && !this.valueIsEmpty(value)) {
-                value = CString(value);
-                if ((this.minLength && value.length < this.minLength) || (this.maxLength && value.length > this.maxLength)) {
-                    b = false;
-                }
-            }
-            return b;
-        };
-        TextField.prototype.computeHasTextChanged = function () {
-            var oldValue = '' + (this.oldValue() == null || this.oldValue() == undefined ? '' : this.oldValue());
-            var value = '' + (this.value() == null || this.value() == undefined ? '' : this.value());
-            return (oldValue != value);
-        };
-        /**
-         * Override
-         */
-        TextField.prototype.onFocusEventHandler = function (e) {
-            var autoValidationDelay = isNaN(this.autoValidationDelay) ? this.defaultAutoValidationDelay : this.autoValidationDelay;
-            this._autoValidationCountset = 1;
-            this._autoValidationTimecount = autoValidationDelay;
-            this._autoValidationDelay = autoValidationDelay;
-            return _super.prototype.onFocusEventHandler.call(this, e);
-        };
-        TextField.prototype.onBlurEventHandler = function (e) {
-            clearTimeout(this._autoValidationDelayTimeout);
-            return _super.prototype.onBlurEventHandler.call(this, e);
-        };
-        TextField.prototype.onKeyDownEventHandler = function (e) {
-            clearTimeout(this._autoValidationDelayTimeout);
-            var t_ = new Date().getTime();
-            if (this.autoValidationDelay == "auto" || this.autoValidationDelay == true) {
-                if (this._previousAutoValidationTimeset > 0) {
-                    var lDiff_ = t_ - this._previousAutoValidationTimeset;
-                    if (lDiff_ > 50 && lDiff_ <= this._autoValidationDelay * 2) {
-                        this._autoValidationCountset++;
-                        this._autoValidationTimecount += lDiff_;
-                        this._autoValidationDelay = this._autoValidationTimecount / this._autoValidationCountset * this._autoValidationCoeff;
-                    }
-                }
-            }
-            this._previousAutoValidationTimeset = t_;
-            return true;
-        };
-        TextField.prototype.onKeyUpEventHandler = function (e) {
-            var _this = this;
-            clearTimeout(this._autoValidationDelayTimeout);
-            if (this.autoValidationDelay != "none" && this.autoValidationDelay != false) {
-                this._autoValidationDelayTimeout = defer(function () {
-                    defer(function () {
-                        if (_this.isValidateValue($(e.target).val())) {
-                            $(e.target).triggerHandler('change');
-                        }
-                        else {
-                            _this._autoValidationDelayTimeout = defer(function () {
-                                $(e.target).triggerHandler('change');
-                            }, _this.defaultAutoValidationDelay);
-                        }
-                    });
-                }, this._autoValidationDelay);
-            }
-            return true;
-        };
-        TextField.prototype.dispose = function () {
-            _super.prototype.dispose.call(this);
-            dispose(this.formattedValue);
-        };
-        return TextField;
-    }(InputField_4.InputField));
-    exports.TextField = TextField;
-});
-define("modules/forms/CodePostalField", ["require", "exports", "modules/forms/InputField", "modules/forms/SelectField", "modules/forms/TextField"], function (require, exports, InputField_5, SelectField_2, TextField_1) {
-    "use strict";
-    exports.__esModule = true;
-    var CodePostalField = /** @class */ (function (_super) {
-        __extends(CodePostalField, _super);
-        function CodePostalField(id, value, required, readOnly) {
-            var _this = _super.call(this, id, value, required, readOnly) || this;
-            _this.isLoadingValues = ko.observable(false);
-            _this.oSelectField = new SelectField_2.SelectField(id + ".select", [], null, required, readOnly);
-            _this.oTextField = new TextField_1.TextField(id + ".text", null, false, readOnly);
-            _this.oTextField.inputType('tel');
-            _this.oTextField.setValidationRegExp(regexp.CdPost);
-            _this.oTextField.maxLength = 5;
-            _this.oSelectField.isEditable.dependsOn(_this.isEditable);
-            _this.oTextField.isEditable.dependsOn(_this.isEditable);
-            _this.inputTemplate = "ui-field-codepostal-template";
-            _this.oSelectField.isRequired.dependsOn(_this.isRequired);
-            _this.oTextField.isRequired.dependsOn(_this.isRequired);
-            _this.oSelectField.isReadOnly.dependsOn(_this.isReadOnly);
-            _this.oTextField.isReadOnly.dependsOn(_this.isReadOnly);
-            _this.oSelectField.isDisabled.dependsOn(_this.isDisabled);
-            _this.oTextField.isDisabled.dependsOn(_this.isDisabled);
-            _this.value.immediateSubscribe(function (v) {
-                if (_this.autoValidate()) {
-                    _this.oTextField.value(v);
-                }
-            });
-            _this.isFocused = ko.computed(function () {
-                return _this.oTextField.isFocused() || _this.oSelectField.isFocused();
-            });
-            _this.oTextField.isFocused.immediateSubscribe(function (b) {
-                if (_this.oTextField.value()) {
-                    _this.oTextField.value(_this.oTextField.value().rPad('0', 5));
-                }
-            });
-            _this.oSelectField.value.subscribe(function (v) {
-                if (_this.autoValidate()) {
-                    _this.autoValidate(false);
-                    _this.value(v);
-                    _this.autoValidate(true);
-                }
-            });
-            _this.oTextField.hasBeenVisited.subscribe(function (b) {
-                if (b && !_this.oTextField.hasChanged()) {
-                    _this.hasBeenVisited(true);
-                }
-            });
-            _this.isLoadingValues.subscribe(function (b) {
-                if (!b && _this.oTextField.hasBeenVisited()) {
-                    _this.hasBeenVisited(true);
-                }
-            });
-            _this.oSelectField.hasBeenVisited.subscribe(function (b) {
-                if (b) {
-                    _this.hasBeenVisited(true);
-                }
-            });
-            _this.oTextField.value.immediateSubscribe(function (v) {
-                if (_this.autoValidate()) {
-                    if (v && v.length == 5) {
-                        if (typeof (CodePostalField.onSearchFn) == "function") {
-                            _this.isLoadingValues(true);
-                            CodePostalField.onSearchFn.call(_this, v, function (choices) {
-                                this.oSelectField.updateChoices(choices);
-                                this.isLoadingValues(false);
-                            });
-                        }
-                    }
-                    else if (!v) {
-                        _this.oSelectField.updateChoices([]);
-                    }
-                }
-            });
-            return _this;
-        }
-        CodePostalField.prototype.forceValue = function (value) {
-            _super.prototype.forceValue.call(this, value);
-            this.oTextField.applyChanges();
-        };
-        /**
-         * Override cancelChanges
-         */
-        CodePostalField.prototype.cancelChanges = function () {
-            this.oTextField.cancelChanges();
-            this.hasBeenVisited(false);
-        };
-        /**
-         * Override forceValue
-         */
-        CodePostalField.prototype.forceValues = function (textValue, listValue) {
-            var _this = this;
-            this.autoValidate(false);
-            _super.prototype.forceValue.call(this, listValue);
-            this.autoValidate(true);
-            if ((textValue != this.oTextField.value()) || !this.oSelectField.hasChoice(listValue)) {
-                this.autoValidate(false);
-                this.oTextField.forceValue(null);
-                this.autoValidate(true);
-                this.oTextField.forceValue(textValue);
-                this.isLoadingValues.subscribeOnce(function (b) {
-                    if (!b) {
-                        _this.oSelectField.forceValue(listValue);
-                    }
-                });
-            }
-            else {
-                this.oSelectField.forceValue(listValue);
-            }
-        };
-        CodePostalField.prototype.getTextDataValue = function () {
-            return this.oTextField.dataValue();
-        };
-        CodePostalField.prototype.getSelectedOptionLabel = function () {
-            return this.isDisabled() ? null : this.oSelectField.selectedOptionText();
-        };
-        /**
-         * Validates the value for the property.
-         * @param {?(number|string)} value The value for this property.
-         * @type {function({?(number|string)})}
-         */
-        CodePostalField.prototype.isValidateValue = function (value) {
-            var isValid = _super.prototype.isValidateValue.call(this, value);
-            return isValid;
-        };
-        return CodePostalField;
-    }(InputField_5.InputField));
-    exports.CodePostalField = CodePostalField;
-});
-define("modules/forms/NumericField", ["require", "exports", "modules/forms/TextField"], function (require, exports, TextField_2) {
-    "use strict";
-    exports.__esModule = true;
-    var TNumericTypes;
-    (function (TNumericTypes) {
-        TNumericTypes[TNumericTypes["Integer"] = 0] = "Integer";
-        TNumericTypes[TNumericTypes["PositiveInteger"] = 1] = "PositiveInteger";
-        TNumericTypes[TNumericTypes["Double"] = 2] = "Double";
-        TNumericTypes[TNumericTypes["PositiveDouble"] = 3] = "PositiveDouble";
-    })(TNumericTypes = exports.TNumericTypes || (exports.TNumericTypes = {}));
-    var NumericField = /** @class */ (function (_super) {
-        __extends(NumericField, _super);
-        /**
-         * Constructor
-         */
-        function NumericField(id, value, formatType, required, readOnly) {
-            var _this = _super.call(this, id, value, required, readOnly) || this;
-            _this.locale = ko.observable();
-            _this.minimum = null;
-            _this.maximum = null;
-            _this.isMinimumExcluded = false;
-            _this.isMaximumExcluded = false;
-            _this.unit = ko.observable();
-            _this.digits = 2;
-            _this.setValidationRegExp(NumericField.getNumericRegExp(formatType));
-            _this.inputTemplate = NumericField.defaultInputTemplate;
-            _this.inputType('tel');
-            _this.pattern('[0-9]*'); // Permit to show numeric virtual keyboard
-            _this.text = ko.computed(function () {
-                return _this.formattedValue() + "&nbsp;" + _this.unit();
-            }).extend({ throttle: 100 });
-            return _this;
-        }
-        /**
-         * Get the reg expression from a format type
-         * @param the format type
-         * @return the RegExp or undefined
-         */
-        NumericField.getNumericRegExp = function (formatType) {
-            switch (formatType) {
-                case TNumericTypes.Integer: return regexp.Integer;
-                case TNumericTypes.PositiveInteger: return regexp.PositiveInteger;
-                case TNumericTypes.Double: return regexp.Double;
-                case TNumericTypes.PositiveDouble: return regexp.PositiveDouble;
-            }
-        };
-        /**
-         * Check if the value is validated, included commons controls
-         * @param value the value to check
-         * @return true or false
-         * @override
-         */
-        NumericField.prototype.isValidateValue = function (value) {
-            if (!_super.prototype.isValidateValue.call(this, value)) {
-                return false;
-            }
-            var isValid = true;
-            if (!this.valueIsEmpty(value)) {
-                if (!is_numeric(value)) {
-                    isValid = false;
-                }
-                if (isValid) {
-                    var numbr = Number(value);
-                    var maxLimit = this.maximum;
-                    if (maxLimit || maxLimit === 0) {
-                        if (this.isMaximumExcluded) {
-                            isValid = numbr < maxLimit;
-                        }
-                        else {
-                            isValid = numbr <= maxLimit;
-                        }
-                    }
-                }
-            }
-            return isValid;
-        };
-        /**
-         * Format a value to display it
-         * @param value the value to display
-         * @return the formatted value
-         * @override
-         */
-        NumericField.prototype.formatValue = function (value) {
-            if (isNaN(value)) {
-                return value;
-            }
-            if (this.locale && !this.valueIsEmpty(value)) {
-                return utils.formatDecimal(value, this.digits, this.locale());
-            }
-            return value;
-        };
-        /**
-         * Unformat a value seized by the user
-         * @param value the value seized
-         * @return the unformatted value
-         * @override
-         */
-        NumericField.prototype.cleanFormatValue = function (value) {
-            if (this.valueIsEmpty(value)) {
-                return value;
-            }
-            else if (CString(value).trim() == "") {
-                return "";
-            }
-            var n = Number(CString(value).replaceAll(" ", "").replaceAll(",", "."));
-            return isNaN(n) ? value : CString(n.round(this.digits));
-        };
-        /**
-         * Surcharge spécifique pour exclure les blancs de toute longueur.
-         */
-        NumericField.prototype.valueIsEmpty = function (value) {
-            return (typeof (value) == "undefined") || value == null || (CString(value) /*.trim()*/ == "");
-        };
-        /**
-         * Surcharge la fonction pour retourner une valeur numérique
-         */
-        NumericField.prototype.getDataValue = function () {
-            var v = _super.prototype.getDataValue.call(this);
-            if (isset(v) && !this.valueIsEmpty(v) && !isNaN(v)) {
-                return CFloat(v);
-            }
-            return null;
-        };
-        NumericField.defaultInputTemplate = "ui-field-numeric-template";
-        return NumericField;
-    }(TextField_2.TextField));
-    exports.NumericField = NumericField;
-});
-define("modules/forms/CurrencyField", ["require", "exports", "modules/forms/NumericField"], function (require, exports, NumericField_1) {
-    "use strict";
-    exports.__esModule = true;
-    var CurrencyField = /** @class */ (function (_super) {
-        __extends(CurrencyField, _super);
-        function CurrencyField(id, value, required, readOnly) {
-            var _this = _super.call(this, id, value, NumericField_1.TNumericTypes.PositiveDouble, required, readOnly) || this;
-            _this.minimum = 0;
-            _this.digits = 2;
-            return _this;
-        }
-        return CurrencyField;
-    }(NumericField_1.NumericField));
-    exports.CurrencyField = CurrencyField;
-});
-define("modules/forms/DateField", ["require", "exports", "modules/forms/TextField"], function (require, exports, TextField_3) {
-    "use strict";
-    exports.__esModule = true;
-    var DateField = /** @class */ (function (_super) {
-        __extends(DateField, _super);
-        function DateField(id, value, required, readOnly) {
-            var _this = _super.call(this, id, value, required, readOnly) || this;
-            _this.minDate = ko.observable();
-            _this.maxDate = ko.observable();
-            _this.date = null;
-            _this.inputTemplate = "ui-field-date-template";
-            _this.minDate.subscribe(function (d) {
-                if (_this.autoValidate()) {
-                    _this.validateValue();
-                }
-            });
-            _this.maxDate.subscribe(function (d) {
-                if (_this.autoValidate()) {
-                    _this.validateValue();
-                }
-            });
-            _this.date = ko.computed(function () {
-                return _this.parseDate(_this.value());
-            });
-            return _this;
-        }
-        DateField.prototype.parseDate = function (value) {
-            return utils.parseLiteralDate(value, app.i18n.getCurrentLocale());
-        };
-        DateField.prototype.formatValue = function (value) {
-            var oDate_ = utils.parseLiteralDate(value, app.i18n.getCurrentLocale());
-            if (oDate_) {
-                return utils.formatDate(oDate_, app.i18n.getCurrentLocale().dateFormat);
-            }
-            return value;
-        };
-        DateField.prototype.cleanFormatValue = function (value) {
-            var oDate_ = utils.parseLiteralDate(value, app.i18n.getCurrentLocale());
-            if (oDate_) {
-                return utils.formatDate(oDate_, "ddmmyyyy");
-            }
-            return value;
-        };
-        DateField.prototype.isValidateValue = function (value) {
-            var bValid_ = _super.prototype.isValidateValue.call(this, value);
-            if (bValid_ && !this.valueIsEmpty(value)) {
-                var oDate_ = this.parseDate(value);
-                bValid_ = oDate_ != null;
-                if (bValid_) {
-                    var oMinDate_ = this.minDate();
-                    var oMaxDate_ = this.maxDate();
-                    bValid_ = oDate_ != null;
-                    bValid_ = bValid_ && (!oMinDate_ || (oMinDate_.isPast(oDate_) || oMinDate_.isSameDate(oDate_)));
-                    bValid_ = bValid_ && (!oMaxDate_ || (oMaxDate_.isFuture(oDate_) || oMaxDate_.isSameDate(oDate_)));
-                }
-            }
-            return bValid_;
-        };
-        return DateField;
-    }(TextField_3.TextField));
-    exports.DateField = DateField;
-});
-define("modules/forms/DateTextField", ["require", "exports", "modules/forms/NumericField", "modules/forms/DateField"], function (require, exports, NumericField_2, DateField_1) {
-    "use strict";
-    exports.__esModule = true;
-    var DateTextFieldTypes = /** @class */ (function () {
-        function DateTextFieldTypes(id, placeHolder, minLength, maxLength, minimum, maximum) {
-            if (minimum === void 0) { minimum = null; }
-            if (maximum === void 0) { maximum = null; }
-            this.id = id;
-            this.minLength = minLength;
-            this.maxLength = maxLength;
-            this.minimum = minimum;
-            this.maximum = maximum;
-            this.placeHolder = placeHolder;
-        }
-        DateTextFieldTypes.day = new DateTextFieldTypes("day", "dd", 1, 2, 1, 31);
-        DateTextFieldTypes.month = new DateTextFieldTypes("month", "mm", 1, 2, 1, 12);
-        DateTextFieldTypes.year = new DateTextFieldTypes("year", "yyyy", 4, 4);
-        return DateTextFieldTypes;
-    }());
-    exports.DateTextFieldTypes = DateTextFieldTypes;
-    var DateTextField = /** @class */ (function (_super) {
-        __extends(DateTextField, _super);
-        function DateTextField(id, dateType, oNextField) {
-            var _this = _super.call(this, id + '.' + dateType.id, null, NumericField_2.TNumericTypes.PositiveInteger, false, false) || this;
-            _this.oNextField = null;
-            _this.minLength = dateType.minLength;
-            _this.maxLength = dateType.maxLength;
-            _this.minimum = dateType.minimum;
-            _this.maximum = dateType.maximum;
-            _this.dateType = dateType;
-            _this.oNextField = oNextField;
-            _this.placeholder = app.i18n.getObservableString(dateType.placeHolder);
-            _this.isFocused.subscribe(function (b) {
-                if (b) {
-                    try {
-                        $('#' + _this.uid).select();
-                    }
-                    catch (e) { }
-                }
-            });
-            return _this;
-        }
-        /**
-         * Format a value to display it
-         * @param value the value to display
-         * @return the formatted value
-         * @override
-         */
-        DateTextField.prototype.formatValue = function (value) {
-            if (!this.valueIsEmpty(value) && !isNaN(value)) {
-                return CString(value).lPad("0", 2);
-            }
-            return _super.prototype.formatValue.call(this, value);
-        };
-        /**
-         * Unformat a value seized by the user
-         * @param value the value seized
-         * @return the unformatted value
-         * @override
-         */
-        DateTextField.prototype.cleanFormatValue = function (value) {
-            value = _super.prototype.cleanFormatValue.call(this, value);
-            if (this.valueIsEmpty(value)) {
-                return "";
-            }
-            return isNaN(value) ? value : CString(Number(value));
-        };
-        DateTextField.prototype.onKeyUpEventHandler = function (e) {
-            if (!!this.oNextField) {
-                var val = $('#' + this.uid).val();
-                if (this.isValidateValue(val) && (this.value() != val) && (CString(val).length >= this.maxLength)) {
-                    $("#" + this.oNextField.uid).focus();
-                }
-            }
-            return _super.prototype.onKeyUpEventHandler.call(this, e);
-        };
-        return DateTextField;
-    }(NumericField_2.NumericField));
-    exports.DateTextField = DateTextField;
-    var DateMultiFieldField = /** @class */ (function (_super) {
-        __extends(DateMultiFieldField, _super);
-        function DateMultiFieldField(id, value, required, readOnly) {
-            var _this = _super.call(this, id, value, required, readOnly) || this;
-            _this.separator = ko.observable();
-            _this.inputTemplate = "ui-field-date-multifield-template";
-            var locale = app.i18n.getCurrentLocale();
-            _this.separator(locale.dateSeparator);
-            _this.value.immediateSubscribe(function (v) {
-                var date = utils.parseLiteralDate(v, app.i18n.getCurrentLocale());
-                if (date) {
-                    _this.oTextFieldDay.value(date.getDate());
-                    _this.oTextFieldMonth.value(date.getMonth() + 1);
-                    _this.oTextFieldYear.value(date.getFullYear());
-                }
-            });
-            _this.oTextFieldYear = new DateTextField(id, DateTextFieldTypes.year);
-            _this.oTextFieldMonth = new DateTextField(id, DateTextFieldTypes.month, _this.oTextFieldYear);
-            _this.oTextFieldDay = new DateTextField(id, DateTextFieldTypes.day, _this.oTextFieldMonth);
-            _this._koComputeIsLastInputValid = ko.pureComputed(function () {
-                var sYear_ = _this.oTextFieldYear.dataValue();
-                var bIsValidYear_ = _this.oTextFieldYear.isValidateValue(sYear_);
-                var sMonth_ = _this.oTextFieldMonth.dataValue();
-                var bIsValidMonth_ = _this.oTextFieldMonth.isValidateValue(sMonth_);
-                var sDay_ = _this.oTextFieldDay.dataValue();
-                var bIsValidDay_ = _this.oTextFieldDay.isValidateValue(sDay_);
-                return bIsValidYear_ && bIsValidMonth_ && bIsValidDay_;
-            }).extend({ throttle: 0 });
-            _this.broadcastEvents(_this.oTextFieldYear);
-            _this.broadcastEvents(_this.oTextFieldMonth);
-            _this.broadcastEvents(_this.oTextFieldDay);
-            _this.hasBeenVisited.subscribe(function (b) {
-                if (!b) {
-                    _this.oTextFieldDay.hasBeenVisited(false);
-                    _this.oTextFieldMonth.hasBeenVisited(false);
-                    _this.oTextFieldYear.hasBeenVisited(false);
-                }
-            });
-            _this._koIsFocusedMainField = ko.computed(function () {
-                if (_this.oTextFieldDay.isFocused() || _this.oTextFieldMonth.isFocused() || _this.oTextFieldYear.isFocused()) {
-                    _this.isFocused(true);
-                }
-                else {
-                    _this.isFocused(false);
-                }
-            });
-            _this._koUpdateValue = ko.computed(function () {
-                var locale = app.i18n.getCurrentLocale();
-                var bIsValid_ = _this._koComputeIsLastInputValid();
-                var oDayValue_ = _this.oTextFieldDay.dataValue();
-                var oMonthValue_ = _this.oTextFieldMonth.dataValue();
-                var oYearValue_ = _this.oTextFieldYear.dataValue();
-                if (!bIsValid_) {
-                    if (_this.oTextFieldDay.isEmpty() || _this.oTextFieldMonth.isEmpty() || _this.oTextFieldYear.isEmpty()) {
-                        _this.value("");
-                    }
-                    else {
-                        _this.value("-");
-                    }
-                }
-                else {
-                    _this.value(CString(oDayValue_).lPad('0', 2) + _this.separator() + CString(oMonthValue_).lPad('0', 2) + _this.separator() + oYearValue_);
-                }
-            });
-            return _this;
-        }
-        DateMultiFieldField.prototype.broadcastEvents = function (Field) {
-            Field.isEditable.dependsOn(this.isEditable);
-            Field.isRequired.dependsOn(this.isRequired);
-            Field.isReadOnly.dependsOn(this.isReadOnly);
-            Field.isDisabled.dependsOn(this.isDisabled);
-        };
-        /**
-         * @Override cancelChanges
-         */
-        DateMultiFieldField.prototype.applyChanges = function () {
-            this.autoValidate(false);
-            this.oTextFieldDay.applyChanges();
-            this.oTextFieldMonth.applyChanges();
-            this.oTextFieldYear.applyChanges();
-            _super.prototype.applyChanges.call(this);
-            this.autoValidate(true);
-        };
-        /**
-         * @Override cancelChanges
-         */
-        DateMultiFieldField.prototype.cancelChanges = function () {
-            this.autoValidate(false);
-            this.oTextFieldDay.cancelChanges();
-            this.oTextFieldMonth.cancelChanges();
-            this.oTextFieldYear.cancelChanges();
-            _super.prototype.cancelChanges.call(this);
-            this.autoValidate(true);
-        };
-        DateMultiFieldField.prototype.dispose = function () {
-            _super.prototype.dispose.call(this);
-            dispose(this._koUpdateValue);
-            dispose(this._koIsFocusedMainField);
-            dispose(this._koComputeIsLastInputValid);
-            dispose(this._koComputeYearIsValid);
-            dispose(this._koComputeMonthIsValid);
-            dispose(this._koComputeDayIsValid);
-        };
-        return DateMultiFieldField;
-    }(DateField_1.DateField));
-    exports.DateMultiFieldField = DateMultiFieldField;
-});
-define("modules/forms/EmailField", ["require", "exports", "modules/forms/TextField"], function (require, exports, TextField_4) {
-    "use strict";
-    exports.__esModule = true;
-    var EmailField = /** @class */ (function (_super) {
-        __extends(EmailField, _super);
-        function EmailField(id, value, required, readOnly) {
-            var _this = _super.call(this, id, value, required, readOnly) || this;
-            _this.allowMultiple = ko.observable(false);
-            //this.inputType('email');
-            _this.allowMultiple.subscribe(function () {
-                if (_this.autoValidate()) {
-                    _this.validateValue();
-                }
-            });
-            return _this;
-        }
-        EmailField.prototype.isValidateValue = function (value) {
-            var b = _super.prototype.isValidateValue.call(this, value);
-            if (b && value) {
-                value = value.replace(",", EmailField.EMAIL_LIST_DELIMITER);
-                var emailsAsArray = value.split(EmailField.EMAIL_LIST_DELIMITER);
-                var i, anEmail;
-                var emailsCount = emailsAsArray.length;
-                var isListValid = true;
-                var reg = regexp.Email;
-                if (!this.allowMultiple() && emailsCount > 1) {
-                    isListValid = false;
-                }
-                else {
-                    for (i = 0; i < emailsCount; i++) {
-                        anEmail = emailsAsArray[i];
-                        if (anEmail.trim() !== '' && !reg.test(anEmail.trim())) {
-                            isListValid = false;
-                            break;
-                        }
-                    }
-                }
-                return isListValid;
-            }
-            return b;
-        };
-        EmailField.prototype.getDataValue = function () {
-            var v = _super.prototype.getDataValue.call(this);
-            if (typeof (v) == "string") {
-                return v.trim();
-            }
-            return v;
-        };
-        EmailField.EMAIL_LIST_DELIMITER = ";";
-        return EmailField;
-    }(TextField_4.TextField));
-    exports.EmailField = EmailField;
-});
-define("modules/forms/GridPasswordField", ["require", "exports", "modules/forms/InputField"], function (require, exports, InputField_6) {
-    "use strict";
-    exports.__esModule = true;
-    var GridPasswordField = /** @class */ (function (_super) {
-        __extends(GridPasswordField, _super);
-        /**
-         * Constructeur
-         */
-        function GridPasswordField(id, required, gridSize) {
-            if (required === void 0) { required = false; }
-            if (gridSize === void 0) { gridSize = 16; }
-            var _this = _super.call(this, id, null, required, false) || this;
-            _this.oTabChars = ko.observable("0123456789");
-            _this.oGridSize = ko.observable();
-            _this.oMaxLength = ko.observable(0);
-            _this.sObfuscatedChar = "*";
-            _this.inputTemplate = "ui-field-gridpassword-template";
-            _this.oGridSize(gridSize);
-            _this.oObfuscatedPassword = ko.computed(function () {
-                var sValue_ = _this.value() || "";
-                return "".rPad(_this.sObfuscatedChar, sValue_.length);
-            });
-            _this.oRandomChars = ko.computed(function () {
-                return _this.oTabChars().rPad(" ", _this.oGridSize()).shake().split("");
-            });
-            _this.oMaxLength.subscribe(function () {
-                if (_this.autoValidate()) {
-                    _this.validateValue();
-                }
-            });
-            return _this;
-        }
-        /**
-         * Evenement lors du clique sur un bouton
-         */
-        GridPasswordField.prototype.onClickChar = function (char) {
-            var sValue_ = this.value() || "";
-            var n_ = this.oMaxLength();
-            if ((n_ <= 0) || (sValue_.length < n_)) {
-                this.value(sValue_ + char);
-            }
-        };
-        /**
-         * @Override
-         */
-        GridPasswordField.prototype.isValidateValue = function (value) {
-            var b_ = _super.prototype.isValidateValue.call(this, value);
-            var s_ = value || "";
-            var n_ = this.oMaxLength ? this.oMaxLength() : 0;
-            return b_ && ((n_ <= 0) || (s_.length <= n_));
-        };
-        /**
-         * Efface la saisie
-         */
-        GridPasswordField.prototype.clear = function () {
-            this.value(null);
-        };
-        /**
-         * Annuler la dernière entrée
-         */
-        GridPasswordField.prototype.cancel = function () {
-            var s_ = this.value() || "";
-            this.value(s_.left(s_.length - 1));
-        };
-        return GridPasswordField;
-    }(InputField_6.InputField));
-    exports.GridPasswordField = GridPasswordField;
-});
-define("modules/forms/LabelField", ["require", "exports", "modules/forms/InputField"], function (require, exports, InputField_7) {
-    "use strict";
-    exports.__esModule = true;
-    var LabelField = /** @class */ (function (_super) {
-        __extends(LabelField, _super);
-        function LabelField(id, value, required) {
-            if (required === void 0) { required = false; }
-            var _this = _super.call(this, id, value, required, true) || this;
-            _this.className = ko.observable(null);
-            _this.inputTemplate = "labelInputTemplate";
-            return _this;
-        }
-        return LabelField;
-    }(InputField_7.InputField));
-    exports.LabelField = LabelField;
-});
-define("modules/forms/PasswordField", ["require", "exports", "modules/forms/TextField"], function (require, exports, TextField_5) {
-    "use strict";
-    exports.__esModule = true;
-    var PasswordField = /** @class */ (function (_super) {
-        __extends(PasswordField, _super);
-        function PasswordField(id, value, required, readOnly) {
-            var _this = _super.call(this, id, value, required, readOnly) || this;
-            _this.inputType('password');
-            return _this;
-        }
-        return PasswordField;
-    }(TextField_5.TextField));
-    exports.PasswordField = PasswordField;
-});
-define("modules/forms/RateField", ["require", "exports", "modules/forms/NumericField"], function (require, exports, NumericField_3) {
-    "use strict";
-    exports.__esModule = true;
-    var RateField = /** @class */ (function (_super) {
-        __extends(RateField, _super);
-        function RateField(id, value, required, readOnly) {
-            var _this = _super.call(this, id, value, NumericField_3.TNumericTypes.PositiveDouble, required, readOnly) || this;
-            _this.minimum = 0;
-            _this.digits = 2;
-            _this.unit('%');
-            return _this;
-        }
-        return RateField;
-    }(NumericField_3.NumericField));
-    exports.RateField = RateField;
-});
-define("modules/forms/TextAreaField", ["require", "exports", "modules/forms/TextField"], function (require, exports, TextField_6) {
-    "use strict";
-    exports.__esModule = true;
-    var TextAreaField = /** @class */ (function (_super) {
-        __extends(TextAreaField, _super);
-        function TextAreaField(id, value, required, readOnly) {
-            var _this = _super.call(this, id, value, required, readOnly) || this;
-            _this.rows = ko.observable(5);
-            _this.scrollGlue = ko.observable(true);
-            _this.keyLock = ko.observable(false);
-            _this.inputTemplate = "ui-field-textarea-template";
-            _this.keyLock.subscribe(function (b) {
-                if (b) {
-                    $(document).on('keypress.locker', 'textarea#' + _this.uid, function (e) {
-                        e.stopImmediatePropagation();
-                        return false;
-                    });
-                }
-                else {
-                    $(document).off('keypress.locker', 'textarea#' + _this.uid);
-                }
-            });
-            return _this;
-        }
-        TextAreaField.prototype.append = function (s) {
-            if (isset(s)) {
-                var toBottom = false;
-                if (this.scrollGlue()) {
-                    toBottom = this.isScrollToBottom();
-                }
-                var value = this.value() || '';
-                this.value(value + s);
-                if (toBottom) {
-                    this.scrollToBottom();
-                }
-            }
-        };
-        TextAreaField.prototype.clear = function () {
-            this.flush();
-        };
-        TextAreaField.prototype.flush = function () {
-            var value = this.value();
-            this.value('');
-            return value;
-        };
-        TextAreaField.prototype.scrollToBottom = function () {
-            var $element = $('#' + this.uid);
-            $element.scrollTop($element[0].scrollHeight);
-        };
-        TextAreaField.prototype.isScrollToBottom = function () {
-            var $element = $('#' + this.uid);
-            return ($element[0].scrollHeight - $element[0].scrollTop) == $element.innerHeight();
-        };
-        return TextAreaField;
-    }(TextField_6.TextField));
-    exports.TextAreaField = TextAreaField;
-});
-define("modules/forms/TextSearchField", ["require", "exports", "modules/forms/TextField"], function (require, exports, TextField_7) {
-    "use strict";
-    exports.__esModule = true;
-    var TextSearchField = /** @class */ (function (_super) {
-        __extends(TextSearchField, _super);
-        function TextSearchField(id, value, required, readOnly) {
-            var _this = _super.call(this, id, value, required, readOnly) || this;
-            _this.inputTemplate = "ui-field-textsearch-template";
-            return _this;
-        }
-        TextSearchField.prototype.onKeyDownEventHandler = function (e) {
-            var _this = this;
-            if ((e.which || e.keyCode) == 13) {
-                defer(function () {
-                    _this.onSearch();
-                }, 100);
-            }
-            return _super.prototype.onKeyDownEventHandler.call(this, e);
-        };
-        TextSearchField.prototype.onSearch = function () {
-            if (this.isValidateValue(this.dataValue())) {
-                this.emit('search', this.dataValue());
-            }
-            else {
-                this.emit('searchError', this.dataValue());
-            }
-        };
-        return TextSearchField;
-    }(TextField_7.TextField));
-    exports.TextSearchField = TextSearchField;
-});
-define("modules/forms/ToggleField", ["require", "exports", "modules/forms/InputField"], function (require, exports, InputField_8) {
-    "use strict";
-    exports.__esModule = true;
-    var ToggleField = /** @class */ (function (_super) {
-        __extends(ToggleField, _super);
-        function ToggleField(id, valueForTrue, valueForFalse, required, readOnly) {
-            var _this = _super.call(this, id, null, required, readOnly) || this;
-            _this.valueForTrue = null;
-            _this.valueForFalse = null;
-            // Resources Manager
-            _this.valueForTrue = valueForTrue;
-            _this.valueForFalse = valueForFalse;
-            _this.textForTrue = app.i18n.getObservableString(id + '.on', id + '.label');
-            _this.textForFalse = app.i18n.getObservableString(id + '.off', id + '.label');
-            _this.inputTemplate = "ui-field-text-toggle";
-            _this.isChecked = ko.computed({
-                read: function () {
-                    return _this.value() == _this.valueForTrue;
-                },
-                write: function (b) {
-                    _this.value(b ? _this.valueForTrue : _this.valueForFalse);
-                }
-            });
-            _this.forceValue(_this.valueForFalse);
-            return _this;
-        }
-        ToggleField.prototype.isValidateValue = function (value) {
-            var isValid = false;
-            if ((value == this.valueForTrue) || (value == this.valueForFalse)) {
-                isValid = true;
-            }
-            return isValid;
-        };
-        return ToggleField;
-    }(InputField_8.InputField));
-    exports.ToggleField = ToggleField;
-});
-define("modules/helpers/xml", ["require", "exports"], function (require, exports) {
-    "use strict";
-    exports.__esModule = true;
-    /**
-     * @fileOverview This file defines a simple xml to json converter.
-     */
-    var XmlConverter = /** @class */ (function () {
-        function XmlConverter() {
-        }
-        /**
-         * Converts XML to JSON.
-         */
-        XmlConverter.toJson = function (xml) {
-            var attributes, childNodes, json;
-            json = {};
-            // Get the attributes
-            switch (xml.nodeType) {
-                case 1: // element
-                    if (xml.attributes.length > 0) {
-                        attributes = json[XmlConverter.ATTRIBUTES_KEY] = {};
-                        $.each(xml.attributes, function (index, nodeAttribute) {
-                            attributes[nodeAttribute.nodeName] = nodeAttribute.nodeValue;
-                        });
-                    }
-                    else if (xml.childNodes.length == 1 && xml.childNodes.item(0).nodeType == 3) {
-                        // Return directly the text
-                        return xml.childNodes.item(0).nodeValue;
-                    }
-                    break;
-                case 3: // text
-                    json = xml.nodeValue;
-                    break;
-            }
-            // Get the child nodes
-            if (xml.hasChildNodes()) {
-                childNodes = json /*["childNodes"] = {}*/;
-                $.each(xml.childNodes, function (index, childNode) {
-                    var nodeName = childNode.nodeName;
-                    if (nodeName == "#text") {
-                        // Ignore empty nodes (spaces, new lines, etc)
-                        return;
-                    }
-                    if (typeof (childNodes[nodeName]) == "undefined") {
-                        childNodes[nodeName] = XmlConverter.toJson(childNode);
-                    }
-                    else {
-                        if (typeof (childNodes[nodeName].push) == "undefined") {
-                            var old = childNodes[nodeName];
-                            childNodes[nodeName] = [];
-                            childNodes[nodeName].push(old);
-                        }
-                        childNodes[nodeName].push(XmlConverter.toJson(childNode));
-                    }
-                });
-            }
-            return json;
-        };
-        XmlConverter.ATTRIBUTES_KEY = "_attributes_";
-        return XmlConverter;
-    }());
-    exports.XmlConverter = XmlConverter;
-});
-define("modules/managers/bindings", ["require", "exports", "modules/classes/EventsBinder.class"], function (require, exports, EventsBinder_class_8) {
-    "use strict";
-    exports.__esModule = true;
-    var RegisterBindingsManager = /** @class */ (function (_super) {
-        __extends(RegisterBindingsManager, _super);
-        function RegisterBindingsManager() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        RegisterBindingsManager.prototype.register = function (binding) {
-            ko.bindingHandlers[binding.getName()] = binding;
-            this.emit('register', binding);
-        };
-        return RegisterBindingsManager;
-    }(EventsBinder_class_8.EventsBinder));
-    exports.RegisterBindingsManager = RegisterBindingsManager;
-});
-define("modules/ui/glassPanel", ["require", "exports", "modules/helpers/logger", "modules/classes/MVVM.class"], function (require, exports, logger_8, MVVM_class_2) {
-    "use strict";
-    exports.__esModule = true;
-    var logger = logger_8.Logger.getLogger('GlassPanel');
-    var _contentString = null;
-    // Current stack of glass panels
-    var _currentStack = {};
-    var GlassPanel = /** @class */ (function (_super) {
-        __extends(GlassPanel, _super);
-        function GlassPanel(id, properties) {
-            var _this = _super.call(this, app.webkitPath + "templates/GlassPanel.html", []) || this;
-            _this.progression = ko.observable();
-            _this.steps = ko.observable('');
-            _this.animationDuration = 500;
-            _this.id = null;
-            _this.pid = null;
-            _this.lockKeyBoard = false;
-            _this.isVisible = ko.observable(true);
-            _this.text = ko.observable('');
-            _this.progressionText = ko.observable('');
-            _this.currentStep = ko.observable();
-            _this.totalSteps = ko.observable();
-            _this.animation = ko.observable();
-            _this.id = id;
-            _this.pid = String.generate(20);
-            _this.currentStep.subscribe(function (value) {
-                _this._update();
-            }, _this);
-            _this.totalSteps.subscribe(function (value) {
-                _this._update();
-            }, _this);
-            _this.update(properties);
-            _currentStack[_this.pid] = _this;
-            return _this;
-        }
-        GlassPanel.prototype._update = function () {
-            var currentStep = Number(this.currentStep());
-            var totalSteps = Number(this.totalSteps());
-            if (!isNaN(currentStep) && !isNaN(totalSteps)) {
-                this.steps(Math.round(currentStep / totalSteps * 100) + '%');
-                this.progression(currentStep / totalSteps);
-            }
-            else {
-                this.steps('');
-                this.progression(0);
-            }
-        };
-        GlassPanel.prototype.update = function (properties) {
-            if (!isset(properties)) {
-                return;
-            }
-            if (isset(properties.text)) {
-                this.text(properties.text);
-            }
-            if (isset(properties.currentStep)) {
-                this.currentStep(Number(properties.currentStep));
-            }
-            if (isset(properties.totalSteps)) {
-                this.totalSteps(Number(properties.totalSteps));
-            }
-            if (isset(properties.progressionText)) {
-                this.progressionText(properties.progressionText);
-            }
-        };
-        GlassPanel.prototype.load = function (fn) {
-            var _this = this;
-            _super.prototype.load.call(this, function (htmlContent) {
-                _contentString = htmlContent;
-                if (typeof (fn) == "function") {
-                    fn.call(_this);
-                }
-            }, _contentString);
-            // Disable keyboard
-            if (this.lockKeyBoard) {
-                $(document).on('keydown.glassPannel', function (e) {
-                    e.stopImmediatePropagation();
-                    return false;
-                });
-            }
-        };
-        GlassPanel.prototype.animate = function (animation, fn) {
-            var _this = this;
-            var animation_ = typeof (animation) == 'string' ? { animation: animation } : animation;
-            if (!animation_.duration) {
-                animation_.duration = this.animationDuration;
-            }
-            this.animation(animation_);
-            if (typeof (fn) == "function") {
-                defer(function () {
-                    fn.apply(_this);
-                }, animation_.duration);
-            }
-        };
-        GlassPanel.prototype.show = function (fn) {
-            var _this = this;
-            if (!this.isLoaded()) {
-                this.load(function () {
-                    _this.show(fn);
-                });
-                return;
-            }
-            this.isVisible(true);
-            this.animate('fadeIn', fn);
-        };
-        GlassPanel.prototype.hide = function (fn) {
-            var _this = this;
-            this.animate('fadeOut', function () {
-                _this.isVisible(false);
-                if (fn) {
-                    fn.apply(_this);
-                }
-            });
-        };
-        GlassPanel.prototype.destroy = function () {
-            var _this = this;
-            delete _currentStack[this.pid];
-            if (!Object.hasKeys(_currentStack)) {
-                // Enable keyboard
-                $(document).off('keydown.glassPannel');
-            }
-            this.hide(function () {
-                _this.dispose();
-            });
-        };
-        /** Show an explicit glasspanel (using his ID)
-         * @memberOf oneesp.manager.commons.glassPanel#
-         * @param {string} ID - The ID specified
-         * @returns {undefined}
-         */
-        GlassPanel.show = function (id) {
-            var panels = GlassPanel.getPanelsById(id);
-            if (panels && panels.length > 0) {
-                $.each(panels, function (k, panel) {
-                    panel.show();
-                });
-            }
-            else {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("No glass panel found. id: " + id);
-                }
-            }
-        };
-        /** Hide an explicit glasspanel (using his ID)
-         * @memberOf oneesp.manager.commons.glassPanel#
-         * @param {string} ID - The ID specified
-         * @returns {undefined}
-         */
-        GlassPanel.hide = function (id) {
-            var panels = GlassPanel.getPanelsById(id);
-            if (panels && panels.length > 0) {
-                $.each(panels, function (k, panel) {
-                    panel.hide();
-                });
-            }
-            else {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("No glass panel found. id: " + id);
-                }
-            }
-        };
-        /** Create a new glassPanel
-         * @memberOf oneesp.manager.commons.glassPanel#
-         * @param {string} text - The main text to show with the glassPanel
-         * @param {object} [opts={ ID:'main' }] - The options of the glassPanel
-         * @returns {undefined}
-         * @example
-         * // Show a glassPanel (will use the 'main' ID)
-         * _glassPanel.create('Loading...'); // -> one glassPanel is showed
-         * // Update the main glassPanel
-         * _glassPanel.create('Loading again...'); // -> one glassPanel is showed
-         * // Create a new glassPanel
-         * _glassPanel.create('Wait...',{ ID: 'waitpanel' }); -> two glassPanel are showed
-         * // Update the 'waitpanel' glassPanel
-         * _glassPanel.create('Wait again...',{ ID: 'waitpanel' }); -> two glassPanel are showed
-         * // Destroy the 'waitpanel' glassPanel
-         * _glassPanel.destroy('waitpanel'); -> one glassPanel is showed (the main)
-         * // Destroy the main glassPanel
-         * _glassPanel.destroy(); -> no glassPanel is showed (equals to _glassPanel.destroy('main');)
-         */
-        GlassPanel.create = function (id, opts) {
-            if (id === void 0) { id = 'main'; }
-            var panel = new GlassPanel(id, opts);
-            // show
-            panel.show();
-            return panel;
-        };
-        /** Destroy a glassPanel
-         * @memberOf oneesp.manager.commons.glassPanel#
-         * @param {string} [ID='main'] - The ID of the glassPanel to destroy (destroy the main by default)
-         * @returns {undefined}
-         */
-        GlassPanel.destroy = function (id) {
-            var panels = GlassPanel.getPanelsById(id);
-            if (panels && panels.length > 0) {
-                $.each(panels, function (k, panel) {
-                    panel.destroy();
-                });
-            }
-            else {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("No glass panel found. id: " + id);
-                }
-            }
-        };
-        GlassPanel.update = function (opts, id) {
-            var panels = GlassPanel.getPanelsById(id);
-            if (panels && panels.length > 0) {
-                $.each(panels, function (k, panel) {
-                    panel.update(opts);
-                });
-            }
-            else {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("No glass panel found. id: " + id);
-                }
-            }
-        };
-        /** Get an explicit glassPanel using his ID
-         * @memberOf oneesp.manager.commons.glassPanel#
-         * @param {string} [ID='main'] - The ID of the glassPanel to return (The main by default)
-         * @returns {undefined}
-         */
-        GlassPanel.getPanel = function (id) {
-            if (id === void 0) { id = 'main'; }
-            return _currentStack[id] || Object.findBy(_currentStack, 'id', id);
-        };
-        /** Get an explicit glassPanel using his ID
-         * @memberOf oneesp.manager.commons.glassPanel#
-         * @param {string} [ID='main'] - The ID of the glassPanel to return (The main by default)
-         * @returns {undefined}
-         */
-        GlassPanel.getPanelsById = function (id) {
-            if (id === void 0) { id = 'main'; }
-            return Object.findManyBy(_currentStack, 'id', id);
-        };
-        return GlassPanel;
-    }(MVVM_class_2.MVVM));
-    exports.GlassPanel = GlassPanel;
+    var logger = logger_7.Logger.getLogger('mainApp');
+    exports.app = new Application_class_1.Application();
+    exports.app.init({ logLevel: logger_7.TLogLevel.TRACE });
+    exports.app.ready(function () {
+        logger.trace("ready !!!!");
+        logger.debug("ready !!!!");
+        logger.info("ready !!!!");
+        logger.warn("ready !!!!");
+        logger.error("ready !!!!");
+        logger.fatal("ready !!!!");
+    });
 });

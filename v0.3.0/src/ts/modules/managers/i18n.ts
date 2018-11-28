@@ -96,7 +96,8 @@ export class I18n extends BaseManager {
 		}
 
         if (locale) {
-    		this.language(locale.getLang());        
+    		this.language(locale.getLang());    
+    		this.isReady(true);
     		return;
         }
         
@@ -164,6 +165,7 @@ export class I18n extends BaseManager {
             
 	            	// Update the current language
 				    this.loadLanguageAsJson(lang, json);
+				    
 				} else {
 				    logger.fatal('Erreur lors du chargement des libellés %s: %s'.format(url, status));
 	                this.emit('initError', lang);
@@ -257,10 +259,7 @@ export class I18n extends BaseManager {
         this.language.subscribe((lang: string): void => {
 			this.loadLanguage(lang)
 			this.emit('change', lang);
-        })
-
-		this.isStringsReady.subscribe((): void => {
-	        this.isReady(true)
+			this.isReady(true)
         })
 
         this.initLanguage(DEFAULT_LANGUAGE);

@@ -34,14 +34,22 @@ export abstract class Appender {
 export class ConsoleAppender extends Appender implements ILogAppender {
     
     public static useFormat: boolean = true;
-    public static formatCSS: string = "padding: .1em .5em; color: #000; border: 1px solid #ddd; background-color: #93e458; border-radius: 3px";
+    public static formatClassNameCSS: string = "padding: .1em .5em; color: #000; border: 1px solid #ddd; background-color: #93e458; border-radius: 3px";
+    public static formatLevelInfoCSS: string = "margin: 0em .5em; padding: .1em .5em; color: #fff; background-color: #4aa3c5; border-radius: 3px";
+    public static formatLevelTraceCSS: string = "margin: 0em .5em; padding: .1em .5em; color: #444; background-color: white; border-radius: 3px; border: 1px solid #ddd";
+    public static formatLevelDebugCSS: string = "margin: 0em .5em; padding: .1em .5em; color: #444; background-color: white; border-radius: 3px; border: 1px solid gray";
+    public static formatLevelWarnCSS: string = "margin: 0em .5em; padding: .1em .5em; color: #444; background-color: #e8dd77; border-radius: 3px; border: 1px solid #ddd";
+    public static formatLevelErrorCSS: string = "margin: 0em .5em; padding: .1em .5em; color: #fff; background-color: #ff5722; border-radius: 3px;";
+    public static formatLevelFatalCSS: string = "margin: 0em .5em; padding: .1em .5em; color: #fff; background-color: #d6290d; border-radius: 3px;";
+    public static formatLevelDefaultCSS: string = "margin: 0em .5em; padding: .1em .5em; color: #444;";
+
 
     public constructor() {
         super();
     }
 
     public formatMessage(level: TLogLevel, date: Date, message: string): string {
-        return TLogLevel[level].rPad(' ', 5) + ' - ' + utils.formatDate(date, "dd/mm/yyyy", "hh:mm:ss.t") + ': ' + message;
+        return utils.formatDate(date, "dd/mm/yyyy", "hh:mm:ss.t") + ': ' + message;
     }
 
     public log(className: string, level: TLogLevel, message: string, exception?: any, date: Date = new Date()): void {
@@ -56,24 +64,33 @@ export class ConsoleAppender extends Appender implements ILogAppender {
         if(isset(console)) {
         
             let fn;
-            
-            if(level == TLogLevel.DEBUG && typeof(console.debug) != 'undefined') {
-                fn = console.debug;
+            let levelFormatCSS: string = ConsoleAppender.formatLevelDefaultCSS;
+            if(level == TLogLevel.TRACE) {
+                fn = console.log;
+                levelFormatCSS = ConsoleAppender.formatLevelTraceCSS;
             }
-            if(level == TLogLevel.INFO && typeof(console.info) != 'undefined') {
+            if(level == TLogLevel.DEBUG) {
+                fn = console.log;
+                levelFormatCSS = ConsoleAppender.formatLevelDebugCSS;
+            }
+            if(level == TLogLevel.INFO) {
                 fn = console.info;
+                levelFormatCSS = ConsoleAppender.formatLevelInfoCSS;
             }
-            if(level == TLogLevel.WARN && typeof(console.warn) != 'undefined') {
+            if(level == TLogLevel.WARN) {
                 fn = console.warn;
+                levelFormatCSS = ConsoleAppender.formatLevelWarnCSS;
             }
-            if(level == TLogLevel.ERROR && typeof(console.error) != 'undefined') {
+            if(level == TLogLevel.ERROR) {
                 fn = console.error;
+                levelFormatCSS = ConsoleAppender.formatLevelErrorCSS;
             }    
-            if(level == TLogLevel.FATAL && typeof(console.error) != 'undefined') {
+            if(level == TLogLevel.FATAL) {
                 fn = console.error;
+                levelFormatCSS = ConsoleAppender.formatLevelFatalCSS;
             }    
 
-            if(!fn && typeof(console.log) != 'undefined') {
+            if(!fn) {
                 fn = console.log;
             }
 
@@ -83,7 +100,7 @@ export class ConsoleAppender extends Appender implements ILogAppender {
 
             let text: string = this.formatMessage(level, date, message);
             if(ConsoleAppender.useFormat) {
-                fn("%c" + className, ConsoleAppender.formatCSS, text, e);
+                fn("%c" +  TLogLevel[level].toLowerCase() + "%c" + className, levelFormatCSS, ConsoleAppender.formatClassNameCSS, text, e);
             } else {
                 fn(className, text, e);
             }
