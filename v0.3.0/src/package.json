@@ -5,7 +5,6 @@
   "date": "2017-04-18",
   "build": {
     "version": "0.0.1",
-    "outDir": "./dist/",
     "targetBaseDir": "./target/",
     "webappDir": "./dist/",
     "webappArchiveName": "app.zip"

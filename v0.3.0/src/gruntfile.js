@@ -9,32 +9,56 @@ module.exports = function(grunt) {
 
 	grunt.log.writeln("Launch");
 	grunt.log.writeln(`Current directory: ${cwd}`);
-
-	let defaultConf = grunt.file.readJSON(__dirname + '/package.json');
+	
+	let moduleConf = grunt.file.readJSON(__dirname + '/package.json');
 	let localConf = {};
+	let applicationName = "webapp";
+	let applicationVersion = "0.0.1";
 	try {
 		localConf = grunt.file.readJSON('package.json')
+		applicationName = localConf.name
+		applicationVersion = localConf.version
 	} catch(e) {}
 
-	let finalConf = Object.assign({ 'baseDir': cwd, 'outDir': cwd + "/dist/" }, defaultConf.build || {});
+	
+	let defaultConf = { 
+		'baseDir': cwd, 
+		'outDir': cwd + "/build",
+		'distDir': cwd + "/dist",
+		'publishDir': cwd + '/publish',
+		'jsFileName': 'index',
+		'cssFileName': 'index',
+		'name': applicationName,
+		'version': applicationVersion
+	};
+	
+	let finalConf = Object.assign(defaultConf, moduleConf.build || {});
 	finalConf = Object.assign(finalConf, localConf.build || {});
 
-	if(!finalConf.outDir) {
+	if(!finalConf.outDir || !finalConf.distDir) {
 		grunt.log.writeln("Error");
 		return;
 	}
+
+	finalConf.baseDir = path.relative(cwd, finalConf.baseDir);
+	finalConf.baseDir = finalConf.baseDir?finalConf.baseDir + path.sep:"";
+	finalConf.outDir = path.relative(cwd, finalConf.outDir);
+	finalConf.outDir = finalConf.outDir?finalConf.outDir + path.sep:"";
+	finalConf.distDir = path.relative(cwd, finalConf.distDir);
+	finalConf.distDir = finalConf.distDir?finalConf.distDir + path.sep:"";
+	finalConf.publishDir = path.relative(cwd, finalConf.publishDir);
+	finalConf.publishDir = finalConf.publishDir?finalConf.publishDir + path.sep:"";
 
 	let tsconfigConf = {};
 	try {
 		tsconfigConf = grunt.file.readJSON("tsconfig.json");
 	} catch(e) {}
 
-
-	grunt.file.setBase(__dirname);
-
-	let __srcDir = path.resolve(__dirname + '/../src/');
-	let __srcVendorsJsDir = path.resolve(__srcDir + "/vendors/js/") + path.sep;
-	let __srcVendorsCssDir = path.resolve(__srcDir + "/vendors/css/") + path.sep;
+	let __finalJsFileName = finalConf.jsFileName + "-" + finalConf.version + ".js";
+	let __finalCssFileName = finalConf.cssFileName + "-" + finalConf.version + ".css";
+	let __srcDir = path.relative(cwd, path.resolve(__dirname + '/../src/'));
+	let __srcVendorsJsDir = path.relative(cwd, path.resolve(__srcDir + "/vendors/js/")) + path.sep;
+	let __srcVendorsCssDir = path.relative(cwd, path.resolve(__srcDir + "/vendors/css/")) + path.sep;
 
 	let jsVendorsFiles = [
 		__srcVendorsJsDir + "sprintf-1.0.0.min.js",
@@ -53,8 +77,10 @@ module.exports = function(grunt) {
 		__srcVendorsJsDir + "knockout.address.min.js",
 		__srcVendorsJsDir + "knockout.templateengine-2.0.5.min.js",
 		__srcVendorsJsDir + "require.js",
-		"<%= conf.outDir %>index.js"
+		finalConf.outDir + "**/*.js"
 	];
+
+	console.log(jsVendorsFiles);
 
 	let cssVendorsFiles = [
 		__srcVendorsCssDir + "bootstrap-3.3.7.min.css",
@@ -62,15 +88,21 @@ module.exports = function(grunt) {
 		__srcVendorsCssDir + "jquery-ui-1.12.1.structure.min.css",
 		__srcVendorsCssDir + "jquery.nanoscroller-0.8.7.css",
 		__srcVendorsCssDir + "jquery.tooltipster-3.3.0.min.css",
-		"<%= conf.outDir %>index.css"
+		finalConf.outDir + "**/*.css"
 	];
 
-
-
-
-	grunt.log.writeln(__srcDir + path.sep);
-	grunt.log.writeln(finalConf.outDir);
-	grunt.log.writeln(path.resolve(finalConf.outDir));
+	let __filesExclusion = finalConf.excludes || [];
+	__filesExclusion.push('tsconfig.json');
+	__filesExclusion.push('package.json');
+	__filesExclusion.push(__srcDir + "/**");
+	__filesExclusion.push(finalConf.outDir + "/**");
+	__filesExclusion.push(finalConf.distDir + "/**");
+	__filesExclusion.push(finalConf.publishDir + "/**");
+	__filesExclusion.push("node_modules/**");
+	__filesExclusion.push("**/node_modules/**");
+	for(let i = 0; i < __filesExclusion.length; i++) {
+		__filesExclusion[i] = '!' + __filesExclusion[i];
+	}
 
 	// Project configuration.
 	grunt.initConfig({
@@ -79,7 +111,7 @@ module.exports = function(grunt) {
 		conf : finalConf,
 		typescript : {
 			dev: {
-				src : ["<%= __srcDir %>/ts/index.ts", "<%= conf.baseDir %>/index.ts"],
+				src : ["<%= __srcDir %>ts/index.ts", "<%= conf.baseDir %>index.ts"],
 				dest : "<%= conf.outDir %>/index.js",
 				options : {
 					sourceMap : true,
@@ -89,7 +121,7 @@ module.exports = function(grunt) {
 				}
 			},
 			prod : {
-				src : ["<%= __srcDir %>/index.ts", "<%= conf.baseDir %>/index.ts" ],
+				src : ["<%= __srcDir %>index.ts", "<%= conf.baseDir %>index.ts" ],
 				dest : "<%= conf.outDir %>index.js",
 				options : {
 					sourceMap : false,
@@ -103,9 +135,9 @@ module.exports = function(grunt) {
 			prod : {
 				files : [ {
 					expand : true,
-					cwd : "<%= conf.outDir %>",
+					cwd : "<%= conf.distDir %>",
 					src : "**/*.js",
-					dest : "<%= conf.outDir %>"
+					dest : "<%= conf.distDir %>"
 				} ]
 			}
 		},
@@ -120,9 +152,9 @@ module.exports = function(grunt) {
 				},
 				files : [ {
 					expand : true,
-					cwd : "<%= conf.outDir %>",
+					cwd : "<%= conf.distDir %>",
 					src : [ "**/*.{html,css}" ],
-					dest : "<%= conf.outDir %>"
+					dest : "<%= conf.distDir %>"
 				} ]
 			}
 		},
@@ -134,10 +166,9 @@ module.exports = function(grunt) {
 					compress : false
 				},
 				files : [ {
-					expand : true,
-					cwd : "<%= conf.baseDir %>",
-					src : [ "**/*.less", "!**/_*.less",
-							'!**/node_modules{,/**/*}' ],
+					expand : false,
+					cwd: cwd,
+					src : [ "<%= conf.baseDir %>**/*.less", __srcDir + "/less/index.less", "!<%= conf.baseDir %>**/_*.less"].concat(__filesExclusion),
 					dest : "<%= conf.outDir %>",
 					ext : ".css"
 				} ]
@@ -150,9 +181,8 @@ module.exports = function(grunt) {
 				},
 				files : [ {
 					expand : true,
-					cwd : "<%= conf.baseDir %>",
-					src : [ "**/*.less", "!**/_*.less",
-							'!**/node_modules{,/**/*}' ],
+					cwd: cwd,
+					src : [ "<%= conf.baseDir %>**/*.less", __srcDir + "/less/index.less", "!<%= conf.baseDir %>**/_*.less"].concat(__filesExclusion),
 					dest : "<%= conf.outDir %>",
 					ext : ".css"
 				} ]
@@ -163,51 +193,54 @@ module.exports = function(grunt) {
 				separator : '\n;',
 			},
 			js: {
-				src : jsVendorsFiles,
-				dest : "<%= conf.outDir %>index-<%= conf.version %>.js"
+				files: [ {
+					expand: true,
+					cwd: cwd,
+					src: jsVendorsFiles,
+					dest : "<%= conf.distDir %>/" + __finalJsFileName
+				}]
 			},
 			css: {
-				src : cssVendorsFiles,
-				dest : "<%= conf.outDir %>index-<%= conf.version %>.css"	
+				files: [ {
+					expand: true,
+					cwd: cwd,
+					src: cssVendorsFiles,
+					dest : "<%= conf.distDir %>/" + __finalCssFileName
+				}]
 			}
 		},
 		copyto : {
-			snapshot : {
+			out : {
 				options : {
 					encoding : "<%= conf.encoding %>",
-					ignore : [ '**/resources/webkit{,/**/*}', // Répertoire
-					// TYPESCRIPT
-					'**/vendors{,/**/*}', // Répertoire includes
-					'**/*.scc', // Fichiers VSS
-					'**/*.ts', // Fichiers Typescript
-					'**/*.less', // Fichiers Less
-					'**/*.inc.*', // Fichiers includes
-					'**/LocaleInfos.js' ]
+					ignore : []
 				},
 				files : [ {
 					expand : true,
-					cwd : "<%= path.resolve(conf.baseDir) %>/resources",
-					src : [ '**/*' ],
+					cwd: cwd,
+					src : [ 
+						'<%= conf.baseDir %>**/*.js', '<%= conf.baseDir %>**/*.css'
+					].concat(__filesExclusion),
 					dest : "<%= conf.outDir %>"
 				} ]
 			},
-			release : {
+			dist : {
 				options : {
 					encoding : "<%= conf.encoding %>",
-					ignore : [ '**/webkit{,/**/*}', // Répertoire
-					// TYPESCRIPT
-					'**/vendors{,/**/*}', // Répertoire includes
-					'**/*.ts', // Fichiers Typescript
-					'**/*.less', // Fichiers Less
-					'**/*.scc', // Fichiers VSS
-					'**/*.inc.*', // Fichiers includes
-					'**/LocaleInfos.js' ]
+					ignore : [
+						'**/*.ts', // Fichiers Typescript
+						'**/*.js',
+						'**/*.less', // Fichiers Less
+						'**/*.css'
+					]
 				},
 				files : [ {
 					expand : true,
-					cwd : "<%= path.resolve(conf.baseDir) %>/resources",
-					src : [ '**/*' ],
-					dest : "<%= conf.outDir %>"
+					cwd: cwd,
+					src : [ 
+						'<%= conf.baseDir %>**/*'
+					].concat(__filesExclusion),
+					dest : "<%= conf.distDir %>"
 				} ]
 			}
 		},
@@ -226,7 +259,14 @@ module.exports = function(grunt) {
 			options : {
 				force : false
 			},
-			out : [ "<%= conf.outDir %>/" ]
+			out : [ "<%= conf.outDir %>" ],
+			dist : [ "<%= conf.distDir %>" ],
+			empty: {
+		        src: ["<%= conf.distDir %>**/*"],
+		        filter: function (path) {
+		            return grunt.file.isDir(path) && fs.readdirSync(path).length === 0;
+		        }
+		    }
 		},
 		showtime : {
 			start : {
@@ -257,27 +297,29 @@ module.exports = function(grunt) {
 			prod : {
 				files : [ {
 					expand : true,
-					cwd : "<%= conf.outDir %>",
+					cwd : "<%= conf.distDir %>",
 					src : [ "**/*.{png,jpg,jpeg}" ],
-					dest : "<%= conf.outDir %>"
+					dest : "<%= conf.distDir %>"
 				} ]
 			}
 		},
 		compress : {
 			app : {
 				options : {
-					archive : '<%= conf.webappDir %>/<%= conf.webappArchiveName %>',
+					archive : '<%= conf.distDir %>/<%= conf.name %>-<%= conf.version %>',
 					mode : 'zip'
 				},
 				files : [ {
 					expand : true,
-					cwd : '<%= conf.targetBaseDir %>/',
+					cwd : '<%= conf.distDir %>',
 					src : [ '**/*' ],
-					dest : '/'
+					dest : '<%= conf.publishDir %>'
 				} ]
 			}
 		}
 	});
+
+	grunt.file.setBase(__dirname);
 
 	// Load the plugin that provides the "uglify" task.
 	grunt.loadNpmTasks('grunt-typescript');
@@ -316,6 +358,8 @@ module.exports = function(grunt) {
 					+ grunt.config.get('conf.baseDir'));
 			grunt.log.writeln("Out dir: "
 					+ grunt.config.get('conf.outDir'));
+			grunt.log.writeln("Dist dir: "
+					+ grunt.config.get('conf.distDir'));
 		});
 
 	grunt.registerMultiTask('showtime', 'Display time', function() {
@@ -325,34 +369,33 @@ module.exports = function(grunt) {
 	grunt.registerTask('build-dev', 'Build generation [DEV]', [ 
 			'conf',
 			'showtime:start', 
-			'clean:out', 
-			/*
-			'copyto:snapshot',
-			'includereplace:vendorcss', 
-			'includereplace:vendorjs',*/
+			'clean:out',
+			'clean:dist',
 			'shell:tsc', 
 			'less:dev',
+			'copyto:out',
 			'concat:js',
-			'concat:css', 
-			//'clean:dependencies',
+			'concat:css',
+			'copyto:dist',
+			'clean:empty',
 			'showtime:end' ]);
 
 	grunt.registerTask('build-prod', 'Build generation [PROD]', [ 
 			'conf',
 			'showtime:start', 
 			'clean:out', 
-			/*
-			'copyto:release',
-			'includereplace:vendorcss', 
-			'includereplace:vendorjs',*/
 			'typescript:prod', 
 			'less:prod',
+			'copyto:out',
 			'concat:js',
 			'concat:css', 
+			'copyto:dist',
+			'clean:empty',
 			'uglify:prod',
 			'htmlmin:prod', 
 			'optimgp:optimg:prod', 
-			//'clean:dependencies',
+			'clean:out',
+			'clean:empty',
 			'showtime:end' ]);
 
 	grunt.registerTask('optimg', 'Images optimization', [ 
@@ -361,9 +404,8 @@ module.exports = function(grunt) {
 			'optimgp:optimg:prod', 
 			'showtime:end' ]);
 
-	grunt.registerTask('webapp', 'Resources generation [APP]', [
-			'clean:target', 
-			'release', 
+	grunt.registerTask('publish', 'Resources generation [Publish]', [
+			'build-prod', 
 			'compress:app' ]);
 
 

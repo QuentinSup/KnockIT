@@ -3,7 +3,8 @@
     "baseUrl": "./",
     "types": ["jquery", "jqueryui", "knockout"],
     "module": "amd",
-    "outFile": "index.js",
+    "outDir": "dist/",
+    "outFile": "dist/index.js",
     "paths": {
       "@webkit/core/*": ["ts/modules/classes/*"],
       "@webkit/form/*": ["ts/modules/forms/*"],
